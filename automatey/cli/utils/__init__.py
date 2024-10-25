@@ -2,18 +2,52 @@
 import click
 import sys
 import os
+import automatey.utils as ut
+import automatey.cli.utils.constants as cli_ut_constants
 
 class ClickWrapper:
 
+    class MessageType:
+
+        ERROR = 'ERROR'
+        INFO = 'INFO'
+        WARNING = 'WARNING'
+
+    @staticmethod
+    def terminate(msg:str, msg_type:str):
+        """
+        Terminate application with message.
+
+        Parameters
+        ----------
+        msg : str
+            Error message.
+        msg_type : str
+            Any 'MessageType.<..>' may be used.
+        """
+        error_code = 0 if (msg_type != ClickWrapper.MessageType.ERROR) else 1 
+        complete_msg = '[' + msg_type + ']: ' + msg
+
+        click.echo(complete_msg)
+        sys.exit(error_code)
+
     @staticmethod
     def terminate(msg:str):
-        click.echo('[Error]: ' + msg)
+        """
+        Terminate application with an error message.
+
+        Parameters
+        ----------
+        msg : str
+            Error message.
+        """
+        click.echo('[Info]: ' + msg)
         sys.exit(1)
 
 class ArgumentProcessor:
 
     @staticmethod
-    def mapInputToOutputPaths(inputPathArgument:str, outputPathArgument:str):
+    def mapInputToOutputPaths(inputPathArgument:str, outputPathArgument:str, File):
         """
         Map input file-path(s) to output file-path(s).
 
@@ -31,6 +65,7 @@ class ArgumentProcessor:
         """
         inputOutputFilePaths = []
         outputDirectoryPath = None
+        randomFileOrDirectoryName = ut.Random.getRandomText(cli_ut_constants.randomFileNameLength)
 
         # [CASE]: File as input.
         if os.path.isfile(inputPathArgument):
