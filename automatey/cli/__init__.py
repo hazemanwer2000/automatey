@@ -12,7 +12,8 @@ import automatey.cli.img.faces
 # [CMD]: Face-Detection
 
 @click.option('--rotate', is_flag=True, default=False, help='Rotate each image (+/-)90 and 180, before processing. This quadruples the processing time.')
-@click.option('-o', '--output', default=None, help='Path to output directory.')
+@click.option('-o', '--output', default=None, help='Path to output directory, or (image-)file.')
+@click.option('-i', '--input', required=True, help='Path to input directory, or (image-)file.')
 @click.command(help='Detect faces in an image.')
 def CMD_img_faces(**kwargs):
     automatey.cli.img.faces.run(kwargs)
