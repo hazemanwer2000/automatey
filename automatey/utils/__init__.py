@@ -81,7 +81,7 @@ class FileManagement:
     class Path:
 
         @staticmethod
-        def getNextIterativePath(path:str, separator:str='#', alt_ext:str=None, suffix:str=''):
+        def getNextIterativePath(path:str, separator:str='#', suffix:str='', alt_ext:str=None) -> str:
             """
             Get the next iterative path, that does not exist.
 
@@ -93,10 +93,16 @@ class FileManagement:
                 Path to file, or directory.
             separator : str
                 In the example above, '-' is the separator.
-            alt_ext : str
-                If a file is specified, this replaces the current file-extension.
             suffix : str
                 In the example above, if suffix '_edit' is specified, **img_edit-2.png** is returned.
+            alt_ext : str
+                If a file is specified, this replaces the current file-extension.
+                It must be without a dot.
+                
+            Returns
+            -------
+            new_path : str
+                Constructed path.
             """
             if os.path.isfile(path):
                 path_no_ext, ext = os.path.splitext(path)
@@ -111,6 +117,34 @@ class FileManagement:
                     break
                 i += 1
             return new_path
+
+        @staticmethod
+        def getNextRandomPath(path:str, name_len:int=8, alt_ext:str=None) -> str:
+            '''
+            Get the next random path.
+
+            Parameters
+            ----------
+            path : str
+                Path to file, or directory.
+            alt_ext : str
+                If a file is specified, this replaces the current file-extension.
+                It must be without a dot.
+            name_len : str
+                Length of the file-name, not including the extension (if present).
+
+            Returns
+            -------
+            new_path : str
+                Constructed path.
+            '''
+            if os.path.isfile(path):
+                _, ext = os.path.splitext(path)
+                ext = ext if alt_ext == None else ('.' + alt_ext)
+            else:
+                ext = ''
+            parent_dir_path = os.path.dirname(path)
+            return os.path.join(parent_dir_path, Random.getRandomString(name_len) + ext)
 
 class Random:
 
