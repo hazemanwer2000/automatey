@@ -1,7 +1,7 @@
 
 import random
 import string
-import sys
+import re
 import os
 
 class FileManagement:
@@ -60,7 +60,7 @@ class FileManagement:
         with open(path, 'rb') as f:
             bin = f.read()
         return bin
-    
+
     @staticmethod 
     def writeFile(path:str, bin:bytes):
         """
@@ -165,6 +165,51 @@ class Random:
         """
         return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(len))
     
-class CMD:
+class StringManipulation:
+    
+    @staticmethod
+    def regexReplaceAll(expr_match, expr_replace, txt):
+        """
+        Replace all (RegEx-)matches to an expression, with another expression.
+
+        Parameters
+        ----------
+        expr_match : str
+            RegEx expression to match.
+        expr_match : str
+            RegEx expression to use for replacement.
+        txt : str
+            Text to search within.
+
+        Returns
+        -------
+        res_txt : str
+            Modified text.
+        """
+        return re.sub(expr_match, expr_replace, txt)
+    
+    @staticmethod
+    def regexFindAll(expr_match:str, txt:str) -> list:
+        """
+        Find all (RegEx-)matches to an expression.
+
+        Parameters
+        ----------
+        expr_match : str
+            RegEx expression to match.
+        txt : str
+            Text to search within.
+
+        Returns
+        -------
+        res : str
+            A list of all matches. If more than one capture group is used, each match is a tuple.
+        """
+        res = re.findall(expr_match, txt)
+        if res == None:
+            res = []
+        return res
+
+class ProcessManagement:
 
     pass
