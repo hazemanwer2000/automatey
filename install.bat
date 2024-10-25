@@ -7,4 +7,4 @@ REM Remove all untracked file(s).
 git clean -fdx
 
 REM Re-install 'automatey' package.
-py -m pip install .
+py -m pip install -e .
