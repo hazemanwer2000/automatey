@@ -47,10 +47,10 @@ cv2_map_RotateCode2ReverseRotateCode = {
 }
 
 cv2_map_RotationType2RotateCode = {
-    RotationType.DEG_90_CW : cv2.ROTATE_90_CLOCKWISE,
-    RotationType.DEG_90_CCW : cv2.ROTATE_90_COUNTERCLOCKWISE,
+    RotationType.DEG_0 : None,
     RotationType.DEG_180 : cv2.ROTATE_180,
-    RotationType.DEG_0 : None
+    RotationType.DEG_90_CW : cv2.ROTATE_90_CLOCKWISE,
+    RotationType.DEG_90_CCW : cv2.ROTATE_90_COUNTERCLOCKWISE
 }
 
 detector = MTCNN()
@@ -65,7 +65,7 @@ color_fill = (0, 0, 0)
 color_border = (179, 0, 0)
 
 thickness_border_thin = 1
-thickness_border_thick = 3
+thickness_border_thick = 2
 
 isOverrideImageExtension = True
 overridingImageExtension = '.png'
@@ -104,6 +104,7 @@ def processImage(img_rgb, rotate_code=None):
         img_rgb = cv2.rotate(img_rgb, rotate_code)
 
     faces = detector.detect_faces(img_rgb)
+    is_faces_detected = (len(faces) != 0)
 
     for face in faces:
         x, y, width, height = face['box']
@@ -114,7 +115,7 @@ def processImage(img_rgb, rotate_code=None):
     if rotate_code != None:
         img_rgb = cv2.rotate(img_rgb, cv2_map_RotateCode2ReverseRotateCode[rotate_code])
 
-    return img_rgb
+    return img_rgb, is_faces_detected
 
 def generateOutputImage(inputFilePath, outputFilePath):
     img = cv2.imread(inputFilePath)
@@ -127,8 +128,9 @@ def generateOutputImage(inputFilePath, outputFilePath):
 
     for rotateCode in rotateCodes:
         modifiedOutputFilePath = ut.FileManagement.Path.getNextIterativePath(outputFilePath, is_file=True)
-        processed_img_rgb = processImage(img_rgb, rotateCode)
-        cv2.imwrite(modifiedOutputFilePath, cv2.cvtColor(processed_img_rgb, cv2.COLOR_RGB2BGR))
+        processed_img_rgb, is_faces_detected = processImage(img_rgb, rotateCode)
+        if is_faces_detected:
+            cv2.imwrite(modifiedOutputFilePath, cv2.cvtColor(processed_img_rgb, cv2.COLOR_RGB2BGR))
 
 def generateOutputVideo(inputFilePath, outputFilePath):
     pass
