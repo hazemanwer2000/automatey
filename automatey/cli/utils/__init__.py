@@ -67,7 +67,7 @@ class ArgumentProcessor:
         """
         inputOutputFilePaths = []
         outputDirectoryPath = None
-        randomFileOrDirectoryName = ut.Random.getRandomText(cli_ut_constants.randomFileNameLength)
+        randomFileOrDirectoryName = ut.Random.getRandomText(cli_ut_constants.RandomFileNameLength)
 
         # [CASE]: File as input.
         if os.path.isfile(inputPathArgument):

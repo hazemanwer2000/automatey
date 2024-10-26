@@ -1,2 +1,2 @@
 
-randomFileNameLength = 10
+RandomFileNameLength = 10
