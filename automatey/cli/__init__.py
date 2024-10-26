@@ -11,7 +11,7 @@ import automatey.cli.img.faces
 #------------\------------\------------\
 # [CMD]: Face-Detection
 
-@click.option('--rotate', is_flag=True, default=False, help='Rotate each image (+/-)90 and 180, before processing. This quadruples the processing time.')
+@click.option('--rotate', type=click.INT, default=0, help="Specify a rotation (right-)angle. '-1' for all-rotation(s).")
 @click.option('--outline', is_flag=True, default=False, help='Rectangle placed around a face is not filled.')
 @click.option('--copy', is_flag=True, default=False, help='Keep a copy of the original image.')
 @click.option('-o', '--output', default=None, help='Path to output directory, or (image-)file.')
