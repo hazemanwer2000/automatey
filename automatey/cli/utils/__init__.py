@@ -5,49 +5,51 @@ import os
 import automatey.utils as ut
 import automatey.cli.utils.constants as cli_ut_constants
 
-class ClickWrapper:
+class Wrappers:
 
-    class MessageType:
+    class click:
 
-        ERROR = 'ERROR'
-        INFO = 'INFO'
-        WARNING = 'WARNING'
+        class MessageType:
+            ERROR = 'ERROR'
+            INFO = 'INFO'
+            WARNING = 'WARNING'
 
-    @staticmethod
-    def terminate(msg:str, msg_type:str):
-        """
-        Terminate application with message.
+        @staticmethod
+        def terminate(msg:str, msg_type:str):
+            """
+            Terminate application with message.
 
-        Parameters
-        ----------
-        msg : str
-            Error message.
-        msg_type : str
-            Any 'MessageType.<..>' may be used.
-        """
-        error_code = 0 if (msg_type != ClickWrapper.MessageType.ERROR) else 1 
-        complete_msg = '[' + msg_type + ']: ' + msg
+            Parameters
+            ----------
+            msg : str
+                Error message.
+            msg_type : str
+                Any 'MessageType.<..>' may be used.
+            """
+            Wrappers.click.log(msg, msg_type)
 
-        click.echo(complete_msg)
-        sys.exit(error_code)
+            error_code = 0 if (msg_type != Wrappers.click.MessageType.ERROR) else 1 
+            sys.exit(error_code)
 
-    @staticmethod
-    def terminate(msg:str):
-        """
-        Terminate application with an error message.
+        @staticmethod
+        def log(msg:str, msg_type:str):
+            """
+            Log message.
 
-        Parameters
-        ----------
-        msg : str
-            Error message.
-        """
-        click.echo('[Info]: ' + msg)
-        sys.exit(1)
+            Parameters
+            ----------
+            msg : str
+                Error message.
+            msg_type : str
+                Any 'MessageType.<..>' may be used.
+            """
+            complete_msg = '[' + msg_type + ']: ' + msg
+            click.echo(complete_msg)
 
 class ArgumentProcessor:
 
     @staticmethod
-    def mapInputToOutputPaths(inputPathArgument:str, outputPathArgument:str, File):
+    def mapInputToOutputPaths(inputPathArgument:str, outputPathArgument:str):
         """
         Map input file-path(s) to output file-path(s).
 
