@@ -1,5 +1,6 @@
 
 import os
+import shutil
 
 # Note: An environment variable is introduced, to disable all 'Tensor-flow' CMD print(s).  
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -14,7 +15,13 @@ import cv2
 #------------------------/
 # [SECTION]: Constant(s)
 #------------------------/
-# ...
+# RGB: Black
+color_fill = (0, 0, 0)
+
+# RGB: Dark-Red
+color_border = (179, 0, 0)
+
+thickness_border = 1
 
 #------------------------/
 # [SECTION]: Global variable(s)
@@ -23,6 +30,8 @@ import cv2
 detector = MTCNN()
 
 isRotationRequired = False
+isOutlineOnly = False
+isCopyOriginal = False
 
 cv2_reverse_rotations = {
     cv2.ROTATE_90_CLOCKWISE : cv2.ROTATE_90_COUNTERCLOCKWISE,
@@ -45,7 +54,9 @@ def generateOutputImage(img_rgb, outputFilePath, rotate_code=None):
 
     for face in faces:
         x, y, width, height = face['box']
-        cv2.rectangle(img_rgb, (x, y), (x + width, y + height), (255, 0, 0), 2)
+        if not isOutlineOnly:
+            cv2.rectangle(img_rgb, (x, y), (x + width, y + height), color_fill, -1)
+        cv2.rectangle(img_rgb, (x, y), (x + width, y + height), color_border, thickness_border)
 
     if rotate_code != None:
         img_rgb = cv2.rotate(img_rgb, cv2_reverse_rotations[rotate_code])
@@ -56,6 +67,8 @@ def generateOutputFile(inputFilePath, outputFilePath):
     img = cv2.imread(inputFilePath)
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+    if isCopyOriginal:
+        shutil.copyfile(inputFilePath, outputFilePath)
     generateOutputImage(img_rgb, ut.FileManagement.Path.getNextIterativePath(outputFilePath, is_file=True))
     if isRotationRequired:
         for rotate_code in cv2_reverse_rotations.keys():
@@ -67,10 +80,14 @@ def generateOutputFile(inputFilePath, outputFilePath):
 
 def run(kwargs):
     global isRotationRequired
+    global isOutlineOnly
+    global isCopyOriginal
 
     outputPathArgument = kwargs['output']
     inputPathArgument = kwargs['input']
     isRotationRequired = kwargs['rotate']
+    isOutlineOnly = kwargs['outline']
+    isCopyOriginal = kwargs['copy']
 
     # [ASSERT]: Input file, or directory exists.
     if not os.path.exists(inputPathArgument):
