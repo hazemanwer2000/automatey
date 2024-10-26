@@ -81,7 +81,7 @@ class FileManagement:
     class Path:
 
         @staticmethod
-        def getNextIterativePath(path:str, separator:str='#', suffix:str='', alt_ext:str=None) -> str:
+        def getNextIterativePath(path:str, separator:str='#', suffix:str='', alt_ext:str=None, is_file:bool=None) -> str:
             """
             Get the next iterative path, that does not exist.
 
@@ -98,13 +98,17 @@ class FileManagement:
             alt_ext : str
                 If a file is specified, this replaces the current file-extension.
                 It must be without a dot.
+            is_file : bool
+                If specified, path does not need to point to an existing file, or directory.
                 
             Returns
             -------
             new_path : str
                 Constructed path.
             """
-            if os.path.isfile(path):
+            is_file = is_file if (is_file != None) else os.path.isfile(path)
+
+            if is_file:
                 path_no_ext, ext = os.path.splitext(path)
                 ext = ext if alt_ext == None else ('.' + alt_ext)
             else:
@@ -119,7 +123,7 @@ class FileManagement:
             return new_path
 
         @staticmethod
-        def getNextRandomPath(path:str, name_len:int=8, alt_ext:str=None) -> str:
+        def getNextRandomPath(path:str, name_len:int=8, alt_ext:str=None, is_file:bool=None) -> str:
             '''
             Get the next random path.
 
@@ -132,13 +136,17 @@ class FileManagement:
                 It must be without a dot.
             name_len : str
                 Length of the file-name, not including the extension (if present).
+            is_file : bool
+                If specified, path does not need to point to an existing file, or directory.
 
             Returns
             -------
             new_path : str
                 Constructed path.
             '''
-            if os.path.isfile(path):
+            is_file = is_file if (is_file != None) else os.path.isfile(path)
+
+            if is_file:
                 _, ext = os.path.splitext(path)
                 ext = ext if alt_ext == None else ('.' + alt_ext)
             else:

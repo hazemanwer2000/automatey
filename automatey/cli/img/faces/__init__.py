@@ -39,10 +39,16 @@ def generateOutputImage(img_rgb, outputFilePath, rotate_code=None):
         img_rgb = cv2.rotate(img_rgb, rotate_code)
 
     faces = detector.detect_faces(img_rgb)
+     # Note: If this is a rotated image, and no faces have been detected, it is discarded.
+    if (rotate_code != None) and (len(faces) == 0):
+        return
 
     for face in faces:
         x, y, width, height = face['box']
         cv2.rectangle(img_rgb, (x, y), (x + width, y + height), (255, 0, 0), 2)
+
+    if rotate_code != None:
+        img_rgb = cv2.rotate(img_rgb, cv2_reverse_rotations[rotate_code])
 
     cv2.imwrite(outputFilePath, cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR))
 
@@ -50,10 +56,10 @@ def generateOutputFile(inputFilePath, outputFilePath):
     img = cv2.imread(inputFilePath)
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    generateOutputImage(img_rgb, outputFilePath)
+    generateOutputImage(img_rgb, ut.FileManagement.Path.getNextIterativePath(outputFilePath, is_file=True))
     if isRotationRequired:
         for rotate_code in cv2_reverse_rotations.keys():
-            generateOutputImage(img_rgb, ut.FileManagement.Path.getNextIterativePath())
+            generateOutputImage(img_rgb, ut.FileManagement.Path.getNextIterativePath(outputFilePath, is_file=True), rotate_code=rotate_code)
 
 #-----------------/
 # [SECTION]: Run!
