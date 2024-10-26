@@ -11,6 +11,8 @@ import click
 import time
 from mtcnn import MTCNN
 import cv2
+import PIL
+import numpy as np
 
 #------------------------/
 # [SECTION]: Enum(s)
@@ -78,6 +80,7 @@ videoExtensionList = ['.mp4']
 #-------------------------------/
 
 requiredRotation = None
+requiredRotateCodes = None
 isOutlineOnly = False
 isCopyOriginal = False
 thicknessBorder = 0
@@ -121,12 +124,7 @@ def generateOutputImage(inputFilePath, outputFilePath):
     img = cv2.imread(inputFilePath)
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    if requiredRotation != RotationType.ALL:
-        rotateCodes = [cv2_map_RotationType2RotateCode[requiredRotation]]
-    else:
-        rotateCodes = cv2_map_RotationType2RotateCode.values()
-
-    for rotateCode in rotateCodes:
+    for rotateCode in requiredRotateCodes:
         modifiedOutputFilePath = ut.FileManagement.Path.getNextIterativePath(outputFilePath, is_file=True)
         processed_img_rgb, is_faces_detected = processImage(img_rgb, rotateCode)
         if is_faces_detected:
@@ -136,7 +134,31 @@ def generateOutputVideo(inputFilePath, outputFilePath):
     pass
 
 def generateOutputGIF(inputFilePath, outputFilePath):
-    pass
+
+    with PIL.Image.open(inputFilePath) as img_gif:
+
+        for rotateCode in requiredRotateCodes:
+
+            # [ACTION]: Loop on all frames.
+            frames = []
+            for frame in PIL.ImageSequence.Iterator(img_gif):
+                frame_cv2 = np.array(frame.convert("RGB"))
+                processed_frame_cv2, _ = processImage(frame_cv2, rotateCode)
+                processed_frame = PIL.Image.fromarray(processed_frame_cv2)
+                frames.append(processed_frame)
+            
+            # [ACTION]: Save processed frames as GIF.
+            modifiedOutputFilePath = ut.FileManagement.Path.getNextIterativePath(outputFilePath, is_file=True)
+            frames[0].save(
+                modifiedOutputFilePath,
+                save_all=True,
+                append_images=frames[1:],
+
+                # Note: Preserve original frame rate.
+                duration=img_gif.info['duration'],
+                # Note: Preserve original loop setting.          
+                loop=img_gif.info.get('loop', 0)
+            )
 
 def generateOutputFile(inputFilePath, outputFilePath, fileType):
     if isCopyOriginal:
@@ -159,6 +181,7 @@ def run(kwargs):
         cli_ut.Wrappers.click.terminate('Non-right angle rotation specified.', cli_ut.Wrappers.click.MessageType.ERROR)
 
     global requiredRotation
+    global requiredRotateCodes
     global isOutlineOnly
     global isCopyOriginal
     global thicknessBorder
@@ -170,6 +193,9 @@ def run(kwargs):
     isCopyOriginal = kwargs['copy']
     thicknessBorder = thickness_border_thick if isOutlineOnly else thickness_border_thin
 
+    # [SET]: Set the required CV2 'Rotate-Codes', based on required rotation (argument).
+    requiredRotateCodes = [cv2_map_RotationType2RotateCode[requiredRotation]] if (requiredRotation != RotationType.ALL) else cv2_map_RotationType2RotateCode.values()
+
     # [ASSERT]: Input file, or directory exists.
     if not os.path.exists(inputPathArgument):
         cli_ut.Wrappers.click.terminate('Input file, or directory does not exist.', cli_ut.Wrappers.click.MessageType.ERROR)
@@ -180,7 +206,7 @@ def run(kwargs):
         os.mkdir(outputDirectoryPath)
 
     # [ACTION]: Report statistics.
-    cli_ut.Wrappers.click.log('Generating ' + str(len(inputOutputFilePaths)) + ' file(s)...', cli_ut.Wrappers.click.MessageType.INFO)
+    cli_ut.Wrappers.click.log('Processing ' + str(len(inputOutputFilePaths)) + ' file(s)...', cli_ut.Wrappers.click.MessageType.INFO)
 
     # [ACTION]: Loop on each...
     for inputOutputFilePath in inputOutputFilePaths:
