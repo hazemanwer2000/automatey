@@ -3,10 +3,10 @@ import os
 import pathlib
 import typing
 import tempfile
-import automatey.RandomUtils as RandomUtils
-from automatey.CMDUtils import printf
 import shutil
 from send2trash import send2trash
+    
+import automatey.RandomUtils as RandomUtils
     
 class File:
     '''
@@ -192,7 +192,7 @@ class File:
         @staticmethod
         def replicateDirectoryStructure(srcDir, dstDir):
             '''
-            Creates all the sub-directories, recursive, of a destination directory.
+            Creates all the sub-directories, recursive, of a source directory, under the destination directory.
             '''
             dstDir.makeDirectory()
             resultList = srcDir.listDirectoryRelatively(isRecursive=True, conditional=lambda x: x.isDirectory())

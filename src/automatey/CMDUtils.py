@@ -1,7 +1,7 @@
 
 import pprint
 
-def printf(anything):
+def printf(anything, width=80):
     '''
     Replaces Python default 'print' API.
     '''
