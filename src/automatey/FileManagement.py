@@ -4,6 +4,7 @@ import pathlib
 import typing
 import tempfile
 import automatey.RandomUtils as RandomUtils
+from automatey.CMDUtils import printf
 import shutil
 from send2trash import send2trash
     
@@ -13,7 +14,7 @@ class File:
     '''
 
     def __init__(self, *paths: str):
-        joinedPath = File.Utils.Path.join(*paths)
+        joinedPath = os.path.join(*paths)
         self.path = os.path.abspath(joinedPath)
     
     def __str__(self) -> bool:
@@ -49,7 +50,6 @@ class File:
         iterator = pathObject.rglob("*") if isRecursive else pathObject.iterdir()
         resultList = []
         for element in iterator:
-            print(element)
             f = File(str(element))
             if conditional(f):
                 resultList.append(f)
@@ -74,7 +74,7 @@ class File:
         
         For example, '..' returns the parent directory of this file/directory. 
         '''
-        return File(Path.join(self.path, *paths))
+        return File(os.path.join(self.path, *paths))
     
     def getExtension(self) -> str:
         '''
@@ -188,6 +188,17 @@ class File:
             '''
             if f.isExists():
                 send2trash(str(f))
+        
+        @staticmethod
+        def replicateDirectoryStructure(srcDir, dstDir):
+            '''
+            Creates all the sub-directories, recursive, of a destination directory.
+            '''
+            dstDir.makeDirectory()
+            resultList = srcDir.listDirectoryRelatively(isRecursive=True, conditional=lambda x: x.isDirectory())
+            for subDirRelPath in resultList:
+                newSubDir = dstDir.traverseDirectory(subDirRelPath)
+                newSubDir.makeDirectory()
         
         class Path:
             
