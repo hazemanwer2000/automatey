@@ -6,10 +6,16 @@ import automatey.MathUtils as MathUtils
 import PIL
 import numpy as np
 
+class BlurType:
+    class GaussianBlur: pass
+    class MedianBlur: pass
+    class BilateralFilter: pass
+
 class Image:
     '''
     Image handler.
     '''
+  
     def __init__(self, f:File):
         self.imgHandler = cv2.imread(str(f))
 
@@ -52,7 +58,42 @@ class Image:
             pillowImgHandler = PIL.ImageEnhance.Contrast(pillowImgHandler).enhance(contrast)
         
         self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+
+    def __gaussianBlur(self, kernelSize):
+        self.imgHandler = cv2.GaussianBlur(self.imgHandler, (kernelSize, kernelSize), sigmaX=0)
         
+    def __medianBlur(self, kernelSize):
+        self.imgHandler = cv2.medianBlur(self.imgHandler, ksize=kernelSize)
+
+    def __bilateralFilter(self, kernelSize):
+        self.imgHandler = cv2.bilateralFilter(self.imgHandler, d=kernelSize, sigmaColor=75, sigmaSpace=75)
+
+    def blur(self, blurType, kernelSize):
+        '''
+        Blur an image. Kernel-size must be odd.
+        '''
+        fcnMap = {
+            BlurType.GaussianBlur: self.__gaussianBlur,
+            BlurType.MedianBlur: self.__medianBlur,
+            BlurType.BilateralFilter: self.__bilateralFilter
+        }
+        fcnMap[blurType](kernelSize)
+
+    def sharpen(self, factor):
+        '''
+        Sharpen an image.
+        
+        Value(s) are factor(s) (i.e., '1.0' has no effect).
+        '''
+        factor = float(factor)
+        
+        pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
+        
+        if factor != 1.0:
+            pillowImgHandler = PIL.ImageEnhance.Sharpness(pillowImgHandler).enhance(factor)
+        
+        self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+    
     def saveAs(self, f:File):
         '''
         Save image, into a file.
