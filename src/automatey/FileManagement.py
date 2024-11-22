@@ -2,12 +2,6 @@
 import os
 import pathlib
 import typing
-
-class Path:
-    
-    @staticmethod
-    def join(*args):
-        return os.path.join(*args)
     
 class File:
     '''
@@ -166,3 +160,12 @@ class File:
         parentDirectory = self.traverseDirectory('..')
         pathObject = pathlib.Path(parentDirectory.path)
         pathObject.mkdir(exist_ok=True, parents=True)
+
+    class Path:
+        
+        @staticmethod
+        def join(*args):
+            '''
+            Concatenates multiple path(s).
+            '''
+            return os.path.abspath(os.path.join(*args))
