@@ -89,14 +89,14 @@ class File:
         '''
         return self.handler.read(count)
     
-    def writeAny(self, writeable):
-        self.handler.write(writeable)
-    
     def writeLine(self, line:str):
         '''
             Writes a line (i.e., appends '\n').
         '''
         self.handler.write(line + '\n')
+    
+    def writeAny(self, writeable):
+        self.handler.write(writeable)
     
     def closeFile(self):
         self.handler.close()
@@ -108,3 +108,7 @@ class File:
     def __exit__(self, cls, obj, traceback):
         self.closeFile()
         return True
+
+    def makeDirectory(self):
+        pathObject = pathlib.Path(self.path)
+        pathObject.mkdir(exist_ok=True, parents=False)
