@@ -15,7 +15,7 @@ class Image:
     '''
     Image handler.
     '''
-  
+
     def __init__(self, f:File):
         self.imgHandler = cv2.imread(str(f))
 
@@ -23,8 +23,8 @@ class Image:
         '''
         Returns a '(width, height)' tuple.
         '''
-        height, width, _  = self.imgHandler.shape
-        return (width, height)
+        shape  = self.imgHandler.shape
+        return (shape[1], shape[0])
     
     def grayscale(self):
         '''
@@ -33,7 +33,7 @@ class Image:
         if len(self.imgHandler.shape) > 2:
             self.imgHandler = cv2.cvtColor(self.imgHandler, cv2.COLOR_BGR2GRAY)
         
-    def blackWhite(self, threshold):
+    def blackWhite(self, threshold=0.5):
         '''
         Convert grayscale into black-and-white.
         
@@ -93,6 +93,66 @@ class Image:
             pillowImgHandler = PIL.ImageEnhance.Sharpness(pillowImgHandler).enhance(factor)
         
         self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+    
+    def findEdges(self):
+        '''
+        Finds and leaves only edges.
+        '''
+        pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
+        pillowImgHandler = pillowImgHandler.filter(PIL.ImageFilter.FIND_EDGES)
+        self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+
+    def emboss(self):
+        '''
+        Emboss.
+        '''
+        pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
+        pillowImgHandler = pillowImgHandler.filter(PIL.ImageFilter.EMBOSS)
+        self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+  
+    __sepiaMatrix = np.array([[0.272, 0.534, 0.131],
+                               [0.349, 0.686, 0.168],
+                               [0.393, 0.769, 0.189]])
+
+    def sepiaTone(self):
+        '''
+        Applies sepia-tone (i.e., a yellow-ish, vintage effect).
+        '''
+        self.imgHandler = cv2.transform(self.imgHandler, Image.__sepiaMatrix)
+        
+    def resize(self, width, height):
+        '''
+        Resize an image, given '(W, H)'.
+        
+        If either set to '-1', aspect ratio is preserved.
+        '''
+        orig_w, orig_h = self.getDimensions()
+        aspectRatio = orig_w / orig_h
+        
+        if width == -1:
+            width = int(height * aspectRatio)
+        elif height == -1:
+            height = int(width / aspectRatio)
+        
+        interpolation = cv2.INTER_AREA
+        # Case: Up-scaling.
+        if (width > orig_w) or (height > orig_h):
+            interpolation = cv2.INTER_LANCZOS4
+
+        self.imgHandler = cv2.resize(self.imgHandler, (width, height), interpolation=interpolation)
+        
+    def pixelate(self, factor):
+        '''
+        Pixelate.
+        
+        Value(s) are factor(s) (i.e., '1.0' has no effect).
+        '''
+        factor = 1 / factor
+        orig_w, orig_h = self.getDimensions()
+        width = int(orig_w * factor)
+        height = int(orig_h * factor)
+        self.imgHandler = cv2.resize(self.imgHandler, (width, height), interpolation=cv2.INTER_AREA)
+        self.imgHandler = cv2.resize(self.imgHandler, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
     
     def saveAs(self, f:File):
         '''
