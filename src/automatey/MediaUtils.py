@@ -25,7 +25,28 @@ class Image:
         '''
         shape  = self.imgHandler.shape
         return (shape[1], shape[0])
-    
+
+    def resize(self, width, height):
+        '''
+        Resize an image, given '(W, H)'.
+        
+        If either set to '-1', aspect ratio is preserved.
+        '''
+        orig_w, orig_h = self.getDimensions()
+        aspectRatio = orig_w / orig_h
+        
+        if width == -1:
+            width = int(height * aspectRatio)
+        elif height == -1:
+            height = int(width / aspectRatio)
+        
+        interpolation = cv2.INTER_AREA
+        # Case: Up-scaling.
+        if (width > orig_w) or (height > orig_h):
+            interpolation = cv2.INTER_LANCZOS4
+
+        self.imgHandler = cv2.resize(self.imgHandler, (width, height), interpolation=interpolation)
+
     def grayscale(self):
         '''
         Convert into grayscale.
@@ -40,7 +61,17 @@ class Image:
         Threshold range is (0, 1). A lower threshold leads to more white regions.
         '''
         _, self.imgHandler = cv2.threshold(self.imgHandler, int(threshold*255), 255, cv2.THRESH_BINARY)
-    
+
+    __sepiaMatrix = np.array([[0.272, 0.534, 0.131],
+                               [0.349, 0.686, 0.168],
+                               [0.393, 0.769, 0.189]])
+
+    def sepiaTone(self):
+        '''
+        Applies sepia-tone (i.e., a yellow-ish, vintage effect).
+        '''
+        self.imgHandler = cv2.transform(self.imgHandler, Image.__sepiaMatrix)
+
     def brightnessContrast(self, brightness=1.0, contrast=1.0):
         '''
         Adjust brightness and contrast.
@@ -109,38 +140,7 @@ class Image:
         pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
         pillowImgHandler = pillowImgHandler.filter(PIL.ImageFilter.EMBOSS)
         self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
-  
-    __sepiaMatrix = np.array([[0.272, 0.534, 0.131],
-                               [0.349, 0.686, 0.168],
-                               [0.393, 0.769, 0.189]])
 
-    def sepiaTone(self):
-        '''
-        Applies sepia-tone (i.e., a yellow-ish, vintage effect).
-        '''
-        self.imgHandler = cv2.transform(self.imgHandler, Image.__sepiaMatrix)
-        
-    def resize(self, width, height):
-        '''
-        Resize an image, given '(W, H)'.
-        
-        If either set to '-1', aspect ratio is preserved.
-        '''
-        orig_w, orig_h = self.getDimensions()
-        aspectRatio = orig_w / orig_h
-        
-        if width == -1:
-            width = int(height * aspectRatio)
-        elif height == -1:
-            height = int(width / aspectRatio)
-        
-        interpolation = cv2.INTER_AREA
-        # Case: Up-scaling.
-        if (width > orig_w) or (height > orig_h):
-            interpolation = cv2.INTER_LANCZOS4
-
-        self.imgHandler = cv2.resize(self.imgHandler, (width, height), interpolation=interpolation)
-        
     def pixelate(self, factor):
         '''
         Pixelate.
