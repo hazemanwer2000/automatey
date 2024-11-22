@@ -83,8 +83,11 @@ class File:
         line = None if (line == '') else (line[:-1])
         return line        
     
-    def readAll(self):
-        return self.handler.read()
+    def readAny(self, count=-1):
+        '''
+            Read *n* bytes, or character(s).
+        '''
+        return self.handler.read(count)
     
     def writeAny(self, writeable):
         self.handler.write(writeable)
