@@ -1,5 +1,6 @@
 
 import PIL.ImageEnhance
+import PIL.ImageOps
 import cv2
 from automatey.FileUtils import File
 import automatey.MathUtils as MathUtils
@@ -10,6 +11,10 @@ class BlurType:
     class GaussianBlur: pass
     class MedianBlur: pass
     class BilateralFilter: pass
+
+class Color:
+    Black = (0, 0, 0)
+    White = (255, 255, 255)
 
 class Image:
     '''
@@ -153,13 +158,23 @@ class Image:
         height = int(orig_h * factor)
         self.imgHandler = cv2.resize(self.imgHandler, (width, height), interpolation=cv2.INTER_AREA)
         self.imgHandler = cv2.resize(self.imgHandler, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
+
+    def addBorder(self, size, color):
+        '''
+        Adds a border.
+        
+        Color must be in '(R, G, B)' format.
+        '''
+        pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
+        pillowImgHandler = PIL.ImageOps.expand(pillowImgHandler, border=size, fill=color)
+        self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
     
     def saveAs(self, f:File):
         '''
         Save image, into a file.
         '''
         cv2.imwrite(str(f), self.imgHandler)
-        
+
     @staticmethod
     def __CV2ToPillow(imgHandler):
         return PIL.Image.fromarray(cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB))
