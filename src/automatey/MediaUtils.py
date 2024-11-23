@@ -222,12 +222,6 @@ class Image:
     def __init__(self, f:File):
         self.imgHandler = INTERNAL.CV2Wrapper.createFromFile(f)
 
-    def getDimensions(self):
-        '''
-        Returns a '(width, height)' tuple.
-        '''
-        return INTERNAL.CV2Wrapper.getDimensions(self.imgHandler)
-
     def resize(self, width, height):
         '''
         Resize an image, given '(W, H)'.
@@ -267,12 +261,27 @@ class Image:
         self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
 
     def gaussianBlur(self, kernelSize):
+        '''
+        Applies gaussian blur.
+        
+        Kernel-size must be odd.
+        '''
         self.imgHandler = INTERNAL.CV2Wrapper.gaussianBlur(self.imgHandler, kernelSize)
         
     def medianBlur(self, kernelSize):
+        '''
+        Applies median blur.
+        
+        Kernel-size must be odd.
+        '''
         self.imgHandler = INTERNAL.CV2Wrapper.medianBlur(self.imgHandler, kernelSize)
 
     def bilateralFilter(self, kernelSize):
+        '''
+        Applies bilateral filter.
+        
+        Kernel-size must be odd.
+        '''
         self.imgHandler = INTERNAL.CV2Wrapper.bilateralFilter(self.imgHandler, kernelSize)
 
     def sharpen(self, factor):
@@ -345,7 +354,7 @@ class GIF:
             self.frames.append(frame)
             frameDuration = meta.get("duration", 0)
             self.totalDuration += frameDuration
-    
+
     def getTotalDuration(self):
         '''
         Get total duration, in 'ms'.
@@ -390,6 +399,88 @@ class GIF:
         '''
         self.__CV2Applier(INTERNAL.CV2Wrapper.grayscale)
 
+    def blackWhite(self, threshold=0.5):
+        '''
+        Convert grayscale into black-and-white.
+        
+        Threshold range is (0, 1). A lower threshold leads to more white regions.
+        '''
+        self.__CV2Applier(INTERNAL.CV2Wrapper.blackWhite, threshold)
+
+    def sepiaTone(self):
+        '''
+        Applies sepia-tone (i.e., a yellow-ish, vintage effect).
+        '''
+        self.__CV2Applier(INTERNAL.CV2Wrapper.sepiaTone)
+
+    def brightnessContrast(self, brightness=1.0, contrast=1.0):
+        '''
+        Adjust brightness and contrast.
+        
+        Value(s) are factor(s) (i.e., '1.0' has no effect).
+        '''
+        pass
+
+    def gaussianBlur(self, kernelSize):
+        '''
+        Applies gaussian blur.
+        
+        Kernel-size must be odd.
+        '''
+        self.__CV2Applier(INTERNAL.CV2Wrapper.gaussianBlur, kernelSize)
+        
+    def medianBlur(self, kernelSize):
+        '''
+        Applies median blur.
+        
+        Kernel-size must be odd.
+        '''
+        self.__CV2Applier(INTERNAL.CV2Wrapper.medianBlur, kernelSize)
+
+    def bilateralFilter(self, kernelSize):
+        '''
+        Applies bilateral filter.
+        
+        Kernel-size must be odd.
+        '''
+        self.__CV2Applier(INTERNAL.CV2Wrapper.bilateralFilter, kernelSize)
+
+    def sharpen(self, factor):
+        '''
+        Sharpen an image.
+        
+        Value(s) are factor(s) (i.e., '1.0' has no effect).
+        '''
+        pass
+    
+    def findEdges(self):
+        '''
+        Finds and leaves only edges.
+        '''
+        pass
+
+    def emboss(self):
+        '''
+        Emboss.
+        '''
+        pass
+
+    def pixelate(self, factor):
+        '''
+        Pixelate.
+        
+        Value(s) are factor(s) (i.e., '1.0' has no effect).
+        '''
+        self.__CV2Applier(INTERNAL.CV2Wrapper.pixelate, factor)
+
+    def addBorder(self, size, color):
+        '''
+        Adds a border.
+        
+        Color must be in '(R, G, B)' format.
+        '''
+        pass   
+    
     def saveAs(self, f:File, fps=None):
         '''
         Save into file.
