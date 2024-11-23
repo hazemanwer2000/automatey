@@ -190,3 +190,44 @@ class Image:
         @staticmethod
         def isImage(f:File):
             return f.getExtension() in Image.Utils.SupportedExtensions
+
+class GIF:
+
+    def __init__(self, f:File):
+        imgHandler = PIL.Image.open(str(f))
+        self.frames = []
+        for i in range(imgHandler.n_frames):
+            imgHandler.seek(i)
+            self.frames.append(imgHandler.copy())
+    
+    def getTotalDuration(self):
+        '''
+        Get total duration, in 'ms'.
+        '''
+        duration = 0
+        for frame in self.frames:
+            duration += frame.info['duration']
+        return duration
+    
+    def getFrameCount(self):
+        '''
+        Get frame count.
+        '''
+        return len(self.frames)
+    
+    def getFPS(self):
+        '''
+        Get FPS.
+        '''
+        return self.getFrameCount() / (self.getTotalDuration() / 1000)
+    
+    def saveAs(self, f:File):
+        '''
+        Save into file.
+        '''
+        self.frames[0].save(
+            str(f),
+            save_all=True,
+            append_images=self.frames[1:],
+            loop=0
+        )

@@ -84,7 +84,7 @@ class File:
         '''
         extension = os.path.splitext(self.path)[1]
         extension = None if (extension == '') else extension[1:]
-        return extension
+        return extension.lower()
     
     def getName(self) -> str:
         '''
