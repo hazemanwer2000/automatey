@@ -9,7 +9,15 @@ import numpy as np
 import imageio
 
 class INTERNAL:
+
+    @staticmethod
+    def ImageIOToPillow(imgHandler):
+        return PIL.Image.fromarray(imgHandler)
     
+    @staticmethod
+    def PillowToImageIO(imgHandler):
+        return np.array(imgHandler)
+
     @staticmethod
     def CV2ToPillow(imgHandler):
         return PIL.Image.fromarray(cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB))
@@ -17,10 +25,6 @@ class INTERNAL:
     @staticmethod
     def PillowToCV2(imgHandler):
         return cv2.cvtColor(np.array(imgHandler), cv2.COLOR_RGB2BGR)
-    
-    @staticmethod
-    def ImageIOToCV2(imgHandler):
-        return cv2.cvtColor(imgHandler, cv2.COLOR_RGB2BGR)
     
     @staticmethod
     def ImageIOToCV2(imgHandler):
@@ -80,7 +84,7 @@ class INTERNAL:
             return imgHandler
 
         @staticmethod
-        def addBorder(self, size, color):
+        def addBorder(imgHandler, size, color):
             '''
             Adds a border.
             
@@ -379,6 +383,12 @@ class GIF:
             cv2ImgHandler = fcn(cv2ImgHandler, *args, **kwargs)
             self.frames[i] = INTERNAL.CV2ToImageIO(cv2ImgHandler)
 
+    def __PillowApplier(self, fcn, *args, **kwargs):
+        for i in range(len(self.frames)):
+            pillowImgHandler = INTERNAL.ImageIOToPillow(self.frames[i])
+            pillowImgHandler = fcn(pillowImgHandler, *args, **kwargs)
+            self.frames[i] = INTERNAL.PillowToImageIO(pillowImgHandler)
+
     def getDimensions(self):
         '''
         Returns a '(width, height)' tuple.
@@ -419,7 +429,7 @@ class GIF:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        pass
+        self.__PillowApplier(INTERNAL.PillowWrapper.brightnessContrast, brightness, contrast)
 
     def gaussianBlur(self, kernelSize):
         '''
@@ -451,19 +461,19 @@ class GIF:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        pass
+        self.__PillowApplier(INTERNAL.PillowWrapper.sharpen, factor)
     
     def findEdges(self):
         '''
         Finds and leaves only edges.
         '''
-        pass
+        self.__PillowApplier(INTERNAL.PillowWrapper.findEdges)
 
     def emboss(self):
         '''
         Emboss.
         '''
-        pass
+        self.__PillowApplier(INTERNAL.PillowWrapper.emboss)
 
     def pixelate(self, factor):
         '''
@@ -479,7 +489,7 @@ class GIF:
         
         Color must be in '(R, G, B)' format.
         '''
-        pass   
+        self.__PillowApplier(INTERNAL.PillowWrapper.addBorder, size, color)
     
     def saveAs(self, f:File, fps=None):
         '''
