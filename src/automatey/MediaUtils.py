@@ -6,30 +6,215 @@ from automatey.FileUtils import File
 import automatey.MathUtils as MathUtils
 import PIL
 import numpy as np
+import imageio
 
-class BlurType:
-    class GaussianBlur: pass
-    class MedianBlur: pass
-    class BilateralFilter: pass
+class INTERNAL:
+    
+    @staticmethod
+    def CV2ToPillow(imgHandler):
+        return PIL.Image.fromarray(cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB))
+    
+    @staticmethod
+    def PillowToCV2(imgHandler):
+        return cv2.cvtColor(np.array(imgHandler), cv2.COLOR_RGB2BGR)
+    
+    class PillowWrapper:
+        
+        @staticmethod
+        def brightnessContrast(imgHandler, brightness=1.0, contrast=1.0):
+            '''
+            Adjust brightness and contrast.
+            
+            Value(s) are factor(s) (i.e., '1.0' has no effect).
+            '''
+            brightness = float(brightness)
+            contrast = float(contrast)
+
+            if brightness != 1.0:
+                imgHandler = PIL.ImageEnhance.Brightness(imgHandler).enhance(brightness)
+            if contrast != 1.0:
+                imgHandler = PIL.ImageEnhance.Contrast(imgHandler).enhance(contrast)
+                
+            return imgHandler
+
+        @staticmethod
+        def sharpen(imgHandler, factor):
+            '''
+            Sharpen an image.
+            
+            Value(s) are factor(s) (i.e., '1.0' has no effect).
+            '''
+            factor = float(factor)
+            
+            if factor != 1.0:
+                imgHandler = PIL.ImageEnhance.Sharpness(imgHandler).enhance(factor)
+                
+            return imgHandler
+
+        @staticmethod
+        def findEdges(imgHandler):
+            '''
+            Finds and leaves only edges.
+            '''
+            imgHandler = imgHandler.filter(PIL.ImageFilter.FIND_EDGES)
+            return imgHandler
+
+        @staticmethod
+        def emboss(imgHandler):
+            '''
+            Finds and leaves only edges.
+            '''
+            imgHandler = imgHandler.filter(PIL.ImageFilter.EMBOSS)
+            return imgHandler
+
+        @staticmethod
+        def addBorder(self, size, color):
+            '''
+            Adds a border.
+            
+            Color must be in '(R, G, B)' format.
+            '''
+            imgHandler = PIL.ImageOps.expand(imgHandler, border=size, fill=color)
+            return imgHandler
+
+    class CV2Wrapper:
+        
+        @staticmethod
+        def createFromFile(f:File):
+            return cv2.imread(str(f))
+        
+        @staticmethod
+        def getDimensions(imgHandler):
+            '''
+            Returns a '(width, height)' tuple.
+            '''
+            shape  = imgHandler.shape
+            return (shape[1], shape[0])
+
+        @staticmethod
+        def resize(imgHandler, width, height):
+            '''
+            Resize an image, given '(W, H)'.
+            
+            If either set to '-1', aspect ratio is preserved.
+            '''
+            orig_w, orig_h = INTERNAL.CV2Wrapper.getDimensions(imgHandler)
+            aspectRatio = orig_w / orig_h
+            
+            if width == -1:
+                width = int(height * aspectRatio)
+            elif height == -1:
+                height = int(width / aspectRatio)
+            
+            interpolation = cv2.INTER_AREA
+            # Case: Up-scaling.
+            if (width > orig_w) or (height > orig_h):
+                interpolation = cv2.INTER_LANCZOS4
+
+            imgHandler = cv2.resize(imgHandler, (width, height), interpolation=interpolation)
+            return imgHandler
+
+        @staticmethod
+        def grayscale(imgHandler):
+            '''
+            Convert into grayscale.
+            '''
+            if len(imgHandler.shape) > 2:
+                imgHandler = cv2.cvtColor(imgHandler, cv2.COLOR_BGR2GRAY)
+            return imgHandler
+
+        @staticmethod
+        def blackWhite(imgHandler, threshold=0.5):
+            '''
+            Convert grayscale into black-and-white.
+            
+            Threshold range is (0, 1). A lower threshold leads to more white regions.
+            '''
+            _, imgHandler = cv2.threshold(imgHandler, int(threshold*255), 255, cv2.THRESH_BINARY)
+            return imgHandler
+
+        sepiaToneMatrix = np.array([[0.272, 0.534, 0.131],
+                                    [0.349, 0.686, 0.168],
+                                    [0.393, 0.769, 0.189]])
+
+        @staticmethod
+        def sepiaTone(imgHandler):
+            '''
+            Applies sepia-tone (i.e., a yellow-ish, vintage effect).
+            '''
+            imgHandler = cv2.transform(imgHandler, INTERNAL.CV2Wrapper.sepiaToneMatrix)
+            return imgHandler
+
+        @staticmethod
+        def gaussianBlur(imgHandler, kernelSize):
+            '''
+            Applies gaussian blur.
+            
+            Kernel-size must be odd.
+            '''
+            imgHandler = cv2.GaussianBlur(imgHandler, (kernelSize, kernelSize), sigmaX=0)
+            return imgHandler
+            
+        @staticmethod
+        def medianBlur(imgHandler, kernelSize):
+            '''
+            Applies median blur.
+            
+            Kernel-size must be odd.
+            '''
+            imgHandler = cv2.medianBlur(imgHandler, ksize=kernelSize)
+            return imgHandler
+
+        @staticmethod
+        def bilateralFilter(imgHandler, kernelSize):
+            '''
+            Applies bilateral filter.
+            
+            Kernel-size must be odd.
+            '''
+            imgHandler = cv2.bilateralFilter(imgHandler, d=kernelSize, sigmaColor=75, sigmaSpace=75)
+            return imgHandler
+
+        @staticmethod
+        def pixelate(imgHandler, factor):
+            '''
+            Pixelate.
+            
+            Value(s) are factor(s) (i.e., '1.0' has no effect).
+            '''
+            factor = 1 / factor
+            orig_w, orig_h = INTERNAL.CV2Wrapper.getDimensions(imgHandler)
+            width = int(orig_w * factor)
+            height = int(orig_h * factor)
+            imgHandler = cv2.resize(imgHandler, (width, height), interpolation=cv2.INTER_AREA)
+            imgHandler = cv2.resize(imgHandler, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
+            return imgHandler
+
+        @staticmethod
+        def saveAs(imgHandler, f:File):
+            '''
+            Save image, into a file.
+            '''
+            cv2.imwrite(str(f), imgHandler)
 
 class Color:
     Black = (0, 0, 0)
     White = (255, 255, 255)
 
+# Uses 'CV2' as its format
 class Image:
     '''
     Image handler.
     '''
 
     def __init__(self, f:File):
-        self.imgHandler = cv2.imread(str(f))
+        self.imgHandler = INTERNAL.CV2Wrapper.createFromFile(f)
 
     def getDimensions(self):
         '''
         Returns a '(width, height)' tuple.
         '''
-        shape  = self.imgHandler.shape
-        return (shape[1], shape[0])
+        return INTERNAL.CV2Wrapper.getDimensions(self.imgHandler)
 
     def resize(self, width, height):
         '''
@@ -37,27 +222,13 @@ class Image:
         
         If either set to '-1', aspect ratio is preserved.
         '''
-        orig_w, orig_h = self.getDimensions()
-        aspectRatio = orig_w / orig_h
-        
-        if width == -1:
-            width = int(height * aspectRatio)
-        elif height == -1:
-            height = int(width / aspectRatio)
-        
-        interpolation = cv2.INTER_AREA
-        # Case: Up-scaling.
-        if (width > orig_w) or (height > orig_h):
-            interpolation = cv2.INTER_LANCZOS4
-
-        self.imgHandler = cv2.resize(self.imgHandler, (width, height), interpolation=interpolation)
+        self.imgHandler = INTERNAL.CV2Wrapper.resize(self.imgHandler, width, height)
 
     def grayscale(self):
         '''
         Convert into grayscale.
         '''
-        if len(self.imgHandler.shape) > 2:
-            self.imgHandler = cv2.cvtColor(self.imgHandler, cv2.COLOR_BGR2GRAY)
+        self.imgHandler = INTERNAL.CV2Wrapper.grayscale(self.imgHandler)
         
     def blackWhite(self, threshold=0.5):
         '''
@@ -65,17 +236,13 @@ class Image:
         
         Threshold range is (0, 1). A lower threshold leads to more white regions.
         '''
-        _, self.imgHandler = cv2.threshold(self.imgHandler, int(threshold*255), 255, cv2.THRESH_BINARY)
-
-    __sepiaMatrix = np.array([[0.272, 0.534, 0.131],
-                               [0.349, 0.686, 0.168],
-                               [0.393, 0.769, 0.189]])
+        self.imgHandler = INTERNAL.CV2Wrapper.blackWhite(self.imgHandler, threshold)
 
     def sepiaTone(self):
         '''
         Applies sepia-tone (i.e., a yellow-ish, vintage effect).
         '''
-        self.imgHandler = cv2.transform(self.imgHandler, Image.__sepiaMatrix)
+        self.imgHandler = INTERNAL.CV2Wrapper.sepiaTone(self.imgHandler)
 
     def brightnessContrast(self, brightness=1.0, contrast=1.0):
         '''
@@ -83,37 +250,18 @@ class Image:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        brightness = float(brightness)
-        contrast = float(contrast)
-        
-        pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
-        
-        if brightness != 1.0:
-            pillowImgHandler = PIL.ImageEnhance.Brightness(pillowImgHandler).enhance(brightness)
-        if contrast != 1.0:
-            pillowImgHandler = PIL.ImageEnhance.Contrast(pillowImgHandler).enhance(contrast)
-        
-        self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL.PillowWrapper.brightnessContrast(pillowImgHandler, brightness, contrast)
+        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
 
-    def __gaussianBlur(self, kernelSize):
-        self.imgHandler = cv2.GaussianBlur(self.imgHandler, (kernelSize, kernelSize), sigmaX=0)
+    def gaussianBlur(self, kernelSize):
+        self.imgHandler = INTERNAL.CV2Wrapper.gaussianBlur(self.imgHandler, kernelSize)
         
-    def __medianBlur(self, kernelSize):
-        self.imgHandler = cv2.medianBlur(self.imgHandler, ksize=kernelSize)
+    def medianBlur(self, kernelSize):
+        self.imgHandler = INTERNAL.CV2Wrapper.medianBlur(self.imgHandler, kernelSize)
 
-    def __bilateralFilter(self, kernelSize):
-        self.imgHandler = cv2.bilateralFilter(self.imgHandler, d=kernelSize, sigmaColor=75, sigmaSpace=75)
-
-    def blur(self, blurType, kernelSize):
-        '''
-        Blur an image. Kernel-size must be odd.
-        '''
-        fcnMap = {
-            BlurType.GaussianBlur: self.__gaussianBlur,
-            BlurType.MedianBlur: self.__medianBlur,
-            BlurType.BilateralFilter: self.__bilateralFilter
-        }
-        fcnMap[blurType](kernelSize)
+    def bilateralFilter(self, kernelSize):
+        self.imgHandler = INTERNAL.CV2Wrapper.bilateralFilter(self.imgHandler, kernelSize)
 
     def sharpen(self, factor):
         '''
@@ -121,30 +269,25 @@ class Image:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        factor = float(factor)
-        
-        pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
-        
-        if factor != 1.0:
-            pillowImgHandler = PIL.ImageEnhance.Sharpness(pillowImgHandler).enhance(factor)
-        
-        self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL.PillowWrapper.sharpen(pillowImgHandler, factor)
+        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
     
     def findEdges(self):
         '''
         Finds and leaves only edges.
         '''
-        pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
-        pillowImgHandler = pillowImgHandler.filter(PIL.ImageFilter.FIND_EDGES)
-        self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL.PillowWrapper.findEdges(pillowImgHandler)
+        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
 
     def emboss(self):
         '''
         Emboss.
         '''
-        pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
-        pillowImgHandler = pillowImgHandler.filter(PIL.ImageFilter.EMBOSS)
-        self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL.PillowWrapper.emboss(pillowImgHandler)
+        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
 
     def pixelate(self, factor):
         '''
@@ -152,12 +295,7 @@ class Image:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        factor = 1 / factor
-        orig_w, orig_h = self.getDimensions()
-        width = int(orig_w * factor)
-        height = int(orig_h * factor)
-        self.imgHandler = cv2.resize(self.imgHandler, (width, height), interpolation=cv2.INTER_AREA)
-        self.imgHandler = cv2.resize(self.imgHandler, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
+        self.imgHandler = INTERNAL.CV2Wrapper.pixelate(self.imgHandler, factor)
 
     def addBorder(self, size, color):
         '''
@@ -165,24 +303,16 @@ class Image:
         
         Color must be in '(R, G, B)' format.
         '''
-        pillowImgHandler = Image.__CV2ToPillow(self.imgHandler)
-        pillowImgHandler = PIL.ImageOps.expand(pillowImgHandler, border=size, fill=color)
-        self.imgHandler = Image.__PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL.PillowWrapper.addBorder(pillowImgHandler)
+        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
     
     def saveAs(self, f:File):
         '''
         Save image, into a file.
         '''
-        cv2.imwrite(str(f), self.imgHandler)
+        INTERNAL.CV2Wrapper.saveAs(self.imgHandler, f)
 
-    @staticmethod
-    def __CV2ToPillow(imgHandler):
-        return PIL.Image.fromarray(cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB))
-    
-    @staticmethod
-    def __PillowToCV2(imgHandler):
-        return cv2.cvtColor(np.array(imgHandler), cv2.COLOR_RGB2BGR)
-    
     class Utils:
         
         SupportedExtensions = ['jpeg', 'jpg', 'png']
@@ -194,20 +324,20 @@ class Image:
 class GIF:
 
     def __init__(self, f:File):
-        imgHandler = PIL.Image.open(str(f))
+        reader = imageio.get_reader(str(f))
         self.frames = []
-        for i in range(imgHandler.n_frames):
-            imgHandler.seek(i)
-            self.frames.append(imgHandler.copy())
+        self.totalDuration = 0
+        for i, frame in enumerate(reader):
+            meta = reader.get_meta_data(i)
+            self.frames.append(frame)
+            frameDuration = meta.get("duration", 0)
+            self.totalDuration += frameDuration
     
     def getTotalDuration(self):
         '''
         Get total duration, in 'ms'.
         '''
-        duration = 0
-        for frame in self.frames:
-            duration += frame.info['duration']
-        return duration
+        return self.totalDuration
     
     def getFrameCount(self):
         '''
@@ -221,13 +351,14 @@ class GIF:
         '''
         return self.getFrameCount() / (self.getTotalDuration() / 1000)
     
-    def saveAs(self, f:File):
+    def saveAs(self, f:File, fps=None):
         '''
         Save into file.
         '''
-        self.frames[0].save(
-            str(f),
-            save_all=True,
-            append_images=self.frames[1:],
-            loop=0
-        )
+        if fps == None:
+            fps = self.getFPS()
+        
+        writer = imageio.get_writer(str(f), fps=fps)
+        for frame in self.frames:
+            writer.append_data(frame)
+        writer.close()
