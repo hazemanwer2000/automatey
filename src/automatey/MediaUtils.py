@@ -18,6 +18,18 @@ class INTERNAL:
     def PillowToCV2(imgHandler):
         return cv2.cvtColor(np.array(imgHandler), cv2.COLOR_RGB2BGR)
     
+    @staticmethod
+    def ImageIOToCV2(imgHandler):
+        return cv2.cvtColor(imgHandler, cv2.COLOR_RGB2BGR)
+    
+    @staticmethod
+    def ImageIOToCV2(imgHandler):
+        return cv2.cvtColor(imgHandler, cv2.COLOR_RGB2BGR)
+    
+    @staticmethod
+    def CV2ToImageIO(imgHandler):
+        return cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB)
+    
     class PillowWrapper:
         
         @staticmethod
@@ -321,6 +333,7 @@ class Image:
         def isImage(f:File):
             return f.getExtension() in Image.Utils.SupportedExtensions
 
+# Uses 'ImageIO' as its format (Like CV2's, but in 'RGB' instead of 'BGR')
 class GIF:
 
     def __init__(self, f:File):
@@ -350,7 +363,33 @@ class GIF:
         Get FPS.
         '''
         return self.getFrameCount() / (self.getTotalDuration() / 1000)
-    
+
+    def __CV2Applier(self, fcn, *args, **kwargs):
+        for i in range(len(self.frames)):
+            cv2ImgHandler = INTERNAL.ImageIOToCV2(self.frames[i])
+            cv2ImgHandler = fcn(cv2ImgHandler, *args, **kwargs)
+            self.frames[i] = INTERNAL.CV2ToImageIO(cv2ImgHandler)
+
+    def getDimensions(self):
+        '''
+        Returns a '(width, height)' tuple.
+        '''
+        return INTERNAL.CV2Wrapper.getDimensions(self.frames[0])
+
+    def resize(self, width, height):
+        '''
+        Resize an image, given '(W, H)'.
+        
+        If either set to '-1', aspect ratio is preserved.
+        '''
+        self.__CV2Applier(INTERNAL.CV2Wrapper.resize, width, height)
+
+    def grayscale(self):
+        '''
+        Convert into grayscale.
+        '''
+        self.__CV2Applier(INTERNAL.CV2Wrapper.grayscale)
+
     def saveAs(self, f:File, fps=None):
         '''
         Save into file.
