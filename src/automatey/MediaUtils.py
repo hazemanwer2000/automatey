@@ -226,6 +226,12 @@ class Image:
     def __init__(self, f:File):
         self.imgHandler = INTERNAL.CV2Wrapper.createFromFile(f)
 
+    def getDimensions(self):
+        '''
+        Returns a '(width, height)' tuple.
+        '''
+        return INTERNAL.CV2Wrapper.getDimensions(self.imgHandler)
+
     def resize(self, width, height):
         '''
         Resize an image, given '(W, H)'.
