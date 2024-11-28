@@ -5,17 +5,35 @@ import imageio
 
 import automatey.FileUtils as FileUtils
 
-class INTERNAL_Utils:
-    '''
-    General (common) utilities.
-    '''
+class Color:
+    Black = (0, 0, 0)
+    White = (255, 255, 255)
+    Transparent = None
 
-    class Coordinates:
+class Point:
+    
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-        @staticmethod
-        def processXYRange(xRange, yRange, width, height):
-            if xRange[1] < 0: xRange[1] += width
-            if yRange[1] < 0: yRange[1] += height
+class Border:
+    
+    def __init__(self, thickness:int, color:Color):
+        self.thickness = thickness
+        self.color = color
+
+class Shape:
+    
+    def __init__(self, fillColor:Color, border:Border):
+        self.fillColor = fillColor
+        self.border = border
+
+class Rectangle(Shape):
+    
+    def __init__(self, fillColor:Color, border:Border, topLeft:Point, bottomRight:Point):
+        Shape.__init__(fillColor=fillColor, border=border)
+        self.topLeft = topLeft
+        self.bottomRight = bottomRight
 
 class INTERNAL_FrameProcessing:
     '''
@@ -72,13 +90,13 @@ class INTERNAL_FrameProcessing:
             return imgHandler
 
         @staticmethod
-        def addBorder(imgHandler, size, color):
+        def addBorder(imgHandler, border:Border):
             '''
             Adds a border.
             
             Color must be in '(R, G, B)' format.
             '''
-            imgHandler = PIL.ImageOps.expand(imgHandler, border=size, fill=color)
+            imgHandler = PIL.ImageOps.expand(imgHandler, border=border.thickness, fill=border.color)
             return imgHandler
 
     class CV2Wrapper:
@@ -202,18 +220,20 @@ class INTERNAL_FrameProcessing:
             imgHandler = cv2.resize(imgHandler, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
             return imgHandler
 
-        def crop(imgHandler, xRange, yRange):
+        @staticmethod
+        def crop(imgHandler, rectangle:Rectangle):
             '''
-            Crop, at specified co-ordinates.
+            Crop.
             
-            Note that negative co-ordinates are allowed.
-            
-            Note that '[0, DIM]' will not alter the size of the respective dimension.
+            Note that (1, 1) specifies the pixel at the top-left corner.
             '''
-            w, h = INTERNAL_FrameProcessing.CV2Wrapper.getDimensions(imgHandler)
-            INTERNAL_Utils.Coordinates.processXYRange(xRange, yRange, w, h)
+            x1 = rectangle.topLeft.x - 1
+            x2 = rectangle.bottomRight.x
             
-            imgHandler = imgHandler[yRange[0]:yRange[1], xRange[0]:xRange[1]]
+            y1 = rectangle.topLeft.y - 1
+            y2 = rectangle.bottomRight.y
+            
+            imgHandler = imgHandler[y1:y2, x1:x2]
             return imgHandler
 
         @staticmethod
@@ -251,10 +271,6 @@ class INTERNAL_FrameConversion:
     @staticmethod
     def CV2ToImageIO(imgHandler):
         return cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB)
-
-class Color:
-    Black = (0, 0, 0)
-    White = (255, 255, 255)
 
 # Uses 'CV2' as its format
 class Image:
@@ -373,25 +389,23 @@ class Image:
         '''
         self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.pixelate(self.imgHandler, factor)
 
-    def addBorder(self, size, color):
+    def addBorder(self, border:Border):
         '''
         Adds a border.
         
         Color must be in '(R, G, B)' format.
         '''
         pillowImgHandler = INTERNAL_FrameConversion.CV2ToPillow(self.imgHandler)
-        pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.addBorder(pillowImgHandler, size, color)
+        pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.addBorder(pillowImgHandler, border)
         self.imgHandler = INTERNAL_FrameConversion.PillowToCV2(pillowImgHandler)
     
-    def crop(self, xRange, yRange):
+    def crop(self, rectangle:Rectangle):
         '''
-        Crop, at specified co-ordinates.
+        Crop.
         
-        Note that negative co-ordinates are allowed.
-        
-        Note that '[0, DIM]' will not alter the size of the respective dimension.
+        Note that (1, 1) specifies the pixel at the top-left corner.
         '''
-        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.crop(self.imgHandler, xRange, yRange)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.crop(self.imgHandler, rectangle)
     
     def saveAs(self, f:FileUtils.File):
         '''
@@ -566,23 +580,21 @@ class GIF:
         '''
         self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.pixelate, factor)
 
-    def addBorder(self, size, color):
+    def addBorder(self, border:Border):
         '''
         Adds a border.
         
         Color must be in '(R, G, B)' format.
         '''
-        self.INTERNAL_PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.addBorder, size, color)
+        self.INTERNAL_PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.addBorder, border)
     
-    def crop(self, xRange, yRange):
+    def crop(self, rectangle:Rectangle):
         '''
-        Crop, at specified co-ordinates.
+        Crop.
         
-        Note that negative co-ordinates are allowed.
-        
-        Note that '[0, DIM]' will not alter the size of the respective dimension.
+        Note that (1, 1) specifies the pixel at the top-left corner.
         '''
-        self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.crop, xRange, yRange)
+        self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.crop, rectangle)
     
     def saveAs(self, f:FileUtils.File, fps=None):
         '''
