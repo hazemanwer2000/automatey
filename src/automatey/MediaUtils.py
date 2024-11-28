@@ -150,6 +150,9 @@ class INTERNAL:
 
         @staticmethod
         def invert(imgHandler):
+            '''
+            Invert value(s).
+            '''
             imgHandler = cv2.bitwise_not(imgHandler)
             return imgHandler
 
@@ -210,12 +213,33 @@ class INTERNAL:
             imgHandler = cv2.resize(imgHandler, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
             return imgHandler
 
+        def crop(imgHandler, xRange, yRange):
+            '''
+            Crop, at specified co-ordinates.
+            
+            Note that negative co-ordinates are allowed.
+            
+            Note that '[0, DIM]' will not alter the size of the respective dimension.
+            '''
+            w, h = INTERNAL.CV2Wrapper.getDimensions(imgHandler)
+            INTERNAL.Utils.processCoordinates(xRange, yRange, w, h)
+            
+            imgHandler = imgHandler[yRange[0]:yRange[1], xRange[0]:xRange[1]]
+            return imgHandler
+
         @staticmethod
         def saveAs(imgHandler, f:File):
             '''
             Save image, into a file.
             '''
             cv2.imwrite(str(f), imgHandler)
+
+    class Utils:
+
+        @staticmethod
+        def processCoordinates(xRange, yRange, width, height):
+            if xRange[1] < 0: xRange[1] += width
+            if yRange[1] < 0: yRange[1] += height
 
 class Color:
     Black = (0, 0, 0)
@@ -259,6 +283,9 @@ class Image:
         self.imgHandler = INTERNAL.CV2Wrapper.blackWhite(self.imgHandler, threshold)
 
     def invert(self):
+        '''
+        Invert value(s).
+        '''
         self.imgHandler = INTERNAL.CV2Wrapper.invert(self.imgHandler)
 
     def sepiaTone(self):
@@ -342,8 +369,18 @@ class Image:
         Color must be in '(R, G, B)' format.
         '''
         pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
-        pillowImgHandler = INTERNAL.PillowWrapper.addBorder(pillowImgHandler)
+        pillowImgHandler = INTERNAL.PillowWrapper.addBorder(pillowImgHandler, size, color)
         self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
+    
+    def crop(self, xRange, yRange):
+        '''
+        Crop, at specified co-ordinates.
+        
+        Note that negative co-ordinates are allowed.
+        
+        Note that '[0, DIM]' will not alter the size of the respective dimension.
+        '''
+        self.imgHandler = INTERNAL.CV2Wrapper.crop(self.imgHandler, xRange, yRange)
     
     def saveAs(self, f:File):
         '''
@@ -431,6 +468,9 @@ class GIF:
         self.__CV2Applier(INTERNAL.CV2Wrapper.blackWhite, threshold)
 
     def invert(self):
+        '''
+        Invert value(s).
+        '''
         self.__CV2Applier(INTERNAL.CV2Wrapper.invert)
 
     def sepiaTone(self):
@@ -506,6 +546,16 @@ class GIF:
         Color must be in '(R, G, B)' format.
         '''
         self.__PillowApplier(INTERNAL.PillowWrapper.addBorder, size, color)
+    
+    def crop(self, xRange, yRange):
+        '''
+        Crop, at specified co-ordinates.
+        
+        Note that negative co-ordinates are allowed.
+        
+        Note that '[0, DIM]' will not alter the size of the respective dimension.
+        '''
+        self.__CV2Applier(INTERNAL.CV2Wrapper.crop, xRange, yRange)
     
     def saveAs(self, f:File, fps=None):
         '''
