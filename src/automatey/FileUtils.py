@@ -83,8 +83,8 @@ class File:
         Returns *None*, if there is no extension.        
         '''
         extension = os.path.splitext(self.path)[1]
-        extension = None if (extension == '') else extension[1:]
-        return extension.lower()
+        extension = None if (extension == '') else extension[1:].lower()
+        return extension
     
     def getName(self) -> str:
         '''

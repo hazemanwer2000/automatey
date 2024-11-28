@@ -3,7 +3,6 @@ import PIL.ImageEnhance
 import PIL.ImageOps
 import cv2
 from automatey.FileUtils import File
-import automatey.MathUtils as MathUtils
 import PIL
 import numpy as np
 import imageio
@@ -149,6 +148,11 @@ class INTERNAL:
             _, imgHandler = cv2.threshold(imgHandler, int(threshold*255), 255, cv2.THRESH_BINARY)
             return imgHandler
 
+        @staticmethod
+        def invert(imgHandler):
+            imgHandler = cv2.bitwise_not(imgHandler)
+            return imgHandler
+
         sepiaToneMatrix = np.array([[0.272, 0.534, 0.131],
                                     [0.349, 0.686, 0.168],
                                     [0.393, 0.769, 0.189]])
@@ -253,6 +257,9 @@ class Image:
         Threshold range is (0, 1). A lower threshold leads to more white regions.
         '''
         self.imgHandler = INTERNAL.CV2Wrapper.blackWhite(self.imgHandler, threshold)
+
+    def invert(self):
+        self.imgHandler = INTERNAL.CV2Wrapper.invert(self.imgHandler)
 
     def sepiaTone(self):
         '''
@@ -422,6 +429,9 @@ class GIF:
         Threshold range is (0, 1). A lower threshold leads to more white regions.
         '''
         self.__CV2Applier(INTERNAL.CV2Wrapper.blackWhite, threshold)
+
+    def invert(self):
+        self.__CV2Applier(INTERNAL.CV2Wrapper.invert)
 
     def sepiaTone(self):
         '''
