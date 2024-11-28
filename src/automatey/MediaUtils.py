@@ -46,23 +46,47 @@ class Border:
     def __init__(self, thickness:int, color:Color):
         self.thickness = thickness
         self.color = color
+    
+class INTERNAL_Drawable:
+    pass
 
-class Shape:
+class INTERNAL_Shape(INTERNAL_Drawable):
     '''
-    Representation of a shape.
+    (Abstract) Representation of a shape.
     '''
     def __init__(self, fillColor:Color, border:Border):
         self.fillColor = fillColor
         self.border = border
+        if (self.border == None):
+            self.border = Border(0, self.fillColor)
 
-class Rectangle(Shape):
+class INTERNAL_Line(INTERNAL_Drawable):
     '''
-    Representation of a rectangle.
+    (Abstract) Representation of a line.
     '''
-    def __init__(self, fillColor:Color, border:Border, topLeft:Point, bottomRight:Point):
-        Shape.__init__(self, fillColor=fillColor, border=border)
-        self.topLeft = topLeft
-        self.bottomRight = bottomRight
+    def __init__(self, thickness:int, color:Color):
+        self.thickness = thickness
+        self.color = color
+
+class Drawables:
+
+    class Rectangle(INTERNAL_Shape):
+        '''
+        Representation of a rectangle.
+        '''
+        def __init__(self, fillColor:Color, border:Border, topLeft:Point, bottomRight:Point):
+            INTERNAL_Shape.__init__(self, fillColor=fillColor, border=border)
+            self.topLeft = topLeft
+            self.bottomRight = bottomRight`
+
+    class RectangularLine(INTERNAL_Line):
+        '''
+        Representation of a rectangular line.
+        '''
+        def __init__(self, thickness:int, color:Color, topLeft:Point, bottomRight:Point):
+            INTERNAL_Line(self, thickness, color)
+            self.topLeft = topLeft
+            self.bottomRight = bottomRight
 
 class INTERNAL_FrameProcessing:
     '''
@@ -248,23 +272,23 @@ class INTERNAL_FrameProcessing:
             return imgHandler
 
         @staticmethod
-        def crop(imgHandler, rectangle:Rectangle):
+        def crop(imgHandler, topLeft:Point, bottomRight:Point):
             '''
             Crop.
             
             Note that (1, 1) specifies the pixel at the top-left corner.
             '''
-            x1 = rectangle.topLeft.x - 1
-            x2 = rectangle.bottomRight.x
+            x1 = topLeft.x - 1
+            x2 = bottomRight.x
             
-            y1 = rectangle.topLeft.y - 1
-            y2 = rectangle.bottomRight.y
+            y1 = topLeft.y - 1
+            y2 = bottomRight.y
             
             imgHandler = imgHandler[y1:y2, x1:x2]
             return imgHandler
         
         @staticmethod
-        def overlayRectangle(imgHandler, rectangle:Rectangle):
+        def overlayRectangle(imgHandler, rectangle:Drawables.Rectangle):
             x1 = rectangle.topLeft.x - 1
             x2 = rectangle.bottomRight.x - 1
             
@@ -279,9 +303,21 @@ class INTERNAL_FrameProcessing:
             return imgHandler
         
         @staticmethod
-        def overlayShape(imgHandler, shape):
+        def overlayRectangularLine(imgHandler, rectangularLine:Drawables.RectangularLine):
+            x1 = rectangularLine.topLeft.x - 1
+            x2 = rectangularLine.bottomRight.x - 1
+            
+            y1 = rectangularLine.topLeft.y - 1
+            y2 = rectangularLine.bottomRight.y - 1
+            
+            imgHandler = cv2.rectangle(imgHandler, (x1, y1), (x2, y2), rectangularLine.color.asBGRTuple(), rectangularLine.thickness)
+            return imgHandler
+        
+        @staticmethod
+        def overlayDrawable(imgHandler, shape):
             fcnDict = {
-                Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangle 
+                Drawables.Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangle,
+                Drawables.RectangularLine: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangularLine,
             }
             return fcnDict[type(shape)](imgHandler, shape)
 
@@ -446,19 +482,19 @@ class Image:
         pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.addBorder(pillowImgHandler, border)
         self.imgHandler = INTERNAL_FrameConversion.PillowToCV2(pillowImgHandler)
     
-    def crop(self, rectangle:Rectangle):
+    def crop(self, topLeft:Point, bottomRight:Point):
         '''
         Crop.
         
         Note that (1, 1) specifies the pixel at the top-left corner.
         '''
-        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.crop(self.imgHandler, rectangle)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.crop(self.imgHandler, topLeft, bottomRight)
         
-    def addShape(self, shape):
+    def overlayDrawable(self, shape):
         '''
         Add a shape (e.g., Rectangle).
         '''
-        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.addShape(self.imgHandler, shape)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.overlayDrawable(self.imgHandler, shape)
     
     def saveAs(self, f:FileUtils.File):
         '''
@@ -639,21 +675,21 @@ class GIF:
         '''
         self.INTERNAL_PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.addBorder, border)
     
-    def crop(self, rectangle:Rectangle):
+    def crop(self, topLeft:Point, bottomRight:Point):
         '''
         Crop.
         
         Note that (1, 1) specifies the pixel at the top-left corner.
         '''
-        self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.crop, rectangle)
+        self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.crop, topLeft:Point, bottomRight:Point)
 
-    def overlayShape(self, shape:Shape):
+    def overlayDrawable(self, shape):
         '''
         Add a shape (e.g., Rectangle).
         '''
         self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.overlayShape, shape)
         
-    def overlayShapePerFrame(self, callout):
+    def overlayDrawablePerFrame(self, callout):
         '''
         Add a shape (e.g., Rectangle).
         
@@ -662,7 +698,7 @@ class GIF:
         # Cannot use CV2Applier, must do it manually.
         for i in range(len(self.frames)):
             cv2ImgHandler = INTERNAL_FrameConversion.ImageIOToCV2(self.frames[i])
-            cv2ImgHandler = INTERNAL_FrameProcessing.CV2Wrapper.overlayShape(cv2ImgHandler, callout(i+1))
+            cv2ImgHandler = INTERNAL_FrameProcessing.CV2Wrapper.overlayDrawable(cv2ImgHandler, callout(i+1))
             self.frames[i] = INTERNAL_FrameConversion.CV2ToImageIO(cv2ImgHandler)
 
     def saveAs(self, f:FileUtils.File, fps=None):
