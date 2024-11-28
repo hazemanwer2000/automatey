@@ -583,4 +583,15 @@ class GIF:
 class Video:
     
     def __init__(self, f:FileUtils.File):
-        pass
+        self.f_src = f
+        
+    class Utils:
+        
+        @staticmethod
+        def isVideo(f:FileUtils.File):
+            '''
+            Check if file is a video.
+            
+            Note, currently only 'mp4' format is supported.
+            '''
+            return f.getExtension() == 'mp4'
