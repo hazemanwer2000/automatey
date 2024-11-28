@@ -6,32 +6,47 @@ import imageio
 import automatey.FileUtils as FileUtils
 
 class Color:
-    Black = (0, 0, 0)
-    White = (255, 255, 255)
-    Transparent = None
+    '''
+    Representation of a color.
+    '''
+    def __init__(self, R:int, G:int, B:int):
+        self.R = R
+        self.G = G
+        self.B = B
+        
+    def asRGBTuple(self):
+        return (self.R, self.G, self.B)
 
 class Point:
-    
+    '''
+    Representation of a point.
+    '''
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
 class Border:
-    
+    '''
+    Representation of a border.
+    '''
     def __init__(self, thickness:int, color:Color):
         self.thickness = thickness
         self.color = color
 
 class Shape:
-    
+    '''
+    Representation of a shape.
+    '''
     def __init__(self, fillColor:Color, border:Border):
         self.fillColor = fillColor
         self.border = border
 
 class Rectangle(Shape):
-    
+    '''
+    Representation of a rectangle.
+    '''
     def __init__(self, fillColor:Color, border:Border, topLeft:Point, bottomRight:Point):
-        Shape.__init__(fillColor=fillColor, border=border)
+        Shape.__init__(self, fillColor=fillColor, border=border)
         self.topLeft = topLeft
         self.bottomRight = bottomRight
 
@@ -96,7 +111,7 @@ class INTERNAL_FrameProcessing:
             
             Color must be in '(R, G, B)' format.
             '''
-            imgHandler = PIL.ImageOps.expand(imgHandler, border=border.thickness, fill=border.color)
+            imgHandler = PIL.ImageOps.expand(imgHandler, border=border.thickness, fill=border.color.asRGBTuple())
             return imgHandler
 
     class CV2Wrapper:
@@ -392,8 +407,6 @@ class Image:
     def addBorder(self, border:Border):
         '''
         Adds a border.
-        
-        Color must be in '(R, G, B)' format.
         '''
         pillowImgHandler = INTERNAL_FrameConversion.CV2ToPillow(self.imgHandler)
         pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.addBorder(pillowImgHandler, border)
@@ -583,8 +596,6 @@ class GIF:
     def addBorder(self, border:Border):
         '''
         Adds a border.
-        
-        Color must be in '(R, G, B)' format.
         '''
         self.INTERNAL_PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.addBorder, border)
     
