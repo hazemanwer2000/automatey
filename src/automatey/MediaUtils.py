@@ -20,6 +20,16 @@ class Color:
         
     def asRGBTuple(self):
         return (self.R, self.G, self.B)
+    
+    def asBGRTuple(self):
+        return (self.B, self.G, self.R)
+
+class Colors:
+    '''
+    Pre-defined set of colors.
+    '''
+    Black = Color(0, 0, 0)
+    White = Color(255, 255, 255)
 
 class Point:
     '''
@@ -112,8 +122,6 @@ class INTERNAL_FrameProcessing:
         def addBorder(imgHandler, border:Border):
             '''
             Adds a border.
-            
-            Color must be in '(R, G, B)' format.
             '''
             imgHandler = PIL.ImageOps.expand(imgHandler, border=border.thickness, fill=border.color.asRGBTuple())
             return imgHandler
@@ -254,6 +262,28 @@ class INTERNAL_FrameProcessing:
             
             imgHandler = imgHandler[y1:y2, x1:x2]
             return imgHandler
+        
+        @staticmethod
+        def addRectangle(imgHandler, rectangle:Rectangle):
+            x1 = rectangle.topLeft.x - 1
+            x2 = rectangle.bottomRight.x - 1
+            
+            y1 = rectangle.topLeft.y - 1
+            y2 = rectangle.bottomRight.y - 1
+            
+            imgHandler = cv2.rectangle(imgHandler, (x1, y1), (x2, y2), rectangle.border.color.asBGRTuple(), -1)
+            imgHandler = cv2.rectangle(imgHandler, 
+                                       (x1+rectangle.border.thickness, y1+rectangle.border.thickness),
+                                       (x2-rectangle.border.thickness, y2-rectangle.border.thickness),
+                                       rectangle.fillColor.asBGRTuple(), -1)
+            return imgHandler
+        
+        @staticmethod
+        def addShape(imgHandler, shape):
+            fcnDict = {
+                Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.addRectangle 
+            }
+            return fcnDict[type(shape)](imgHandler, shape)
 
         @staticmethod
         def saveAs(imgHandler, f:FileUtils.File):
@@ -423,6 +453,12 @@ class Image:
         Note that (1, 1) specifies the pixel at the top-left corner.
         '''
         self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.crop(self.imgHandler, rectangle)
+        
+    def addShape(self, shape):
+        '''
+        Add a shape (e.g., Rectangle).
+        '''
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.addShape(self.imgHandler, shape)
     
     def saveAs(self, f:FileUtils.File):
         '''
