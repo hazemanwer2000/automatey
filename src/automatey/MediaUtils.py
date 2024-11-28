@@ -5,32 +5,21 @@ import imageio
 
 import automatey.FileUtils as FileUtils
 
-class INTERNAL:
+class INTERNAL_Utils:
+    '''
+    General (common) utilities.
+    '''
 
     @staticmethod
-    def ImageIOToPillow(imgHandler):
-        return PIL.Image.fromarray(imgHandler)
-    
-    @staticmethod
-    def PillowToImageIO(imgHandler):
-        return np.array(imgHandler)
+    def processCoordinates(xRange, yRange, width, height):
+        if xRange[1] < 0: xRange[1] += width
+        if yRange[1] < 0: yRange[1] += height
 
-    @staticmethod
-    def CV2ToPillow(imgHandler):
-        return PIL.Image.fromarray(cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB))
-    
-    @staticmethod
-    def PillowToCV2(imgHandler):
-        return cv2.cvtColor(np.array(imgHandler), cv2.COLOR_RGB2BGR)
-    
-    @staticmethod
-    def ImageIOToCV2(imgHandler):
-        return cv2.cvtColor(imgHandler, cv2.COLOR_RGB2BGR)
-    
-    @staticmethod
-    def CV2ToImageIO(imgHandler):
-        return cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB)
-    
+class INTERNAL_FrameProcessing:
+    '''
+    Contains wrapper(s) for different libraries, that process frame(s).
+    '''
+
     class PillowWrapper:
         
         @staticmethod
@@ -111,7 +100,7 @@ class INTERNAL:
             
             If either set to '-1', aspect ratio is preserved.
             '''
-            orig_w, orig_h = INTERNAL.CV2Wrapper.getDimensions(imgHandler)
+            orig_w, orig_h = INTERNAL_FrameProcessing.CV2Wrapper.getDimensions(imgHandler)
             aspectRatio = orig_w / orig_h
             
             if width == -1:
@@ -163,7 +152,7 @@ class INTERNAL:
             '''
             Applies sepia-tone (i.e., a yellow-ish, vintage effect).
             '''
-            imgHandler = cv2.transform(imgHandler, INTERNAL.CV2Wrapper.sepiaToneMatrix)
+            imgHandler = cv2.transform(imgHandler, INTERNAL_FrameProcessing.CV2Wrapper.sepiaToneMatrix)
             return imgHandler
 
         @staticmethod
@@ -204,7 +193,7 @@ class INTERNAL:
             Value(s) are factor(s) (i.e., '1.0' has no effect).
             '''
             factor = 1 / factor
-            orig_w, orig_h = INTERNAL.CV2Wrapper.getDimensions(imgHandler)
+            orig_w, orig_h = INTERNAL_FrameProcessing.CV2Wrapper.getDimensions(imgHandler)
             width = int(orig_w * factor)
             height = int(orig_h * factor)
             imgHandler = cv2.resize(imgHandler, (width, height), interpolation=cv2.INTER_AREA)
@@ -219,8 +208,8 @@ class INTERNAL:
             
             Note that '[0, DIM]' will not alter the size of the respective dimension.
             '''
-            w, h = INTERNAL.CV2Wrapper.getDimensions(imgHandler)
-            INTERNAL.Utils.processCoordinates(xRange, yRange, w, h)
+            w, h = INTERNAL_FrameProcessing.CV2Wrapper.getDimensions(imgHandler)
+            INTERNAL_Utils.processCoordinates(xRange, yRange, w, h)
             
             imgHandler = imgHandler[yRange[0]:yRange[1], xRange[0]:xRange[1]]
             return imgHandler
@@ -232,12 +221,34 @@ class INTERNAL:
             '''
             cv2.imwrite(str(f), imgHandler)
 
-    class Utils:
+class INTERNAL_FrameConversion:
+    '''
+    Contains frame-conversion method(s) between the different frame processor(s).
+    '''
 
-        @staticmethod
-        def processCoordinates(xRange, yRange, width, height):
-            if xRange[1] < 0: xRange[1] += width
-            if yRange[1] < 0: yRange[1] += height
+    @staticmethod
+    def ImageIOToPillow(imgHandler):
+        return PIL.Image.fromarray(imgHandler)
+    
+    @staticmethod
+    def PillowToImageIO(imgHandler):
+        return np.array(imgHandler)
+
+    @staticmethod
+    def CV2ToPillow(imgHandler):
+        return PIL.Image.fromarray(cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB))
+    
+    @staticmethod
+    def PillowToCV2(imgHandler):
+        return cv2.cvtColor(np.array(imgHandler), cv2.COLOR_RGB2BGR)
+    
+    @staticmethod
+    def ImageIOToCV2(imgHandler):
+        return cv2.cvtColor(imgHandler, cv2.COLOR_RGB2BGR)
+    
+    @staticmethod
+    def CV2ToImageIO(imgHandler):
+        return cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB)
 
 class Color:
     Black = (0, 0, 0)
@@ -250,13 +261,13 @@ class Image:
     '''
 
     def __init__(self, f:FileUtils.File):
-        self.imgHandler = INTERNAL.CV2Wrapper.createFromFile(f)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.createFromFile(f)
 
     def getDimensions(self):
         '''
         Returns a '(width, height)' tuple.
         '''
-        return INTERNAL.CV2Wrapper.getDimensions(self.imgHandler)
+        return INTERNAL_FrameProcessing.CV2Wrapper.getDimensions(self.imgHandler)
 
     def resize(self, width, height):
         '''
@@ -264,13 +275,13 @@ class Image:
         
         If either set to '-1', aspect ratio is preserved.
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.resize(self.imgHandler, width, height)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.resize(self.imgHandler, width, height)
 
     def grayscale(self):
         '''
         Convert into grayscale.
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.grayscale(self.imgHandler)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.grayscale(self.imgHandler)
         
     def blackWhite(self, threshold=0.5):
         '''
@@ -278,19 +289,19 @@ class Image:
         
         Threshold range is (0, 1). A lower threshold leads to more white regions.
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.blackWhite(self.imgHandler, threshold)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.blackWhite(self.imgHandler, threshold)
 
     def invert(self):
         '''
         Invert value(s).
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.invert(self.imgHandler)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.invert(self.imgHandler)
 
     def sepiaTone(self):
         '''
         Applies sepia-tone (i.e., a yellow-ish, vintage effect).
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.sepiaTone(self.imgHandler)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.sepiaTone(self.imgHandler)
 
     def brightnessContrast(self, brightness=1.0, contrast=1.0):
         '''
@@ -298,9 +309,9 @@ class Image:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
-        pillowImgHandler = INTERNAL.PillowWrapper.brightnessContrast(pillowImgHandler, brightness, contrast)
-        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL_FrameConversion.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.brightnessContrast(pillowImgHandler, brightness, contrast)
+        self.imgHandler = INTERNAL_FrameConversion.PillowToCV2(pillowImgHandler)
 
     def gaussianBlur(self, kernelSize):
         '''
@@ -308,7 +319,7 @@ class Image:
         
         Kernel-size must be odd.
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.gaussianBlur(self.imgHandler, kernelSize)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.gaussianBlur(self.imgHandler, kernelSize)
         
     def medianBlur(self, kernelSize):
         '''
@@ -316,7 +327,7 @@ class Image:
         
         Kernel-size must be odd.
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.medianBlur(self.imgHandler, kernelSize)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.medianBlur(self.imgHandler, kernelSize)
 
     def bilateralFilter(self, kernelSize):
         '''
@@ -324,7 +335,7 @@ class Image:
         
         Kernel-size must be odd.
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.bilateralFilter(self.imgHandler, kernelSize)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.bilateralFilter(self.imgHandler, kernelSize)
 
     def sharpen(self, factor):
         '''
@@ -332,25 +343,25 @@ class Image:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
-        pillowImgHandler = INTERNAL.PillowWrapper.sharpen(pillowImgHandler, factor)
-        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL_FrameConversion.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.sharpen(pillowImgHandler, factor)
+        self.imgHandler = INTERNAL_FrameConversion.PillowToCV2(pillowImgHandler)
     
     def findEdges(self):
         '''
         Finds and leaves only edges.
         '''
-        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
-        pillowImgHandler = INTERNAL.PillowWrapper.findEdges(pillowImgHandler)
-        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL_FrameConversion.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.findEdges(pillowImgHandler)
+        self.imgHandler = INTERNAL_FrameConversion.PillowToCV2(pillowImgHandler)
 
     def emboss(self):
         '''
         Emboss.
         '''
-        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
-        pillowImgHandler = INTERNAL.PillowWrapper.emboss(pillowImgHandler)
-        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL_FrameConversion.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.emboss(pillowImgHandler)
+        self.imgHandler = INTERNAL_FrameConversion.PillowToCV2(pillowImgHandler)
 
     def pixelate(self, factor):
         '''
@@ -358,7 +369,7 @@ class Image:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.pixelate(self.imgHandler, factor)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.pixelate(self.imgHandler, factor)
 
     def addBorder(self, size, color):
         '''
@@ -366,9 +377,9 @@ class Image:
         
         Color must be in '(R, G, B)' format.
         '''
-        pillowImgHandler = INTERNAL.CV2ToPillow(self.imgHandler)
-        pillowImgHandler = INTERNAL.PillowWrapper.addBorder(pillowImgHandler, size, color)
-        self.imgHandler = INTERNAL.PillowToCV2(pillowImgHandler)
+        pillowImgHandler = INTERNAL_FrameConversion.CV2ToPillow(self.imgHandler)
+        pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.addBorder(pillowImgHandler, size, color)
+        self.imgHandler = INTERNAL_FrameConversion.PillowToCV2(pillowImgHandler)
     
     def crop(self, xRange, yRange):
         '''
@@ -378,13 +389,13 @@ class Image:
         
         Note that '[0, DIM]' will not alter the size of the respective dimension.
         '''
-        self.imgHandler = INTERNAL.CV2Wrapper.crop(self.imgHandler, xRange, yRange)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.crop(self.imgHandler, xRange, yRange)
     
     def saveAs(self, f:FileUtils.File):
         '''
         Save image, into a file.
         '''
-        INTERNAL.CV2Wrapper.saveAs(self.imgHandler, f)
+        INTERNAL_FrameProcessing.CV2Wrapper.saveAs(self.imgHandler, f)
 
     class Utils:
         
@@ -396,6 +407,9 @@ class Image:
 
 # Uses 'ImageIO' as its format (Like CV2's, but in 'RGB' instead of 'BGR')
 class GIF:
+    '''
+    GIF-handler.
+    '''
 
     def __init__(self, f:FileUtils.File):
         reader = imageio.get_reader(str(f))
@@ -440,21 +454,21 @@ class GIF:
 
     def __CV2Applier(self, fcn, *args, **kwargs):
         for i in range(len(self.frames)):
-            cv2ImgHandler = INTERNAL.ImageIOToCV2(self.frames[i])
+            cv2ImgHandler = INTERNAL_FrameConversion.ImageIOToCV2(self.frames[i])
             cv2ImgHandler = fcn(cv2ImgHandler, *args, **kwargs)
-            self.frames[i] = INTERNAL.CV2ToImageIO(cv2ImgHandler)
+            self.frames[i] = INTERNAL_FrameConversion.CV2ToImageIO(cv2ImgHandler)
 
     def __PillowApplier(self, fcn, *args, **kwargs):
         for i in range(len(self.frames)):
-            pillowImgHandler = INTERNAL.ImageIOToPillow(self.frames[i])
+            pillowImgHandler = INTERNAL_FrameConversion.ImageIOToPillow(self.frames[i])
             pillowImgHandler = fcn(pillowImgHandler, *args, **kwargs)
-            self.frames[i] = INTERNAL.PillowToImageIO(pillowImgHandler)
+            self.frames[i] = INTERNAL_FrameConversion.PillowToImageIO(pillowImgHandler)
 
     def getDimensions(self):
         '''
         Returns a '(width, height)' tuple.
         '''
-        return INTERNAL.CV2Wrapper.getDimensions(self.frames[0])
+        return INTERNAL_FrameProcessing.CV2Wrapper.getDimensions(self.frames[0])
 
     def resize(self, width, height):
         '''
@@ -462,13 +476,13 @@ class GIF:
         
         If either set to '-1', aspect ratio is preserved.
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.resize, width, height)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.resize, width, height)
 
     def grayscale(self):
         '''
         Convert into grayscale.
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.grayscale)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.grayscale)
 
     def blackWhite(self, threshold=0.5):
         '''
@@ -476,19 +490,19 @@ class GIF:
         
         Threshold range is (0, 1). A lower threshold leads to more white regions.
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.blackWhite, threshold)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.blackWhite, threshold)
 
     def invert(self):
         '''
         Invert value(s).
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.invert)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.invert)
 
     def sepiaTone(self):
         '''
         Applies sepia-tone (i.e., a yellow-ish, vintage effect).
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.sepiaTone)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.sepiaTone)
 
     def brightnessContrast(self, brightness=1.0, contrast=1.0):
         '''
@@ -496,7 +510,7 @@ class GIF:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        self.__PillowApplier(INTERNAL.PillowWrapper.brightnessContrast, brightness, contrast)
+        self.__PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.brightnessContrast, brightness, contrast)
 
     def gaussianBlur(self, kernelSize):
         '''
@@ -504,7 +518,7 @@ class GIF:
         
         Kernel-size must be odd.
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.gaussianBlur, kernelSize)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.gaussianBlur, kernelSize)
         
     def medianBlur(self, kernelSize):
         '''
@@ -512,7 +526,7 @@ class GIF:
         
         Kernel-size must be odd.
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.medianBlur, kernelSize)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.medianBlur, kernelSize)
 
     def bilateralFilter(self, kernelSize):
         '''
@@ -520,7 +534,7 @@ class GIF:
         
         Kernel-size must be odd.
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.bilateralFilter, kernelSize)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.bilateralFilter, kernelSize)
 
     def sharpen(self, factor):
         '''
@@ -528,19 +542,19 @@ class GIF:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        self.__PillowApplier(INTERNAL.PillowWrapper.sharpen, factor)
+        self.__PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.sharpen, factor)
     
     def findEdges(self):
         '''
         Finds and leaves only edges.
         '''
-        self.__PillowApplier(INTERNAL.PillowWrapper.findEdges)
+        self.__PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.findEdges)
 
     def emboss(self):
         '''
         Emboss.
         '''
-        self.__PillowApplier(INTERNAL.PillowWrapper.emboss)
+        self.__PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.emboss)
 
     def pixelate(self, factor):
         '''
@@ -548,7 +562,7 @@ class GIF:
         
         Value(s) are factor(s) (i.e., '1.0' has no effect).
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.pixelate, factor)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.pixelate, factor)
 
     def addBorder(self, size, color):
         '''
@@ -556,7 +570,7 @@ class GIF:
         
         Color must be in '(R, G, B)' format.
         '''
-        self.__PillowApplier(INTERNAL.PillowWrapper.addBorder, size, color)
+        self.__PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.addBorder, size, color)
     
     def crop(self, xRange, yRange):
         '''
@@ -566,7 +580,7 @@ class GIF:
         
         Note that '[0, DIM]' will not alter the size of the respective dimension.
         '''
-        self.__CV2Applier(INTERNAL.CV2Wrapper.crop, xRange, yRange)
+        self.__CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.crop, xRange, yRange)
     
     def saveAs(self, f:FileUtils.File, fps=None):
         '''
@@ -581,7 +595,12 @@ class GIF:
         writer.close()
 
 class Video:
+    '''
+    Video-handler.
     
+    Note, currently only 'mp4' format is supported.
+    '''
+ 
     def __init__(self, f:FileUtils.File):
         self.f_src = f
         
