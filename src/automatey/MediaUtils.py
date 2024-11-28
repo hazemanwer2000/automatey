@@ -1,11 +1,9 @@
-
-import PIL.ImageEnhance
-import PIL.ImageOps
 import cv2
-from automatey.FileUtils import File
 import PIL
 import numpy as np
 import imageio
+
+import automatey.FileUtils as FileUtils
 
 class INTERNAL:
 
@@ -95,7 +93,7 @@ class INTERNAL:
     class CV2Wrapper:
         
         @staticmethod
-        def createFromFile(f:File):
+        def createFromFile(f:FileUtils.File):
             return cv2.imread(str(f))
         
         @staticmethod
@@ -228,7 +226,7 @@ class INTERNAL:
             return imgHandler
 
         @staticmethod
-        def saveAs(imgHandler, f:File):
+        def saveAs(imgHandler, f:FileUtils.File):
             '''
             Save image, into a file.
             '''
@@ -251,7 +249,7 @@ class Image:
     Image handler.
     '''
 
-    def __init__(self, f:File):
+    def __init__(self, f:FileUtils.File):
         self.imgHandler = INTERNAL.CV2Wrapper.createFromFile(f)
 
     def getDimensions(self):
@@ -382,7 +380,7 @@ class Image:
         '''
         self.imgHandler = INTERNAL.CV2Wrapper.crop(self.imgHandler, xRange, yRange)
     
-    def saveAs(self, f:File):
+    def saveAs(self, f:FileUtils.File):
         '''
         Save image, into a file.
         '''
@@ -393,13 +391,13 @@ class Image:
         SupportedExtensions = ['jpeg', 'jpg', 'png']
         
         @staticmethod
-        def isImage(f:File):
+        def isImage(f:FileUtils.File):
             return f.getExtension() in Image.Utils.SupportedExtensions
 
 # Uses 'ImageIO' as its format (Like CV2's, but in 'RGB' instead of 'BGR')
 class GIF:
 
-    def __init__(self, f:File):
+    def __init__(self, f:FileUtils.File):
         reader = imageio.get_reader(str(f))
         self.frames = []
         totalDuration = 0
@@ -570,7 +568,7 @@ class GIF:
         '''
         self.__CV2Applier(INTERNAL.CV2Wrapper.crop, xRange, yRange)
     
-    def saveAs(self, f:File, fps=None):
+    def saveAs(self, f:FileUtils.File, fps=None):
         '''
         Save into file.
         '''
@@ -581,3 +579,8 @@ class GIF:
         for frame in self.frames:
             writer.append_data(frame)
         writer.close()
+
+class Video:
+    
+    def __init__(self, f:FileUtils.File):
+        pass
