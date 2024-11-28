@@ -402,18 +402,13 @@ class GIF:
     def __init__(self, f:File):
         reader = imageio.get_reader(str(f))
         self.frames = []
-        self.totalDuration = 0
+        totalDuration = 0
         for i, frame in enumerate(reader):
             meta = reader.get_meta_data(i)
             self.frames.append(frame)
             frameDuration = meta.get("duration", 0)
-            self.totalDuration += frameDuration
-
-    def getTotalDuration(self):
-        '''
-        Get total duration, in 'ms'.
-        '''
-        return self.totalDuration
+            totalDuration += frameDuration
+        self.fps = len(self.frames) / (totalDuration / 1000)
     
     def getFrameCount(self):
         '''
@@ -425,7 +420,25 @@ class GIF:
         '''
         Get FPS.
         '''
-        return self.getFrameCount() / (self.getTotalDuration() / 1000)
+        return self.fps
+
+    def selectFrames(self, ranges):
+        '''
+        Select specific range(s) of frame(s).
+        
+        Note that backward range(s) are supported.
+        
+        Note that frame(s) are '1'-indexed.
+        '''
+        newFrames = []
+        for _range in ranges:
+            start = _range[0] - 1
+            stop = _range[1] - 1
+            step = -1 if (stop < start) else 1
+            for i in range(start, (stop + step), step):
+                copiedFrame = np.copy(self.frames[i])
+                newFrames.append(copiedFrame)
+        self.frames = newFrames
 
     def __CV2Applier(self, fcn, *args, **kwargs):
         for i in range(len(self.frames)):
@@ -562,7 +575,7 @@ class GIF:
         Save into file.
         '''
         if fps == None:
-            fps = self.getFPS()
+            fps = self.fps
         
         writer = imageio.get_writer(str(f), fps=fps)
         for frame in self.frames:
