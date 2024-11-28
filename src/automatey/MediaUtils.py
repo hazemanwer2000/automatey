@@ -77,14 +77,14 @@ class Drawables:
         def __init__(self, fillColor:Color, border:Border, topLeft:Point, bottomRight:Point):
             INTERNAL_Shape.__init__(self, fillColor=fillColor, border=border)
             self.topLeft = topLeft
-            self.bottomRight = bottomRight`
+            self.bottomRight = bottomRight
 
     class RectangularLine(INTERNAL_Line):
         '''
         Representation of a rectangular line.
         '''
         def __init__(self, thickness:int, color:Color, topLeft:Point, bottomRight:Point):
-            INTERNAL_Line(self, thickness, color)
+            INTERNAL_Line.__init__(self, thickness, color)
             self.topLeft = topLeft
             self.bottomRight = bottomRight
 
@@ -684,7 +684,7 @@ class GIF:
         
         Note that (1, 1) specifies the pixel at the top-left corner.
         '''
-        self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.crop, topLeft:Point, bottomRight:Point)
+        self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.crop, topLeft, bottomRight)
 
     def overlayDrawable(self, shape):
         '''
