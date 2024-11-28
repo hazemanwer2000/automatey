@@ -315,6 +315,9 @@ class INTERNAL_FrameProcessing:
         
         @staticmethod
         def overlayDrawable(imgHandler, shape):
+            '''
+            Add a drawable (e.g., Rectangle).
+            '''
             fcnDict = {
                 Drawables.Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangle,
                 Drawables.RectangularLine: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangularLine,
@@ -492,7 +495,7 @@ class Image:
         
     def overlayDrawable(self, shape):
         '''
-        Add a shape (e.g., Rectangle).
+        Add a drawable (e.g., Rectangle).
         '''
         self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.overlayDrawable(self.imgHandler, shape)
     
@@ -685,13 +688,13 @@ class GIF:
 
     def overlayDrawable(self, shape):
         '''
-        Add a shape (e.g., Rectangle).
+        Add a drawable (e.g., Rectangle).
         '''
         self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.overlayShape, shape)
         
     def overlayDrawablePerFrame(self, callout):
         '''
-        Add a shape (e.g., Rectangle).
+        Add a drawable (e.g., Rectangle).
         
         Callout receives the current frame index (1 to FRAME-COUNT), and returns a shape.
         '''
