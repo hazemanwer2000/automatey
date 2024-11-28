@@ -1,7 +1,11 @@
 import cv2
 import PIL
-import numpy as np
+import PIL.Image
+import PIL.ImageOps
+import PIL.ImageEnhance
+import PIL.ImageFilter
 import imageio
+import numpy as np
 
 import automatey.FileUtils as FileUtils
 
