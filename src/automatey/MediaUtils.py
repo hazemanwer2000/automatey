@@ -264,7 +264,7 @@ class INTERNAL_FrameProcessing:
             return imgHandler
         
         @staticmethod
-        def addRectangle(imgHandler, rectangle:Rectangle):
+        def overlayRectangle(imgHandler, rectangle:Rectangle):
             x1 = rectangle.topLeft.x - 1
             x2 = rectangle.bottomRight.x - 1
             
@@ -279,9 +279,9 @@ class INTERNAL_FrameProcessing:
             return imgHandler
         
         @staticmethod
-        def addShape(imgHandler, shape):
+        def overlayShape(imgHandler, shape):
             fcnDict = {
-                Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.addRectangle 
+                Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangle 
             }
             return fcnDict[type(shape)](imgHandler, shape)
 
@@ -646,7 +646,25 @@ class GIF:
         Note that (1, 1) specifies the pixel at the top-left corner.
         '''
         self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.crop, rectangle)
-    
+
+    def overlayShape(self, shape:Shape):
+        '''
+        Add a shape (e.g., Rectangle).
+        '''
+        self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.overlayShape, shape)
+        
+    def overlayShapePerFrame(self, callout):
+        '''
+        Add a shape (e.g., Rectangle).
+        
+        Callout receives the current frame index (1 to FRAME-COUNT), and returns a shape.
+        '''
+        # Cannot use CV2Applier, must do it manually.
+        for i in range(len(self.frames)):
+            cv2ImgHandler = INTERNAL_FrameConversion.ImageIOToCV2(self.frames[i])
+            cv2ImgHandler = INTERNAL_FrameProcessing.CV2Wrapper.overlayShape(cv2ImgHandler, callout(i+1))
+            self.frames[i] = INTERNAL_FrameConversion.CV2ToImageIO(cv2ImgHandler)
+
     def saveAs(self, f:FileUtils.File, fps=None):
         '''
         Save into file.
@@ -668,6 +686,7 @@ class Video:
  
     def __init__(self, f:FileUtils.File):
         self.f_src = f
+        self.actions = []
         
     class Utils:
         
