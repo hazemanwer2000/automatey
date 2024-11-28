@@ -10,10 +10,12 @@ class INTERNAL_Utils:
     General (common) utilities.
     '''
 
-    @staticmethod
-    def processXYRange(xRange, yRange, width, height):
-        if xRange[1] < 0: xRange[1] += width
-        if yRange[1] < 0: yRange[1] += height
+    class Coordinates:
+
+        @staticmethod
+        def processXYRange(xRange, yRange, width, height):
+            if xRange[1] < 0: xRange[1] += width
+            if yRange[1] < 0: yRange[1] += height
 
 class INTERNAL_FrameProcessing:
     '''
@@ -209,7 +211,7 @@ class INTERNAL_FrameProcessing:
             Note that '[0, DIM]' will not alter the size of the respective dimension.
             '''
             w, h = INTERNAL_FrameProcessing.CV2Wrapper.getDimensions(imgHandler)
-            INTERNAL_Utils.processXYRange(xRange, yRange, w, h)
+            INTERNAL_Utils.Coordinates.processXYRange(xRange, yRange, w, h)
             
             imgHandler = imgHandler[yRange[0]:yRange[1], xRange[0]:xRange[1]]
             return imgHandler
