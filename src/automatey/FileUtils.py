@@ -1,11 +1,14 @@
-
+# Standard Libraries
 import os
 import pathlib
 import typing
 import tempfile
 import shutil
+
+# External Libraries
 from send2trash import send2trash
-    
+
+# Internal Libraries
 import automatey.RandomUtils as RandomUtils
     
 class File:
@@ -17,11 +20,11 @@ class File:
         joinedPath = os.path.join(*paths)
         self.path = os.path.abspath(joinedPath)
     
-    def __str__(self) -> bool:
+    def __str__(self):
         return self.path
     
-    def __repr__(self) -> bool:
-        return self.path
+    def __repr__(self):
+        return str(self)
 
     def isExists(self) -> bool:
         '''

@@ -1,3 +1,4 @@
+# External libraries
 import cv2
 import PIL
 import PIL.Image
@@ -7,6 +8,7 @@ import PIL.ImageFilter
 import imageio
 import numpy as np
 
+# Internal libraries
 import automatey.FileUtils as FileUtils
 
 class Color:
@@ -722,10 +724,16 @@ class Video:
     
     Note, currently only 'mp4' format is supported.
     '''
- 
+
     def __init__(self, f:FileUtils.File):
         self.f_src = f
         self.actions = []
+        
+    class INTERNAL_Action:
+        pass
+        
+    class Actions:
+        pass
         
     class Utils:
         
