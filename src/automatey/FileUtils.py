@@ -10,6 +10,10 @@ from send2trash import send2trash
 
 # Internal Libraries
 import automatey.RandomUtils as RandomUtils
+
+class INTERNAL_Constants:
+    
+    RANDOM_FILE_NAME_LENGTH = 7
     
 class File:
     '''
@@ -175,7 +179,11 @@ class File:
             '''
             Returns a *File* object, of the temporary directory.
             '''
-            return File(tempfile.gettempdir())
+            baseTmpDir = File(tempfile.gettempdir())
+            newTmpDirName = RandomUtils.Generation.String(INTERNAL_Constants.RANDOM_FILE_NAME_LENGTH)
+            newTmpDir = baseTmpDir.traverseDirectory(newTmpDirName)
+            newTmpDir.makeDirectory()
+            return newTmpDir
         
         @staticmethod
         def copyFile(srcFile, dstFile):
@@ -228,7 +236,7 @@ class File:
                 return os.path.join(parentDir, name + suffix + extension)
                 
             @staticmethod
-            def randomizeName(path, fileNameLength, charPool=None):
+            def randomizeName(path, fileNameLength=INTERNAL_Constants.RANDOM_FILE_NAME_LENGTH, charPool=None):
                 '''
                 Randomize name, preserving the extension (if present).
                 '''

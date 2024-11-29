@@ -423,6 +423,35 @@ class Actions:
             self.playbackFPS = playbackFPS
             self.captureFPS = captureFPS
 
+# Currently, 
+#   - A 'Join' action is expected, with a 'GIF' action being optional.
+#   - All other action(s) may be applied only to 'Trim' action(s), as sub-action(s).
+class INTERNAL_VideoProcessing:
+    
+    class FFMPEGWrapper:
+        
+        @staticmethod
+        def processTrimAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, trimAction:Actions.Trim) -> list:
+            return ['Dummy!']
+        
+        @staticmethod
+        def processActions(f_src:FileUtils.File, f_dst:FileUtils.File, actions:list):
+            tmpDir = FileUtils.File.Utils.getTemporaryDirectory()
+            f_tmpBase = tmpDir.traverseDirectory(f_src.getName())
+            commandList = []
+            f_joinList = []
+            
+            joinAction:Actions.Join = [action for action in actions if isinstance(action, Actions.Join)][0]
+            for trimAction in joinAction.trimActions:
+                f_tmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
+                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processTrimAction(f_src, f_tmpDst, trimAction)
+                f_joinList.append(f_tmpDst)
+            
+            if len(joinAction.trimActions) > 1:
+                pass
+            else:
+                pass
+
 # Uses 'CV2' as its format
 class Image:
     '''
@@ -794,11 +823,26 @@ class Video:
         self.f_src = f
         self.actions = []
         
-    class INTERNAL_Action:
-        pass
+    def registerAction(self, action):
+        '''
+        Register an action.
         
-    class Actions:
-        pass
+        Note,
+        - Only 'Join' and 'GIF' are supported.
+        '''
+        self.actions.append(action)
+    
+    def saveAs(self, f_dst:FileUtils.File):
+        '''
+        Processes registered action(s), and save end-file.
+        '''
+        INTERNAL_VideoProcessing.FFMPEGWrapper.processActions(self.f_src, f_dst, self.actions)
+    
+    def clearActions(self):
+        '''
+        Clears all registered action(s)
+        '''
+        self.actions.clear()
         
     class Utils:
         
