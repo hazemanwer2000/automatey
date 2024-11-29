@@ -420,11 +420,13 @@ class Actions:
             
     class GIF(INTERNAL_Action):
         '''
-        In GIF.
+        Output is a GIF.
+        
+        Note,
+        - Capture FPS specifies the FPS at which frame(s) are sampled.
         '''
         
-        def __init__(self, playbackFPS=None, captureFPS=None):
-            self.playbackFPS = playbackFPS
+        def __init__(self, captureFPS):
             self.captureFPS = captureFPS
 
 class INTERNAL_VideoProcessing:
@@ -451,7 +453,11 @@ class INTERNAL_VideoProcessing:
                 r'{{{OUTPUT-FILE}}}',
             ),
             'GIFGenerate' : ProcessUtils.CommandTemplate(
-                
+                r'ffmpeg',
+                r'-i {{{INPUT-FILE}}}',
+                r'-vf fps={{{CAPTURE-FPS}}}',
+                r'-loop 0',
+                r'{{{OUTPUT-FILE}}}',
             ),
             'QueryGeneralInfo' : ProcessUtils.CommandTemplate(
                 r'ffprobe',
@@ -465,6 +471,9 @@ class INTERNAL_VideoProcessing:
         
         @staticmethod
         def queryInfo(f_src:FileUtils.File, commandName) -> str:
+            '''
+            Executes a command, with a single `input-file`, and meant to extract info.
+            '''
             
             # Format command.
             command_QueryInfo = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates[commandName].createFormatter()
@@ -493,6 +502,13 @@ class INTERNAL_VideoProcessing:
         
         @staticmethod
         def queryGeneralInfo(f_src:FileUtils.File) -> float:
+            '''
+            Returns a dictionary, with,
+            
+            - Width, as `width`
+            - Height, as `height`
+            - FPS, as `fps`
+            '''
             
             generalInfoDict = {}
             
@@ -508,7 +524,7 @@ class INTERNAL_VideoProcessing:
             return generalInfoDict
         
         @staticmethod
-        def processTrimAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, trimAction:Actions.Trim) -> list:
+        def processTrimAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, trimAction:Actions.Trim, generalInfo:dict) -> list:
             
             command_VideoTrim = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoTrim'].createFormatter()
             
@@ -530,7 +546,7 @@ class INTERNAL_VideoProcessing:
             return [str(command_VideoTrim)]
         
         @staticmethod
-        def processJoinAction(f_joinList:list, f_tmpDst:FileUtils.File, joinAction:Actions.Join) -> list:
+        def processJoinAction(f_joinList:list, f_tmpDst:FileUtils.File, joinAction:Actions.Join, generalInfo:dict) -> list:
 
             # Create listing (text) file
             f_txtTmpDst = FileUtils.File(
@@ -553,11 +569,20 @@ class INTERNAL_VideoProcessing:
             ]
             
         @staticmethod
-        def processGIFAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, GIFAction:Actions.GIF) -> list:
-            return []
+        def processGIFAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, GIFAction:Actions.GIF, generalInfo:dict) -> list:
+            # Create 'GIFGenerate' command
+            command_GIFGenerate = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['GIFGenerate'].createFormatter()
+            
+            command_GIFGenerate.assertParameter('input-file', str(f_src))
+            command_GIFGenerate.assertParameter('output-file', str(f_tmpDst))
+            
+            captureFPS = GIFAction.captureFPS
+            command_GIFGenerate.assertParameter('capture-fps', f"{captureFPS:.3f}")
+            
+            return [str(command_GIFGenerate)]
         
         @staticmethod
-        def processActions(f_src:FileUtils.File, f_dst:FileUtils.File, actions:list):
+        def processActions(f_src:FileUtils.File, f_dst:FileUtils.File, actions:list, generalInfo:dict):
             tmpDir = FileUtils.File.Utils.getTemporaryDirectory()
             f_tmpBase = tmpDir.traverseDirectory(f_src.getName())
             commandList = []
@@ -567,13 +592,13 @@ class INTERNAL_VideoProcessing:
             joinAction:Actions.Join = [action for action in actions if isinstance(action, Actions.Join)][0]
             for trimAction in joinAction.trimActions:
                 f_tmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
-                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processTrimAction(f_src, f_tmpDst, trimAction)
+                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processTrimAction(f_src, f_tmpDst, trimAction, generalInfo)
                 f_joinList.append(f_tmpDst)
             
             # Process 'Join' action.
             if len(f_joinList) > 1:
                 f_joinTmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
-                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processJoinAction(f_joinList, f_joinTmpDst, joinAction)
+                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processJoinAction(f_joinList, f_joinTmpDst, joinAction, generalInfo)
             else:
                 f_joinTmpDst = f_joinList[0]
             
@@ -586,7 +611,7 @@ class INTERNAL_VideoProcessing:
                         extension='gif'
                     )
                 )
-                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processGIFAction(f_joinTmpDst, f_gifTmpDst, GIFActionList[0])
+                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processGIFAction(f_joinTmpDst, f_gifTmpDst, GIFActionList[0], generalInfo)
                 f_finalTmpDst = f_gifTmpDst
             else:
                 f_finalTmpDst = f_joinTmpDst
@@ -953,6 +978,7 @@ class GIF:
             writer.append_data(frame)
         writer.close()
 
+# Deals in 'Action'(s) and General-Info
 class Video:
     '''
     Video-handler.
@@ -963,17 +989,13 @@ class Video:
     def __init__(self, f:FileUtils.File):
         self.f_src = f
         self.actions = []
-        
-        generalInfo = INTERNAL_VideoProcessing.FFMPEGWrapper.queryGeneralInfo(self.f_src)
-        self.fps = generalInfo['fps']
-        self.width = generalInfo['width']
-        self.height = generalInfo['height']
+        self.generalInfo = INTERNAL_VideoProcessing.FFMPEGWrapper.queryGeneralInfo(self.f_src)
         
     def getFPS(self):
-        return self.fps
+        return self.generalInfo['fps']
 
     def getDimensions(self):
-        return (self.width, self.height)
+        return (self.generalInfo['width'], self.generalInfo['height'])
         
     def registerAction(self, action):
         '''
@@ -989,7 +1011,7 @@ class Video:
         '''
         Processes registered action(s), and save end-file.
         '''
-        INTERNAL_VideoProcessing.FFMPEGWrapper.processActions(self.f_src, f_dst, self.actions)
+        INTERNAL_VideoProcessing.FFMPEGWrapper.processActions(self.f_src, f_dst, self.actions, self.generalInfo)
     
     def clearActions(self):
         '''
