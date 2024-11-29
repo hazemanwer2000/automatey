@@ -368,6 +368,61 @@ class INTERNAL_FrameConversion:
     def CV2ToImageIO(imgHandler):
         return cv2.cvtColor(imgHandler, cv2.COLOR_BGR2RGB)
 
+class INTERNAL_Action:
+    pass
+
+class INTERNAL_ActionFilter(INTERNAL_Action):
+    '''
+    All filter(s).
+    '''
+    pass
+
+class INTERNAL_ActionTransition(INTERNAL_Action):
+    '''
+    All start/end transition(s).
+    '''
+    
+    def __init__(self, durationInSeconds, isStartTransition, isEndTransition):
+        self.durationInSeconds = durationInSeconds
+        self.isStartTransition = isStartTransition
+        self.isEndTransition = isEndTransition
+
+class INTERNAL_ActionScalar(INTERNAL_Action):
+    '''
+    All scaling operation(s), including resizing and cropping.
+    '''
+    pass
+
+class Actions:
+    
+    class Trim(INTERNAL_Action):
+        '''
+        Trim sequence.
+        '''
+        
+        def __init__(self, startTime:TimeUtils.Time, endTime:TimeUtils.Time, isNearestKeyframe:bool=False, subActions=None):
+            self.startTime = startTime
+            self.endTime = endTime
+            self.isNearestKeyframe = isNearestKeyframe
+            self.subActions = subActions
+
+    class Join(INTERNAL_Action):
+        '''
+        Join sequence(s).
+        '''
+        
+        def __init__(self, *trimActions):
+            self.trimActions = trimActions
+            
+    class GIF(INTERNAL_Action):
+        '''
+        In GIF.
+        '''
+        
+        def __init__(self, playbackFPS=None, captureFPS=None):
+            self.playbackFPS = playbackFPS
+            self.captureFPS = captureFPS
+
 # Uses 'CV2' as its format
 class Image:
     '''
