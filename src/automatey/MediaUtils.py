@@ -11,6 +11,9 @@ import numpy as np
 # Internal libraries
 import automatey.FileUtils as FileUtils
 import automatey.TimeUtils as TimeUtils
+import automatey.ProcessUtils as ProcessUtils
+
+from pprint import pprint 
 
 class Color:
     '''
@@ -430,9 +433,40 @@ class INTERNAL_VideoProcessing:
     
     class FFMPEGWrapper:
         
+        commandTemplates = {
+            'VideoTrim' : ProcessUtils.CommandTemplate(
+                r'ffmpeg',
+                r'-i {{{INPUT-FILE}}}',
+                r'{{{START-TIME: -ss {{{TIME}}} :}}}',
+                r'{{{END-TIME: -to {{{TIME}}} :}}}',
+                r'-crf {{{CRF}}}',
+                r'-c:v libx264',
+                r'-c:a aac',
+                r'{{{OUTPUT-FILE}}}'
+            )
+        }
+        
         @staticmethod
         def processTrimAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, trimAction:Actions.Trim) -> list:
-            return ['Dummy!']
+            
+            command_VideoTrim = INTERNAL_VideoProcessing.FFMPEGWrapper.commandTemplates['VideoTrim'].createFormatter()
+            
+            command_VideoTrim.assertParameter('input-file', str(f_src))
+            command_VideoTrim.assertParameter('output-file', str(f_tmpDst))
+            
+            if trimAction.startTime != None:
+                command_VideoTrim.assertSection('start-time', {'time' : trimAction.startTime.toString(precision=3)})
+            else:
+                command_VideoTrim.excludeSection('start-time')
+                
+            if trimAction.endTime != None:
+                command_VideoTrim.assertSection('end-time', {'time' : trimAction.endTime.toString(precision=3)})
+            else:
+                command_VideoTrim.excludeSection('end-time')
+                
+            command_VideoTrim.assertParameter('crf', '15')
+            
+            return [str(command_VideoTrim)]
         
         @staticmethod
         def processActions(f_src:FileUtils.File, f_dst:FileUtils.File, actions:list):
@@ -451,6 +485,8 @@ class INTERNAL_VideoProcessing:
                 pass
             else:
                 pass
+            
+            pprint(commandList, width=1000)
 
 # Uses 'CV2' as its format
 class Image:

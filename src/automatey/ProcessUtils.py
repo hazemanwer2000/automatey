@@ -70,7 +70,7 @@ class CommandTemplate:
                     '''
                     Format a section Regex match expression.
                     '''
-                    return r'{{{' + sectionName.upper() + ':' + r'(.*)' + r':}}}'
+                    return r'{{{' + sectionName.upper() + ':' + r'(.*?)' + r':}}}'
                 
                 @staticmethod
                 def formatParameterExpression(paramName:str):

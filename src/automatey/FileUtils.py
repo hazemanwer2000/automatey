@@ -25,7 +25,7 @@ class File:
         self.path = os.path.abspath(joinedPath)
     
     def __str__(self):
-        return self.path
+        return self.path.replace('\\', '/')
     
     def __repr__(self):
         return str(self)
