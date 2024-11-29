@@ -426,9 +426,6 @@ class Actions:
             self.playbackFPS = playbackFPS
             self.captureFPS = captureFPS
 
-# Currently, 
-#   - A 'Join' action is expected, with a 'GIF' action being optional.
-#   - All other action(s) may be applied only to 'Trim' action(s), as sub-action(s).
 class INTERNAL_VideoProcessing:
     
     class FFMPEGWrapper:
@@ -442,9 +439,50 @@ class INTERNAL_VideoProcessing:
                 r'-crf {{{CRF}}}',
                 r'-c:v libx264',
                 r'-c:a aac',
-                r'{{{OUTPUT-FILE}}}'
+                r'{{{OUTPUT-FILE}}}',
+            ),
+            'VideoConcat' : ProcessUtils.CommandTemplate(
+                r'ffmpeg',
+                r'-f concat',
+                r'-safe 0',
+                r'-i {{{LIST-FILE}}}',
+                r'-c copy',
+                r'{{{OUTPUT-FILE}}}',
+            ),
+            'GIFGenerate' : ProcessUtils.CommandTemplate(
+                
+            ),
+            'QueryFPS' : ProcessUtils.CommandTemplate(
+                r'ffprobe',
+                r'-v error',
+                r'-select_streams v:0',
+                r'-show_entries stream=avg_frame_rate',
+                r'-of default=noprint_wrappers=1',
+                r'{{{INPUT-FILE}}}',
             )
         }
+        
+        @staticmethod
+        def queryInfo(f_src:FileUtils.File, commandName) -> str:
+            
+            # Format command.
+            command_QueryInfo = INTERNAL_VideoProcessing.FFMPEGWrapper.commandTemplates[commandName].createFormatter()
+            command_QueryInfo.assertParameter('input-file', str(f_src))
+            
+            # Execute.
+            proc = ProcessUtils.Process(str(command_QueryInfo))
+            proc.run()
+            
+            return proc.STDOUT()
+        
+        @staticmethod
+        def queryFPS(f_src:FileUtils.File) -> float:
+            
+            # Fetch, and extract info from result.
+            result = INTERNAL_VideoProcessing.FFMPEGWrapper.queryInfo(f_src, 'QueryFPS')
+            fps = eval(result.split('=')[1].strip())
+            
+            return fps
         
         @staticmethod
         def processTrimAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, trimAction:Actions.Trim) -> list:
@@ -469,24 +507,68 @@ class INTERNAL_VideoProcessing:
             return [str(command_VideoTrim)]
         
         @staticmethod
+        def processJoinAction(f_joinList:list, f_tmpDst:FileUtils.File, joinAction:Actions.Join) -> list:
+
+            # Create listing (text) file
+            f_txtTmpDst = FileUtils.File(
+                FileUtils.File.Utils.Path.modifyName(
+                    FileUtils.File.Utils.Path.randomizeName(str(f_tmpDst)),
+                    extension='txt'
+                )
+            )
+            with f_txtTmpDst.openFile('wt') as f_txtTmpDstHandler:
+                for f in f_joinList:
+                    f_txtTmpDstHandler.writeLine("file '" + str(f) + "'")
+            
+            # Create 'Concat' command
+            command_VideoConcat = INTERNAL_VideoProcessing.FFMPEGWrapper.commandTemplates['VideoConcat'].createFormatter()
+            command_VideoConcat.assertParameter('list-file', str(f_txtTmpDst))
+            command_VideoConcat.assertParameter('output-file', str(f_tmpDst))
+            
+            return [
+                str(command_VideoConcat)
+            ]
+            
+        @staticmethod
+        def processGIFAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, GIFAction:Actions.GIF) -> list:
+            return []
+        
+        @staticmethod
         def processActions(f_src:FileUtils.File, f_dst:FileUtils.File, actions:list):
             tmpDir = FileUtils.File.Utils.getTemporaryDirectory()
             f_tmpBase = tmpDir.traverseDirectory(f_src.getName())
             commandList = []
             f_joinList = []
             
+            # Find 'Join' action, and process each associated 'Trim' action.
             joinAction:Actions.Join = [action for action in actions if isinstance(action, Actions.Join)][0]
             for trimAction in joinAction.trimActions:
                 f_tmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
                 commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processTrimAction(f_src, f_tmpDst, trimAction)
                 f_joinList.append(f_tmpDst)
             
-            if len(joinAction.trimActions) > 1:
-                pass
+            # Process 'Join' action.
+            if len(f_joinList) > 1:
+                f_joinTmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
+                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processJoinAction(f_joinList, f_joinTmpDst, joinAction)
             else:
-                pass
+                f_joinTmpDst = f_joinList[0]
             
-            pprint(commandList, width=1000)
+            # Find, and process 'GIF' action, if present.
+            GIFActionList:Actions.GIF = [action for action in actions if isinstance(action, Actions.GIF)]
+            if (len(GIFActionList) > 0):
+                f_gifTmpDst = FileUtils.File(
+                    FileUtils.File.Utils.Path.modifyName(
+                        FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)),
+                        extension='gif'
+                    )
+                )
+                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processGIFAction(f_joinTmpDst, f_gifTmpDst, GIFActionList[0])
+                f_finalTmpDst = f_gifTmpDst
+            else:
+                f_finalTmpDst = f_joinTmpDst
+            
+            pprint(commandList, width=400)
 
 # Uses 'CV2' as its format
 class Image:
@@ -859,12 +941,18 @@ class Video:
         self.f_src = f
         self.actions = []
         
+        self.fps = INTERNAL_VideoProcessing.FFMPEGWrapper.queryFPS(self.f_src)
+        
+    def getFPS(self):
+        return self.fps
+        
     def registerAction(self, action):
         '''
         Register an action.
         
         Note,
-        - Only 'Join' and 'GIF' are supported.
+        - Only a single 'Join' (mandatory) and a 'GIF' (optional) are supported.
+        - Other action(s) may be applied to 'Trim'.
         '''
         self.actions.append(action)
     

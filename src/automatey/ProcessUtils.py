@@ -11,6 +11,9 @@ class Utils:
         
         @staticmethod
         def normalize(inputCommand:str):
+            '''
+            Strip, and replace multiple, consecutive occurences of white-space character(s), with a single space.
+            '''
             strippedCommand = inputCommand.strip()
             normalizedCommand = StringUtils.Regex.replaceAll(r'\s+', ' ', strippedCommand)
             return normalizedCommand
@@ -126,7 +129,9 @@ class STDERR(STD): pass
 class Process:
     
     def __init__(self, *args):
-        self.command = args
+        # Joining all, then splitting again.
+        self.command = (' '.join(args)).split(sep=' ')
+        
         self.callouts = {
             STDOUT: None,
             STDERR: None,

@@ -151,7 +151,7 @@ class File:
         self.handler = None
 
     def __enter__(self):
-        pass
+        return self
     
     def __exit__(self, cls, obj, traceback):
         self.closeFile()
