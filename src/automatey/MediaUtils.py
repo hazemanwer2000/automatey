@@ -12,6 +12,7 @@ import numpy as np
 import automatey.FileUtils as FileUtils
 import automatey.TimeUtils as TimeUtils
 import automatey.ProcessUtils as ProcessUtils
+import automatey.StringUtils as StringUtils
 
 from pprint import pprint 
 
@@ -430,7 +431,7 @@ class INTERNAL_VideoProcessing:
     
     class FFMPEGWrapper:
         
-        commandTemplates = {
+        CommandTemplates = {
             'VideoTrim' : ProcessUtils.CommandTemplate(
                 r'ffmpeg',
                 r'-i {{{INPUT-FILE}}}',
@@ -452,11 +453,11 @@ class INTERNAL_VideoProcessing:
             'GIFGenerate' : ProcessUtils.CommandTemplate(
                 
             ),
-            'QueryFPS' : ProcessUtils.CommandTemplate(
+            'QueryGeneralInfo' : ProcessUtils.CommandTemplate(
                 r'ffprobe',
                 r'-v error',
                 r'-select_streams v:0',
-                r'-show_entries stream=avg_frame_rate',
+                r'-show_entries stream=avg_frame_rate,width,height',
                 r'-of default=noprint_wrappers=1',
                 r'{{{INPUT-FILE}}}',
             )
@@ -466,7 +467,7 @@ class INTERNAL_VideoProcessing:
         def queryInfo(f_src:FileUtils.File, commandName) -> str:
             
             # Format command.
-            command_QueryInfo = INTERNAL_VideoProcessing.FFMPEGWrapper.commandTemplates[commandName].createFormatter()
+            command_QueryInfo = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates[commandName].createFormatter()
             command_QueryInfo.assertParameter('input-file', str(f_src))
             
             # Execute.
@@ -475,19 +476,41 @@ class INTERNAL_VideoProcessing:
             
             return proc.STDOUT()
         
+        GeneralInfoFieldSpecification = {
+            'width' : {
+                'label' : 'width',
+                'formatter' : lambda x: int(eval(x))
+            },
+            'height' : {
+                'label' : 'height',
+                'formatter' : lambda x: int(eval(x))
+            },
+            'avg_frame_rate' : {
+                'label' : 'fps',
+                'formatter' : lambda x: float(eval(x))
+            }
+        }
+        
         @staticmethod
-        def queryFPS(f_src:FileUtils.File) -> float:
+        def queryGeneralInfo(f_src:FileUtils.File) -> float:
+            
+            generalInfoDict = {}
             
             # Fetch, and extract info from result.
-            result = INTERNAL_VideoProcessing.FFMPEGWrapper.queryInfo(f_src, 'QueryFPS')
-            fps = eval(result.split('=')[1].strip())
+            result = INTERNAL_VideoProcessing.FFMPEGWrapper.queryInfo(f_src, 'QueryGeneralInfo')
+            result = StringUtils.Normalize.asSentence(result)
+            fields = result.split(' ')
+            for field in fields:
+                fieldName, fieldValue = field.split('=')
+                fieldSpecification = INTERNAL_VideoProcessing.FFMPEGWrapper.GeneralInfoFieldSpecification[fieldName]
+                generalInfoDict[fieldSpecification['label']] = fieldSpecification['formatter'](fieldValue)
             
-            return fps
+            return generalInfoDict
         
         @staticmethod
         def processTrimAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, trimAction:Actions.Trim) -> list:
             
-            command_VideoTrim = INTERNAL_VideoProcessing.FFMPEGWrapper.commandTemplates['VideoTrim'].createFormatter()
+            command_VideoTrim = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoTrim'].createFormatter()
             
             command_VideoTrim.assertParameter('input-file', str(f_src))
             command_VideoTrim.assertParameter('output-file', str(f_tmpDst))
@@ -521,7 +544,7 @@ class INTERNAL_VideoProcessing:
                     f_txtTmpDstHandler.writeLine("file '" + str(f) + "'")
             
             # Create 'Concat' command
-            command_VideoConcat = INTERNAL_VideoProcessing.FFMPEGWrapper.commandTemplates['VideoConcat'].createFormatter()
+            command_VideoConcat = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoConcat'].createFormatter()
             command_VideoConcat.assertParameter('list-file', str(f_txtTmpDst))
             command_VideoConcat.assertParameter('output-file', str(f_tmpDst))
             
@@ -941,10 +964,16 @@ class Video:
         self.f_src = f
         self.actions = []
         
-        self.fps = INTERNAL_VideoProcessing.FFMPEGWrapper.queryFPS(self.f_src)
+        generalInfo = INTERNAL_VideoProcessing.FFMPEGWrapper.queryGeneralInfo(self.f_src)
+        self.fps = generalInfo['fps']
+        self.width = generalInfo['width']
+        self.height = generalInfo['height']
         
     def getFPS(self):
         return self.fps
+
+    def getDimensions(self):
+        return (self.width, self.height)
         
     def registerAction(self, action):
         '''

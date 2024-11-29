@@ -5,19 +5,6 @@ import automatey.StringUtils as StringUtils
 # Standard libraries
 import subprocess
 
-class Utils:
-    
-    class Command:
-        
-        @staticmethod
-        def normalize(inputCommand:str):
-            '''
-            Strip, and replace multiple, consecutive occurences of white-space character(s), with a single space.
-            '''
-            strippedCommand = inputCommand.strip()
-            normalizedCommand = StringUtils.Regex.replaceAll(r'\s+', ' ', strippedCommand)
-            return normalizedCommand
-
 class CommandTemplate:
     '''
     A command template.
@@ -68,7 +55,7 @@ class CommandTemplate:
             self.template = CommandTemplate.Formatter.INTERNAL_Utils.excludeSection(sectionName, self.template)
         
         def __str__(self):
-            return Utils.Command.normalize(self.template)
+            return StringUtils.Normalize.asSentence(self.template)
         
         def __repr__(self):
             return str(self)
