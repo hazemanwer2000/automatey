@@ -200,13 +200,18 @@ class INTERNAL_FrameProcessing:
             return imgHandler
 
         @staticmethod
-        def blackWhite(imgHandler, threshold=0.5):
+        def blackWhite(imgHandler, threshold=0.5, kernelSize=0):
             '''
             Convert grayscale into black-and-white.
             
             Threshold range is (0, 1). A lower threshold leads to more white regions.
+            
+            Kernel is used for Erosion-Dilation procedure. If 0 in size, procedure does not occur.
             '''
             _, imgHandler = cv2.threshold(imgHandler, int(threshold*255), 255, cv2.THRESH_BINARY)
+            if kernelSize > 0:
+                kernel = (kernelSize, kernelSize)
+                imgHandler = cv2.morphologyEx(imgHandler, cv2.MORPH_OPEN, kernel)
             return imgHandler
 
         @staticmethod
@@ -392,13 +397,15 @@ class Image:
         '''
         self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.grayscale(self.imgHandler)
         
-    def blackWhite(self, threshold=0.5):
+    def blackWhite(self, threshold=0.5, kernelSize=0):
         '''
         Convert grayscale into black-and-white.
         
         Threshold range is (0, 1). A lower threshold leads to more white regions.
+        
+        Kernel is used for Erosion-Dilation procedure. If 0 in size, procedure does not occur.
         '''
-        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.blackWhite(self.imgHandler, threshold)
+        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.blackWhite(self.imgHandler, threshold, kernelSize)
 
     def invert(self):
         '''
@@ -595,13 +602,15 @@ class GIF:
         '''
         self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.grayscale)
 
-    def blackWhite(self, threshold=0.5):
+    def blackWhite(self, threshold=0.5, kernelSize=0):
         '''
         Convert grayscale into black-and-white.
         
         Threshold range is (0, 1). A lower threshold leads to more white regions.
+        
+        Kernel is used for Erosion-Dilation procedure. If 0 in size, procedure does not occur.
         '''
-        self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.blackWhite, threshold)
+        self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.blackWhite, threshold, kernelSize)
 
     def invert(self):
         '''
