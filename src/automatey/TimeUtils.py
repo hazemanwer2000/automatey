@@ -56,6 +56,12 @@ class Time:
         
         return  (hours, minutes, seconds, remaining_us)
     
+    def __add__(self, obj):
+        return Time(self.microseconds + obj.microseconds)
+    
+    def __sub__(self, obj):
+        return Time(self.microseconds - obj.microseconds)
+    
     @staticmethod
     def createFromString(formattedString:str):
         '''
