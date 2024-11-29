@@ -9,7 +9,6 @@ class Utils:
         def normalize(inputCommand:str):
             strippedCommand = inputCommand.strip()
             normalizedCommand = StringUtils.Regex.replaceAll(r'\s+', ' ', strippedCommand)
-            print(normalizedCommand)
             return normalizedCommand
 
 class CommandTemplate:
@@ -23,31 +22,42 @@ class CommandTemplate:
     Note that,
     - All name(s) must be upper-case.
     - Section name(s) must be unique (or, repeated, but identical in content).
+    - When nesting, inner section(s) must be asserted first.
     '''
     
     def __init__(self, *args):
-        self.template = ' '.join(args)
+        template = ' '.join(args)
         
-    def assertSection(self, sectionName:str, params:dict):
+        self.template = template
+        self.workingTemplate = template
+        
+    def assertSection(self, sectionName:str, params:dict=None):
         '''
         Assert a section, asserting contained parameter value(s).
         '''
-        self.template = CommandTemplate.INTERNAL_Utils.Regex.assertSection(sectionName, params, self.template)
+        params = {} if (params == None) else params
+        self.workingTemplate = CommandTemplate.INTERNAL_Utils.Regex.assertSection(sectionName, params, self.workingTemplate)
     
     def assertParameter(self, paramName:str, paramValue:str):
         '''
         Assert parameter value.
         '''
-        self.template = CommandTemplate.INTERNAL_Utils.Regex.assertParameter(paramName, paramValue, self.template)
+        self.workingTemplate = CommandTemplate.INTERNAL_Utils.Regex.assertParameter(paramName, paramValue, self.workingTemplate)
     
-    def removeSection(self, sectionName:str):
+    def excludeSection(self, sectionName:str):
         '''
         Remove a section.
         '''
-        self.template = CommandTemplate.INTERNAL_Utils.Regex.removeSection(sectionName, self.template)
+        self.workingTemplate = CommandTemplate.INTERNAL_Utils.Regex.excludeSection(sectionName, self.workingTemplate)
+        
+    def reset(self):
+        '''
+        Undo all modification(s).
+        '''
+        self.workingTemplate = self.template
     
     def __str__(self):
-        return Utils.Command.normalize(self.template)
+        return Utils.Command.normalize(self.workingTemplate)
     
     def __repr__(self):
         return str(self)
@@ -87,12 +97,12 @@ class CommandTemplate:
                 sectionExpr = CommandTemplate.INTERNAL_Utils.Regex.formatSectionExpression(sectionName)
                 sectionContent = StringUtils.Regex.findAll(sectionExpr, txt)[0]
                 for paramName in params:
-                    sectionContent = CommandTemplate.INTERNAL_Utils.Regex.assertParameter(paramName, params[paramName])
+                    sectionContent = CommandTemplate.INTERNAL_Utils.Regex.assertParameter(paramName, params[paramName], sectionContent)
                 txt = StringUtils.Regex.replaceAll(sectionExpr, sectionContent, txt)
                 return txt
             
             @staticmethod
-            def removeSection(sectionName:str, txt):
+            def excludeSection(sectionName:str, txt):
                 '''
                 Remove a section.
                 '''
