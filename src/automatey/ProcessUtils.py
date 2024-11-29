@@ -1,5 +1,9 @@
 
+# Internal libraries
 import automatey.StringUtils as StringUtils
+
+# Standard libraries
+import subprocess
 
 class Utils:
     
@@ -29,6 +33,11 @@ class CommandTemplate:
         self.template = ' '.join(args)
     
     def createFormatter(self):
+        '''
+        Creates a formatter object, to be used to format the template into a command.
+        
+        As many formatter object(s) may be created.
+        '''
         return CommandTemplate.Formatter(self.template)
 
     class Formatter:
@@ -108,3 +117,63 @@ class CommandTemplate:
                 sectionExpr = CommandTemplate.Formatter.INTERNAL_Utils.Regex.formatSectionExpression(sectionName)
                 txt = StringUtils.Regex.replaceAll(sectionExpr, '', txt)
                 return txt
+
+class STD: pass
+        
+class STDOUT(STD): pass
+class STDERR(STD): pass
+
+class Process:
+    
+    def __init__(self, *args):
+        self.command = args
+        self.callouts = {
+            STDOUT: None,
+            STDERR: None,
+        }
+        self.proc = None
+    
+    def registerCallout(self, STDType:STD, calloutFcn):
+        '''
+        Register a callout, per STD, to be called with every line read.
+        '''
+        self.callouts[STDType] = calloutFcn
+    
+    def run(self) -> int:
+        '''
+        Creates process, and executes command, synchronously.
+        '''
+        self.proc = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        isSTDOUTCallout = self.callouts[STDOUT] != None
+        isSTDERRCallout = self.callouts[STDERR] != None
+        
+        while (isSTDOUTCallout or isSTDERRCallout):
+            
+            if (isSTDOUTCallout):
+                line = self.proc.stdout.readline()
+                if (line):
+                    self.callouts[STDOUT](line)
+                else:
+                    isSTDOUTCallout = False
+
+            if (isSTDERRCallout):
+                line = self.proc.stderr.readline()
+                if (line):
+                    self.callouts[STDERR](line)
+                else:
+                    isSTDERRCallout = False
+        
+        return self.proc.wait()
+    
+    def STDOUT(self):
+        '''
+        Get STDOUT. If a callout is configured, this must not be used.
+        '''
+        return self.proc.stdout.read()
+    
+    def STDERR(self):
+        '''
+        Get STDERR. If a callout is configured, this must not be used.
+        '''
+        return self.proc.stderr.read()

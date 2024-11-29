@@ -1,14 +1,14 @@
-# Standard Libraries
+# Standard libraries
 import os
 import pathlib
 import typing
 import tempfile
 import shutil
 
-# External Libraries
+# External libraries
 from send2trash import send2trash
 
-# Internal Libraries
+# Internal libraries
 import automatey.RandomUtils as RandomUtils
 
 class INTERNAL_Constants:
