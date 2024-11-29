@@ -228,11 +228,11 @@ class File:
                 return os.path.join(parentDir, name + suffix + extension)
                 
             @staticmethod
-            def randomizeName(path):
+            def randomizeName(path, fileNameLength, charPool=None):
                 '''
                 Randomize name, preserving the extension (if present).
                 '''
-                randomName = RandomUtils.getRandomString()
+                randomName = RandomUtils.Generation.String(fileNameLength, charPool)
                 return File.Utils.Path.modifyName(path, name=randomName)
             
             @staticmethod

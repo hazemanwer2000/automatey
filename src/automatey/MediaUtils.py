@@ -10,6 +10,7 @@ import numpy as np
 
 # Internal libraries
 import automatey.FileUtils as FileUtils
+import automatey.TimeUtils as TimeUtils
 
 class Color:
     '''

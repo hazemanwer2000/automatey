@@ -1,8 +1,6 @@
 
 # Standard libraries
 from datetime import datetime
-import typing
-import math
 
 class Constants:
     US_IN_HOUR = 3600000000
