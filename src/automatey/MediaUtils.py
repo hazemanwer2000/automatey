@@ -427,8 +427,11 @@ class Actions:
         - Capture FPS specifies the FPS at which frame(s) are sampled.
         '''
         
-        def __init__(self, captureFPS):
+        def __init__(self, captureFPS, playbackFactor=1.0, width=-1, height=-1):
             self.captureFPS = captureFPS
+            self.playbackFactor = playbackFactor
+            self.width=width
+            self.height=height
 
 class INTERNAL_VideoProcessing:
     
@@ -462,7 +465,7 @@ class INTERNAL_VideoProcessing:
                 r'-hide_banner',
                 r'-loglevel error',
                 r'-i {{{INPUT-FILE}}}',
-                r'-vf fps={{{CAPTURE-FPS}}}',
+                r'-vf fps={{{CAPTURE-FPS}}},scale={{{WIDTH}}}:{{{HEIGHT}}}:flags=lanczos,setpts={{{PTS-FACTOR}}}*PTS[v]',
                 r'-loop 0',
                 r'{{{OUTPUT-FILE}}}',
             ),
@@ -584,7 +587,14 @@ class INTERNAL_VideoProcessing:
             command_GIFGenerate.assertParameter('output-file', str(f_tmpDst))
             
             captureFPS = GIFAction.captureFPS
+            PTSFactor = 1 / GIFAction.playbackFactor
+            width = GIFAction.width
+            height = GIFAction.height
+            
             command_GIFGenerate.assertParameter('capture-fps', f"{captureFPS:.3f}")
+            command_GIFGenerate.assertParameter('pts-factor', f"{PTSFactor:.3f}")
+            command_GIFGenerate.assertParameter('width', str(width))
+            command_GIFGenerate.assertParameter('height', str(height))
             
             return [str(command_GIFGenerate)]
         
