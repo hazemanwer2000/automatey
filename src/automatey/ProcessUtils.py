@@ -108,64 +108,31 @@ class CommandTemplate:
                 txt = StringUtils.Regex.replaceAll(sectionExpr, '', txt)
                 return txt
 
-class STD: pass
-        
-class STDOUT(STD): pass
-class STDERR(STD): pass
-
 class Process:
+    '''
+    Representation of a (sub-)process.
+    '''
     
     def __init__(self, *args):
         # Joining all, then splitting again.
         self.command = (' '.join(args)).split(sep=' ')
         
-        self.callouts = {
-            STDOUT: None,
-            STDERR: None,
-        }
-        self.proc = None
+        self.stdout = None
+        self.stderr = None
     
-    def registerCallout(self, STDType:STD, calloutFcn):
+    def run(self, STDOUT2DEVNULL=False, STDERR2DEVNULL=False) -> int:
         '''
-        Register a callout, per STD, to be called with every line read.
+        Executes command, synchronously.
         '''
-        self.callouts[STDType] = calloutFcn
-    
-    def run(self) -> int:
-        '''
-        Creates process, and executes command, synchronously.
-        '''
-        self.proc = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        stdoutRedirection = subprocess.DEVNULL if STDOUT2DEVNULL else subprocess.PIPE
+        stderrRedirection = subprocess.DEVNULL if STDERR2DEVNULL else subprocess.PIPE
         
-        isSTDOUTCallout = self.callouts[STDOUT] != None
-        isSTDERRCallout = self.callouts[STDERR] != None
-        
-        while (isSTDOUTCallout or isSTDERRCallout):
-            
-            if (isSTDOUTCallout):
-                line = self.proc.stdout.readline()
-                if (line):
-                    self.callouts[STDOUT](line)
-                else:
-                    isSTDOUTCallout = False
-
-            if (isSTDERRCallout):
-                line = self.proc.stderr.readline()
-                if (line):
-                    self.callouts[STDERR](line)
-                else:
-                    isSTDERRCallout = False
-        
-        return self.proc.wait()
+        proc = subprocess.Popen(self.command, stdout=stdoutRedirection, stderr=stderrRedirection, text=True)
+        self.stdout, self.stderr = proc.communicate()
+        return proc.returncode
     
     def STDOUT(self):
-        '''
-        Get STDOUT. If a callout is configured, this must not be used.
-        '''
-        return self.proc.stdout.read()
+        return self.stdout
     
     def STDERR(self):
-        '''
-        Get STDERR. If a callout is configured, this must not be used.
-        '''
-        return self.proc.stderr.read()
+        return self.stderr

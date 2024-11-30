@@ -13,6 +13,7 @@ import automatey.FileUtils as FileUtils
 import automatey.TimeUtils as TimeUtils
 import automatey.ProcessUtils as ProcessUtils
 import automatey.StringUtils as StringUtils
+import automatey.ExceptionUtils as ExceptionUtils
 
 from pprint import pprint 
 
@@ -436,6 +437,8 @@ class INTERNAL_VideoProcessing:
         CommandTemplates = {
             'VideoTrim' : ProcessUtils.CommandTemplate(
                 r'ffmpeg',
+                r'-hide_banner',
+                r'-loglevel error',
                 r'-i {{{INPUT-FILE}}}',
                 r'{{{START-TIME: -ss {{{TIME}}} :}}}',
                 r'{{{END-TIME: -to {{{TIME}}} :}}}',
@@ -446,6 +449,8 @@ class INTERNAL_VideoProcessing:
             ),
             'VideoConcat' : ProcessUtils.CommandTemplate(
                 r'ffmpeg',
+                r'-hide_banner',
+                r'-loglevel error',
                 r'-f concat',
                 r'-safe 0',
                 r'-i {{{LIST-FILE}}}',
@@ -454,6 +459,8 @@ class INTERNAL_VideoProcessing:
             ),
             'GIFGenerate' : ProcessUtils.CommandTemplate(
                 r'ffmpeg',
+                r'-hide_banner',
+                r'-loglevel error',
                 r'-i {{{INPUT-FILE}}}',
                 r'-vf fps={{{CAPTURE-FPS}}}',
                 r'-loop 0',
@@ -583,8 +590,8 @@ class INTERNAL_VideoProcessing:
         
         @staticmethod
         def processActions(f_src:FileUtils.File, f_dst:FileUtils.File, actions:list, generalInfo:dict):
-            tmpDir = FileUtils.File.Utils.getTemporaryDirectory()
-            f_tmpBase = tmpDir.traverseDirectory(f_src.getName())
+            f_tmpDir = FileUtils.File.Utils.getTemporaryDirectory()
+            f_tmpBase = f_tmpDir.traverseDirectory(f_src.getName())
             commandList = []
             f_joinList = []
             
@@ -615,8 +622,24 @@ class INTERNAL_VideoProcessing:
                 f_finalTmpDst = f_gifTmpDst
             else:
                 f_finalTmpDst = f_joinTmpDst
+                
+            #pprint(commandList, width=400)
+            #return
             
-            pprint(commandList, width=400)
+            # Execute command-list.
+            INTERNAL_VideoProcessing.FFMPEGWrapper.executeCommands(commandList)
+            
+            # Copy into (actual) destination, and delete temporary directory.
+            FileUtils.File.Utils.copyFile(f_finalTmpDst, f_dst)
+            FileUtils.File.Utils.recycle(f_tmpDir)
+            
+        @staticmethod
+        def executeCommands(commandList):
+            for command in commandList:
+                print(command)
+                proc = ProcessUtils.Process(str(command))
+                if (proc.run() != 0):
+                    raise ExceptionUtils.BackendError(proc.STDERR())
 
 # Uses 'CV2' as its format
 class Image:
