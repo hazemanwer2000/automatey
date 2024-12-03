@@ -9,11 +9,11 @@ import imageio
 import numpy as np
 
 # Internal libraries
-import automatey.FileUtils as FileUtils
-import automatey.TimeUtils as TimeUtils
-import automatey.ProcessUtils as ProcessUtils
-import automatey.StringUtils as StringUtils
-import automatey.ExceptionUtils as ExceptionUtils
+import automatey.OS.FileUtils as FileUtils
+import automatey.Base.TimeUtils as TimeUtils
+import automatey.OS.ProcessUtils as ProcessUtils
+import automatey.Utils.StringUtils as StringUtils
+import automatey.Base.ExceptionUtils as ExceptionUtils
 
 from pprint import pprint 
 

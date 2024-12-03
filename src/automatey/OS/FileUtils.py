@@ -9,7 +9,7 @@ import shutil
 from send2trash import send2trash
 
 # Internal libraries
-import automatey.RandomUtils as RandomUtils
+import automatey.Utils.RandomUtils as RandomUtils
 
 class INTERNAL_Constants:
     

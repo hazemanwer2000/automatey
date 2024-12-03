@@ -1,6 +1,6 @@
 
 # Internal libraries
-import automatey.StringUtils as StringUtils
+import automatey.Utils.StringUtils as StringUtils
 
 # Standard libraries
 import subprocess
