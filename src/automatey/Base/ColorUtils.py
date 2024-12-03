@@ -68,3 +68,6 @@ class Color:
         return Color(compuMethod(RGBFormat[0]),
                      compuMethod(RGBFormat[1]),
                      compuMethod(RGBFormat[2]))
+
+BLACK = Color(0, 0, 0)
+WHITE = Color(255, 255, 255)
