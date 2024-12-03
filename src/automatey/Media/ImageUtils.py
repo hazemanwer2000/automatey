@@ -34,10 +34,10 @@ class Border:
         self.thickness = thickness
         self.color = color
     
-class INTERNAL_Drawable:
+class Drawable:
     pass
 
-class INTERNAL_Shape(INTERNAL_Drawable):
+class INTERNAL_Shape(Drawable):
     '''
     (Abstract) Representation of a shape.
     '''
@@ -47,7 +47,7 @@ class INTERNAL_Shape(INTERNAL_Drawable):
         if (self.border == None):
             self.border = Border(0, self.fillColor)
 
-class INTERNAL_Line(INTERNAL_Drawable):
+class INTERNAL_Line(Drawable):
     '''
     (Abstract) Representation of a line.
     '''
@@ -497,7 +497,7 @@ class Image:
         '''
         self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.crop(self.imgHandler, topLeft, bottomRight)
         
-    def overlayDrawable(self, shape):
+    def overlayDrawable(self, shape:Drawable):
         '''
         Add a drawable (e.g., Rectangle).
         '''
