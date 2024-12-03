@@ -55,7 +55,9 @@ class CommandTemplate:
             self.template = CommandTemplate.Formatter.INTERNAL_Utils.excludeSection(sectionName, self.template)
         
         def __str__(self):
-            return StringUtils.Normalize.asSentence(self.template)
+            strippedText = self.template.strip()
+            normalizedText = StringUtils.Regex.replaceAll(r'\s+', ' ', strippedText)
+            return normalizedText
         
         def __repr__(self):
             return str(self)

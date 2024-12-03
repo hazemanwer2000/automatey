@@ -22,17 +22,3 @@ class Regex:
         if res == None:
             res = []
         return res
-
-class Normalize:
-    '''
-    Contains all API(s), used to put a string into a specific format.
-    '''
-    
-    @staticmethod
-    def asSentence(text:str):
-        '''
-        Strip, and replace multiple, consecutive occurences of white-space character(s), with a single space.
-        '''
-        strippedText = text.strip()
-        normalizedText = Regex.replaceAll(r'\s+', ' ', strippedText)
-        return normalizedText
