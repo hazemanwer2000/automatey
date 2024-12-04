@@ -125,6 +125,15 @@ class INTERNAL_VideoProcessing:
                 r'{{{AUDIO-FILTER: -af {{{VALUE}}} :}}}',
                 r'{{{OUTPUT-FILE}}}',
             ),
+            'VideoMute' : ProcessUtils.CommandTemplate(
+                r'ffmpeg',
+                r'-hide_banner',
+                r'-loglevel error',
+                r'-i {{{INPUT-FILE}}}',
+                r'-c copy',
+                r'-an',
+                r'{{{OUTPUT-FILE}}}',
+            ),
             'VideoConcat' : ProcessUtils.CommandTemplate(
                 r'ffmpeg',
                 r'-hide_banner',
@@ -223,6 +232,7 @@ class INTERNAL_VideoProcessing:
         
         @staticmethod
         def processTrimAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, trimAction:Actions.Trim, generalInfo:dict) -> list:
+            commandList = []
             
             if (trimAction.isNearestKeyframe):
                 command_VideoTrim = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoTrimNearestKeyframe'].createFormatter()
@@ -230,7 +240,6 @@ class INTERNAL_VideoProcessing:
                 command_VideoTrim = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoTrim'].createFormatter()
 
             command_VideoTrim.assertParameter('input-file', str(f_src))
-            command_VideoTrim.assertParameter('output-file', str(f_tmpDst))
             
             if trimAction.startTime != None:
                 command_VideoTrim.assertSection('start-time', {'time' : trimAction.startTime.toString(precision=3)})
@@ -265,7 +274,23 @@ class INTERNAL_VideoProcessing:
                 else:
                     command_VideoTrim.assertSection('audio-filter', {'value': audioFilters})
             
-            return [str(command_VideoTrim)]
+            lastCommand = command_VideoTrim
+            
+            # Check if mute'ing is necessary.
+            if trimAction.isMute:
+                f_interTmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpDst)))
+                lastCommand.assertParameter('output-file', str(f_interTmpDst))
+                commandList.append(str(lastCommand))
+                
+                command_VideoMute = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoMute'].createFormatter()
+                command_VideoMute.assertParameter('input-file', str(f_interTmpDst))
+                lastCommand = command_VideoMute
+            
+            # Finalization.
+            lastCommand.assertParameter('output-file', str(f_tmpDst))
+            commandList.append(str(lastCommand))
+            
+            return commandList
         
         @staticmethod
         def processJoinAction(f_joinList:list, f_tmpDst:FileUtils.File, joinAction:Actions.Join, generalInfo:dict) -> list:
@@ -328,8 +353,9 @@ class INTERNAL_VideoProcessing:
             if len(f_joinList) > 1:
                 f_joinTmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
                 commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processJoinAction(f_joinList, f_joinTmpDst, joinAction, generalInfo)
+                f_finalTmpDst = f_joinTmpDst
             else:
-                f_joinTmpDst = f_joinList[0]
+                f_finalTmpDst = f_joinList[0]
             
             # Find, and process 'GIF' action, if present.
             if (len(actions) > 1):
@@ -340,10 +366,8 @@ class INTERNAL_VideoProcessing:
                         extension='gif'
                     )
                 )
-                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processGIFAction(f_joinTmpDst, f_gifTmpDst, GIFAction, generalInfo)
+                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processGIFAction(f_finalTmpDst, f_gifTmpDst, GIFAction, generalInfo)
                 f_finalTmpDst = f_gifTmpDst
-            else:
-                f_finalTmpDst = f_joinTmpDst
                 
             #pprint(commandList, width=400)
             #return
