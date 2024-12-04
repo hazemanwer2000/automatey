@@ -64,7 +64,7 @@ class Actions:
             self.isMute = isMute
             self.isNearestKeyframe = isNearestKeyframe
             self.quality = quality
-            self.modifiers = modifiers
+            self.modifiers = [] if (modifiers == None) else modifiers
 
     class Join(Action):
         '''
@@ -208,7 +208,8 @@ class INTERNAL_VideoProcessing:
             
             # Fetch, and extract info from result.
             result = INTERNAL_VideoProcessing.FFMPEGWrapper.queryInfo(f_src, 'QueryGeneralInfo')
-            result = StringUtils.Normalize.asSentence(result)
+            result = result.strip()
+            result = StringUtils.Regex.replaceAll(r'\s+', ' ', result)
             fields = result.split(' ')
             for field in fields:
                 fieldName, fieldValue = field.split('=')
@@ -242,12 +243,15 @@ class INTERNAL_VideoProcessing:
             command_VideoTrim.assertParameter('input-file', str(f_src))
             
             if trimAction.startTime != None:
-                command_VideoTrim.assertSection('start-time', {'time' : trimAction.startTime.toString(precision=3)})
+                startTime = trimAction.startTime
+                command_VideoTrim.assertSection('start-time', {'time' : startTime.toString(precision=3)})
             else:
+                startTime = TimeUtils.Time(0)
                 command_VideoTrim.excludeSection('start-time')
                 
             if trimAction.endTime != None:
-                command_VideoTrim.assertSection('end-time', {'time' : trimAction.endTime.toString(precision=3)})
+                duration = trimAction.endTime - startTime
+                command_VideoTrim.assertSection('duration', {'time' : duration.toString(precision=3)})
             else:
                 command_VideoTrim.excludeSection('end-time')
             
@@ -369,8 +373,8 @@ class INTERNAL_VideoProcessing:
                 commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processGIFAction(f_finalTmpDst, f_gifTmpDst, GIFAction, generalInfo)
                 f_finalTmpDst = f_gifTmpDst
                 
-            #pprint(commandList, width=400)
-            #return
+            pprint(commandList, width=400)
+            return
             
             # Execute command-list.
             INTERNAL_VideoProcessing.FFMPEGWrapper.executeCommands(commandList)
