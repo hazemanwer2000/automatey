@@ -53,13 +53,26 @@ class INTERNAL_VideoProcessing:
     class FFMPEGWrapper:
         
         CommandTemplates = {
+            'VideoTrimNearestKeyframe' : ProcessUtils.CommandTemplate(
+                r'ffmpeg',
+                r'-hide_banner',
+                r'-loglevel error',
+                r'-noaccurate_seek',
+                r'{{{START-TIME: -ss {{{TIME}}} :}}}',
+                r'-i {{{INPUT-FILE}}}',
+                r'{{{DURATION: -to {{{TIME}}} :}}}',
+                r'-vcodec copy',
+                r'-acodec copy',
+                r'-avoid_negative_ts make_zero',
+                r'{{{OUTPUT-FILE}}}',
+            ),
             'VideoTrim' : ProcessUtils.CommandTemplate(
                 r'ffmpeg',
                 r'-hide_banner',
                 r'-loglevel error',
-                r'-i {{{INPUT-FILE}}}',
                 r'{{{START-TIME: -ss {{{TIME}}} :}}}',
-                r'{{{END-TIME: -to {{{TIME}}} :}}}',
+                r'-i {{{INPUT-FILE}}}',
+                r'{{{DURATION: -to {{{TIME}}} :}}}',
                 r'-crf {{{CRF}}}',
                 r'-c:v libx264',
                 r'-c:a aac',
