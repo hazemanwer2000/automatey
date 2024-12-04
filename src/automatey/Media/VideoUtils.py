@@ -10,21 +10,61 @@ import automatey.Base.ExceptionUtils as ExceptionUtils
 
 from pprint import pprint 
 
+class Quality:
+    
+    class HIGH: pass
+    class AVERAGE: pass
+
 class Action:
     pass
 
+class Modifier:
+    pass
+
+class Filter(Modifier):
+    pass
+
+class Transition(Modifier):
+    pass
+
+class Scalar(Modifier):
+    pass
+
+class AudioModifier:
+    pass
+
+class AudioTransition(AudioModifier):
+    pass
+
 class Actions:
-    
+
+    class Modifiers:
+        
+        class Filters:
+            
+            class SepiaTone(Filter):
+                pass
+            
+            class Grayscale(Filter):
+                pass
+
     class Trim(Action):
         '''
         Trim sequence.
         '''
         
-        def __init__(self, startTime:TimeUtils.Time, endTime:TimeUtils.Time, isNearestKeyframe:bool=False, subActions=None):
+        def __init__(self, startTime:TimeUtils.Time, 
+                     endTime:TimeUtils.Time,
+                     isMute=False,
+                     isNearestKeyframe:bool=False,
+                     quality=Quality.HIGH,
+                     modifiers=None):
             self.startTime = startTime
             self.endTime = endTime
+            self.isMute = isMute
             self.isNearestKeyframe = isNearestKeyframe
-            self.subActions = subActions
+            self.quality = quality
+            self.modifiers = modifiers
 
     class Join(Action):
         '''
@@ -52,6 +92,11 @@ class INTERNAL_VideoProcessing:
     
     class FFMPEGWrapper:
         
+        Constants = {
+            'AverageCRF' : 17,
+            'HighCRF' : 12,
+        }
+        
         CommandTemplates = {
             'VideoTrimNearestKeyframe' : ProcessUtils.CommandTemplate(
                 r'ffmpeg',
@@ -76,6 +121,8 @@ class INTERNAL_VideoProcessing:
                 r'-crf {{{CRF}}}',
                 r'-c:v libx264',
                 r'-c:a aac',
+                r'{{{VIDEO-FILTER: -vf {{{VALUE}}} :}}}',
+                r'{{{AUDIO-FILTER: -af {{{VALUE}}} :}}}',
                 r'{{{OUTPUT-FILE}}}',
             ),
             'VideoConcat' : ProcessUtils.CommandTemplate(
@@ -160,12 +207,28 @@ class INTERNAL_VideoProcessing:
                 generalInfoDict[fieldSpecification['label']] = fieldSpecification['formatter'](fieldValue)
             
             return generalInfoDict
+
+        @staticmethod
+        def deriveVideoFilters(modifiers):
+            return ''
+        
+        @staticmethod
+        def deriveAudioFilters(modifiers):
+            return ''
+        
+        QualityToCRF = {
+            Quality.AVERAGE : Constants['AverageCRF'],
+            Quality.HIGH : Constants['HighCRF'],
+        }
         
         @staticmethod
         def processTrimAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, trimAction:Actions.Trim, generalInfo:dict) -> list:
             
-            command_VideoTrim = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoTrim'].createFormatter()
-            
+            if (trimAction.isNearestKeyframe):
+                command_VideoTrim = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoTrimNearestKeyframe'].createFormatter()
+            else:
+                command_VideoTrim = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoTrim'].createFormatter()
+
             command_VideoTrim.assertParameter('input-file', str(f_src))
             command_VideoTrim.assertParameter('output-file', str(f_tmpDst))
             
@@ -178,8 +241,29 @@ class INTERNAL_VideoProcessing:
                 command_VideoTrim.assertSection('end-time', {'time' : trimAction.endTime.toString(precision=3)})
             else:
                 command_VideoTrim.excludeSection('end-time')
+            
+            # If trimming is not at nearest key-frame, then it is possible to specify filter(s), and CRF value.
+            if not (trimAction.isNearestKeyframe):
+                # Deriving CRF value.
+                CRFValue = INTERNAL_VideoProcessing.FFMPEGWrapper.QualityToCRF[trimAction.quality]
+                command_VideoTrim.assertParameter('crf', str(CRFValue))
                 
-            command_VideoTrim.assertParameter('crf', '15')
+                # Processing modifier(s).
+                modifiers = [modifier for modifier in trimAction.modifiers if issubclass(modifier, Modifier)]
+                audioModifiers = [modifier for modifier in trimAction.modifiers if issubclass(modifier, AudioModifier)]
+                
+                videoFilters:str = INTERNAL_VideoProcessing.FFMPEGWrapper.deriveVideoFilters(modifiers)
+                audioFilters:str = INTERNAL_VideoProcessing.FFMPEGWrapper.deriveAudioFilters(audioModifiers)
+                
+                if videoFilters == '':
+                    command_VideoTrim.excludeSection('video-filter')
+                else:
+                    command_VideoTrim.assertSection('video-filter', {'value': videoFilters})
+                    
+                if audioFilters == '':
+                    command_VideoTrim.excludeSection('audio-filter')
+                else:
+                    command_VideoTrim.assertSection('audio-filter', {'value': audioFilters})
             
             return [str(command_VideoTrim)]
         
@@ -304,7 +388,7 @@ class Video:
         
         Note,
         - Only a single 'Join' (mandatory), which consists of one or more 'Trim' action(s), and a 'GIF' (optional) are supported.
-        - Other action(s) may be applied to 'Trim'.
+        - Modifier(s) may be applied to 'Trim' action(s).
         - All action(s) are order sensitive.
         '''
         self.actions.append(action)
