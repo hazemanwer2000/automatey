@@ -218,6 +218,12 @@ class INTERNAL_VideoProcessing:
             
             return generalInfoDict
 
+        class VideoFilterConstructors:
+            
+            @staticmethod
+            def SepiaTone():
+                return ''
+
         @staticmethod
         def deriveVideoFilters(modifiers):
             return ''
@@ -297,27 +303,41 @@ class INTERNAL_VideoProcessing:
             return commandList
         
         @staticmethod
-        def processJoinAction(f_joinList:list, f_tmpDst:FileUtils.File, joinAction:Actions.Join, generalInfo:dict) -> list:
+        def processJoinAction(f_src:FileUtils.File, f_tmpBase:FileUtils.File, joinAction:Actions.Join, generalInfo:dict) -> list:
+            commandList = []
+            f_joinList = []
 
-            # Create listing (text) file
-            f_txtTmpDst = FileUtils.File(
-                FileUtils.File.Utils.Path.modifyName(
-                    FileUtils.File.Utils.Path.randomizeName(str(f_tmpDst)),
-                    extension='txt'
+            # Process each associated 'Trim' action.
+            for trimAction in joinAction.trimActions:
+                newCommandList, f_trimTmpDst = INTERNAL_VideoProcessing.FFMPEGWrapper.processTrimAction(f_src, f_tmpBase, trimAction, generalInfo)
+                commandList += newCommandList
+                f_joinList.append(f_trimTmpDst)
+            
+            # Join video file(s), if necessary.
+            if len(f_joinList) > 1:
+                # Create listing (text) file
+                f_txtTmpDst = FileUtils.File(
+                    FileUtils.File.Utils.Path.modifyName(
+                        FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)),
+                        extension='txt'
+                    )
                 )
-            )
-            with f_txtTmpDst.openFile('wt') as f_txtTmpDstHandler:
-                for f in f_joinList:
-                    f_txtTmpDstHandler.writeLine("file '" + str(f) + "'")
+                with f_txtTmpDst.openFile('wt') as f_txtTmpDstHandler:
+                    for f in f_joinList:
+                        f_txtTmpDstHandler.writeLine("file '" + str(f) + "'")
+                
+                # Create 'Concat' command
+                f_joinTmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
+                command_VideoConcat = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoConcat'].createFormatter()
+                command_VideoConcat.assertParameter('list-file', str(f_txtTmpDst))
+                command_VideoConcat.assertParameter('output-file', str(f_joinTmpDst))
+                
+                commandList.append(str(command_VideoConcat))
+                f_finalTmpDst = f_joinTmpDst
+            else:
+                f_finalTmpDst = f_joinList[0]
             
-            # Create 'Concat' command
-            command_VideoConcat = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoConcat'].createFormatter()
-            command_VideoConcat.assertParameter('list-file', str(f_txtTmpDst))
-            command_VideoConcat.assertParameter('output-file', str(f_tmpDst))
-            
-            return [
-                str(command_VideoConcat)
-            ]
+            return commandList, f_finalTmpDst
             
         @staticmethod
         def processGIFAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, GIFAction:Actions.GIF, generalInfo:dict) -> list:
@@ -344,22 +364,10 @@ class INTERNAL_VideoProcessing:
             f_tmpDir = FileUtils.File.Utils.getTemporaryDirectory()
             f_tmpBase = f_tmpDir.traverseDirectory(f_src.getName())
             commandList = []
-            f_joinList = []
             
-            # Find 'Join' action, and process each associated 'Trim' action.
-            joinAction:Actions.Join = actions[0]
-            for trimAction in joinAction.trimActions:
-                f_tmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
-                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processTrimAction(f_src, f_tmpDst, trimAction, generalInfo)
-                f_joinList.append(f_tmpDst)
+            # Process (mandatory) 'Join' action.
+            newCommandList, f_joinTmpDst = INTERNAL_VideoProcessing.FFMPEGWrapper.processJoinAction(f_src, f_tmpBase, actions[0], generalInfo)
             
-            # Process 'Join' action.
-            if len(f_joinList) > 1:
-                f_joinTmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
-                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processJoinAction(f_joinList, f_joinTmpDst, joinAction, generalInfo)
-                f_finalTmpDst = f_joinTmpDst
-            else:
-                f_finalTmpDst = f_joinList[0]
             
             # Find, and process 'GIF' action, if present.
             if (len(actions) > 1):
