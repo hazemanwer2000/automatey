@@ -26,6 +26,9 @@ class INTERNAL_Utils:
     class Filter(Modifier):
         pass
 
+    class AudioModifier:
+        pass
+
 class Actions:
 
     class Trim(INTERNAL_Utils.Action):
@@ -67,6 +70,11 @@ class Actions:
             self.playbackFactor = playbackFactor
             self.width=width
             self.height=height
+
+class Modifiers:
+    
+    class SepiaTone(INTERNAL_Utils.Filter):
+        pass
 
 class INTERNAL_VideoProcessing:
     
@@ -206,12 +214,20 @@ class INTERNAL_VideoProcessing:
         class VideoFilterConstructors:
             
             @staticmethod
-            def SepiaTone():
-                return ''
+            def SepiaTone(modifier:Modifiers.SepiaTone):
+                return 'colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131'
+            
+        ModifierToVideoFilter = {
+            Modifiers.SepiaTone : VideoFilterConstructors.SepiaTone
+        }
 
         @staticmethod
         def deriveVideoFilters(modifiers):
-            return ''
+            filters = []
+            for modifier in modifiers:
+                filterConstructor = INTERNAL_VideoProcessing.FFMPEGWrapper.ModifierToVideoFilter[type(modifier)]
+                filters.append(filterConstructor(modifier))
+            return ','.join(filters)
         
         @staticmethod
         def deriveAudioFilters(modifiers):
@@ -248,8 +264,8 @@ class INTERNAL_VideoProcessing:
                 command_VideoTrim.assertParameter('crf', str(CRFValue))
                 
                 # Processing modifier(s).
-                modifiers = [modifier for modifier in trimAction.modifiers if issubclass(modifier, Modifier)]
-                audioModifiers = [modifier for modifier in trimAction.modifiers if issubclass(modifier, AudioModifier)]
+                modifiers = [modifier for modifier in trimAction.modifiers if issubclass(type(modifier), INTERNAL_Utils.Modifier)]
+                audioModifiers = [modifier for modifier in trimAction.modifiers if issubclass(type(modifier), INTERNAL_Utils.AudioModifier)]
                 
                 videoFilters:str = INTERNAL_VideoProcessing.FFMPEGWrapper.deriveVideoFilters(modifiers)
                 audioFilters:str = INTERNAL_VideoProcessing.FFMPEGWrapper.deriveAudioFilters(audioModifiers)
