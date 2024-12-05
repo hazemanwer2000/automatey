@@ -98,6 +98,13 @@ class File:
         Get name of file/directory. 
         '''
         return os.path.split(self.path)[1]
+    
+    def getNameWithoutExtension(self) -> str:
+        '''
+        Get name of file/directory, without an extension (if present).
+        '''
+        pathWithoutExt = os.path.splitext(self.path)[0]
+        return os.path.split(pathWithoutExt)[-1]
 
     def openFile(self, mode:str) -> typing.Self:
         '''

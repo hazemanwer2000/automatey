@@ -290,8 +290,15 @@ class Image:
     Image handler.
     '''
 
-    def __init__(self, f:FileUtils.File):
-        self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.createFromFile(f)
+    def __init__(self, f:FileUtils.File, INTERNAL_imgHandler=None):
+        if (f != None):
+            self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.createFromFile(f)
+        else:
+            self.imgHandler = INTERNAL_imgHandler
+
+    @staticmethod
+    def INTERNAL_createFromCV2(imgHandler):
+        return Image(None, INTERNAL_imgHandler=imgHandler)
 
     def getDimensions(self):
         '''
@@ -483,6 +490,15 @@ class GIF:
                 copiedFrame = np.copy(self.frames[i])
                 newFrames.append(copiedFrame)
         self.frames = newFrames
+
+    def asImage(self, frameIdx) -> Image:
+        '''
+        Get a specific frame, as an 'Image'.
+        
+        Note that frame(s) are '1'-indexed.
+        '''
+        cv2ImgHandler = INTERNAL_FrameConversion.ImageIOToCV2(self.frames[frameIdx-1])
+        return Image.INTERNAL_createFromCV2(cv2ImgHandler)
 
     def INTERNAL_CV2Applier(self, fcn, *args, **kwargs):
         for i in range(len(self.frames)):
