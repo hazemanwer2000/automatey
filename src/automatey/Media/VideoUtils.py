@@ -73,8 +73,23 @@ class Actions:
 
 class Modifiers:
     
-    class SepiaTone(INTERNAL_Utils.Filter):
-        pass
+    class Filters:
+    
+        class SepiaTone(INTERNAL_Utils.Filter):
+            pass
+        
+        class Grayscale(INTERNAL_Utils.Filter):
+            pass
+        
+        class BrightnessContrast(INTERNAL_Utils.Filter):
+            '''
+            Adjust brightness and contrast.
+            
+            Value(s) are factor(s) (i.e., '1.0' has no effect).
+            '''
+            def __init__(self, brightness=1.0, contrast=1.0):
+                self.brightness = brightness
+                self.contrast = contrast
 
 class INTERNAL_VideoProcessing:
     
@@ -213,12 +228,29 @@ class INTERNAL_VideoProcessing:
 
         class VideoFilterConstructors:
             
+            FilterTemplates = {
+                'BrightnessContrast' : ProcessUtils.CommandTemplate(r'eq=brightness={{{BRIGHTNESS}}}:contrast={{{CONTRAST}}}'),
+            }
+            
             @staticmethod
-            def SepiaTone(modifier:Modifiers.SepiaTone):
+            def SepiaTone(modifier:Modifiers.Filters.SepiaTone):
                 return 'colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131'
             
+            @staticmethod
+            def Grayscale(modifier:Modifiers.Filters.Grayscale):
+                return 'format=gray'
+            
+            @staticmethod
+            def BrightnessContrast(modifier:Modifiers.Filters.BrightnessContrast):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['BrightnessContrast'].createFormatter()
+                formatter.assertParameter('brightness', f"{modifier.brightness-1:.3f}")
+                formatter.assertParameter('contrast', f"{modifier.contrast:.3f}")
+                return str(formatter)
+            
         ModifierToVideoFilter = {
-            Modifiers.SepiaTone : VideoFilterConstructors.SepiaTone
+            Modifiers.Filters.SepiaTone : VideoFilterConstructors.SepiaTone,
+            Modifiers.Filters.Grayscale : VideoFilterConstructors.Grayscale,
+            Modifiers.Filters.BrightnessContrast : VideoFilterConstructors.BrightnessContrast,
         }
 
         @staticmethod
