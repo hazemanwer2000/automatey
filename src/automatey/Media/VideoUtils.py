@@ -97,6 +97,16 @@ class Modifiers:
             '''
             def __init__(self, kernelSize):
                 self.kernelSize = kernelSize
+                
+        class Sharpen(INTERNAL_Utils.Filter):
+            '''
+            Sharpen.
+            
+            Value(s) are factor(s) (i.e., '1.0' has no effect).
+            '''
+            def __init__(self, factor, kernelSize=5):
+                self.factor = factor
+                self.kernelSize = kernelSize
 
 class INTERNAL_VideoProcessing:
     
@@ -240,6 +250,7 @@ class INTERNAL_VideoProcessing:
                 'Grayscale' : ProcessUtils.CommandTemplate(r'format=gray'),
                 'BrightnessContrast' : ProcessUtils.CommandTemplate(r'eq=brightness={{{BRIGHTNESS}}}:contrast={{{CONTRAST}}}'),
                 'GaussianBlur' : ProcessUtils.CommandTemplate(r'gblur=sigma={{{SIGMA}}}'),
+                'Sharpen' : ProcessUtils.CommandTemplate(r'unsharp=luma_msize_x={{{KERNEL-SIZE}}}:luma_msize_y={{{KERNEL-SIZE}}}:luma_amount={{{FACTOR}}}'),
             }
             
             @staticmethod
@@ -267,11 +278,20 @@ class INTERNAL_VideoProcessing:
                 formatter.assertParameter('sigma', f"{sigmaValue:.3f}")
                 return str(formatter)
             
+            @staticmethod
+            def Sharpen(modifier:Modifiers.Filters.Sharpen):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Sharpen'].createFormatter()
+                formatter.assertParameter('kernel-size', f"{modifier.kernelSize:d}")
+                formatter.assertParameter('factor', f"{modifier.factor:.3f}")
+                return str(formatter)
+            
         ModifierToVideoFilter = {
+            # Filter(s)
             Modifiers.Filters.SepiaTone : VideoFilterConstructors.SepiaTone,
             Modifiers.Filters.Grayscale : VideoFilterConstructors.Grayscale,
             Modifiers.Filters.BrightnessContrast : VideoFilterConstructors.BrightnessContrast,
             Modifiers.Filters.GaussianBlur : VideoFilterConstructors.GaussianBlur,
+            Modifiers.Filters.Sharpen : VideoFilterConstructors.Sharpen,
         }
 
         @staticmethod
@@ -416,6 +436,7 @@ class INTERNAL_VideoProcessing:
             
             return [str(command_GIFGenerate)], f_gifTmpDst
         
+        # 'Trim' action not included, since it is technically a sub-action.
         ActionToProcessor = {
             Actions.Join : processJoinAction,
             Actions.GIF : processGIFAction,
