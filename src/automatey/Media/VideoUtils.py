@@ -238,7 +238,7 @@ class INTERNAL_VideoProcessing:
         }
         
         @staticmethod
-        def processTrimAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, trimAction:Actions.Trim, generalInfo:dict) -> list:
+        def processTrimAction(f_src:FileUtils.File, f_tmpBase:FileUtils.File, trimAction:Actions.Trim, generalInfo:dict) -> list:
             commandList = []
             
             if (trimAction.isNearestKeyframe):
@@ -288,19 +288,20 @@ class INTERNAL_VideoProcessing:
             
             # Check if mute'ing is necessary.
             if trimAction.isMute:
-                f_interTmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpDst)))
-                lastCommand.assertParameter('output-file', str(f_interTmpDst))
+                f_tmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
+                lastCommand.assertParameter('output-file', str(f_tmpDst))
                 commandList.append(str(lastCommand))
                 
                 command_VideoMute = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['VideoMute'].createFormatter()
-                command_VideoMute.assertParameter('input-file', str(f_interTmpDst))
+                command_VideoMute.assertParameter('input-file', str(f_tmpDst))
                 lastCommand = command_VideoMute
             
             # Finalization.
+            f_tmpDst = FileUtils.File(FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)))
             lastCommand.assertParameter('output-file', str(f_tmpDst))
             commandList.append(str(lastCommand))
             
-            return commandList
+            return commandList, f_tmpDst
         
         @staticmethod
         def processJoinAction(f_src:FileUtils.File, f_tmpBase:FileUtils.File, joinAction:Actions.Join, generalInfo:dict) -> list:
@@ -385,16 +386,21 @@ class INTERNAL_VideoProcessing:
                 f_finalTmpDst = f_gifTmpDst
             else:
                 f_finalTmpDst = f_joinTmpDst
-                
+            
             pprint(commandList, width=400)
-            return
             
-            # Execute command-list.
-            INTERNAL_VideoProcessing.FFMPEGWrapper.executeCommands(commandList)
-            
-            # Copy into (actual) destination, and delete temporary directory.
-            FileUtils.File.Utils.copyFile(f_finalTmpDst, f_dst)
-            FileUtils.File.Utils.recycle(f_tmpDir)
+            try:
+                # Execute command-list.
+                INTERNAL_VideoProcessing.FFMPEGWrapper.executeCommands(commandList)
+                
+                # Copy into (actual) destination, and delete temporary directory.
+                FileUtils.File.Utils.copyFile(f_finalTmpDst, f_dst)
+                FileUtils.File.Utils.recycle(f_tmpDir)
+                
+            except ExceptionUtils.BackendError as e:
+                # Delete temporary directory, before propagating error.
+                FileUtils.File.Utils.recycle(f_tmpDir)
+                raise
             
         @staticmethod
         def executeCommands(commandList):
