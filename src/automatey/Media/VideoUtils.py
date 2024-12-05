@@ -100,13 +100,26 @@ class Modifiers:
                 
         class Sharpen(INTERNAL_Utils.Filter):
             '''
-            Sharpen.
+            Pixelate.
             
             Value(s) are factor(s) (i.e., '1.0' has no effect).
+            
+            (Optional) Kernel-size must be odd.
             '''
             def __init__(self, factor, kernelSize=5):
                 self.factor = factor
                 self.kernelSize = kernelSize
+                
+        class Pixelate(INTERNAL_Utils.Filter):
+            '''
+            Pixelate.
+            
+            Value(s) are factor(s) (i.e., '1' has no effect).
+            
+            Note that, value(s) should be integer(s).
+            '''
+            def __init__(self, factor):
+                self.factor = factor
 
 class INTERNAL_VideoProcessing:
     
@@ -251,6 +264,7 @@ class INTERNAL_VideoProcessing:
                 'BrightnessContrast' : ProcessUtils.CommandTemplate(r'eq=brightness={{{BRIGHTNESS}}}:contrast={{{CONTRAST}}}'),
                 'GaussianBlur' : ProcessUtils.CommandTemplate(r'gblur=sigma={{{SIGMA}}}'),
                 'Sharpen' : ProcessUtils.CommandTemplate(r'unsharp=luma_msize_x={{{KERNEL-SIZE}}}:luma_msize_y={{{KERNEL-SIZE}}}:luma_amount={{{FACTOR}}}'),
+                'Pixelate' : ProcessUtils.CommandTemplate(r'pixelize=width={{{PIXEL-SIZE}}}:height={{{PIXEL-SIZE}}}'),
             }
             
             @staticmethod
@@ -284,6 +298,12 @@ class INTERNAL_VideoProcessing:
                 formatter.assertParameter('kernel-size', f"{modifier.kernelSize:d}")
                 formatter.assertParameter('factor', f"{modifier.factor:.3f}")
                 return str(formatter)
+
+            @staticmethod
+            def Pixelate(modifier:Modifiers.Filters.Pixelate):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Pixelate'].createFormatter()
+                formatter.assertParameter('pixel-size', f"{modifier.factor:d}")
+                return str(formatter)
             
         ModifierToVideoFilter = {
             # Filter(s)
@@ -292,6 +312,7 @@ class INTERNAL_VideoProcessing:
             Modifiers.Filters.BrightnessContrast : VideoFilterConstructors.BrightnessContrast,
             Modifiers.Filters.GaussianBlur : VideoFilterConstructors.GaussianBlur,
             Modifiers.Filters.Sharpen : VideoFilterConstructors.Sharpen,
+            Modifiers.Filters.Pixelate : VideoFilterConstructors.Pixelate,
         }
 
         @staticmethod
