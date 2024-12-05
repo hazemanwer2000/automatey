@@ -340,12 +340,19 @@ class INTERNAL_VideoProcessing:
             return commandList, f_finalTmpDst
             
         @staticmethod
-        def processGIFAction(f_src:FileUtils.File, f_tmpDst:FileUtils.File, GIFAction:Actions.GIF, generalInfo:dict) -> list:
-            # Create 'GIFGenerate' command
+        def processGIFAction(f_src:FileUtils.File, f_tmpBase:FileUtils.File, GIFAction:Actions.GIF, generalInfo:dict) -> list:
+            
+            f_gifTmpDst = FileUtils.File(
+                FileUtils.File.Utils.Path.modifyName(
+                    FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)),
+                    extension='gif'
+                )
+            )
+            
             command_GIFGenerate = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['GIFGenerate'].createFormatter()
             
             command_GIFGenerate.assertParameter('input-file', str(f_src))
-            command_GIFGenerate.assertParameter('output-file', str(f_tmpDst))
+            command_GIFGenerate.assertParameter('output-file', str(f_gifTmpDst))
             
             captureFPS = GIFAction.captureFPS
             PTSFactor = 1 / GIFAction.playbackFactor
@@ -357,7 +364,7 @@ class INTERNAL_VideoProcessing:
             command_GIFGenerate.assertParameter('width', str(width))
             command_GIFGenerate.assertParameter('height', str(height))
             
-            return [str(command_GIFGenerate)]
+            return [str(command_GIFGenerate)], f_gifTmpDst
         
         @staticmethod
         def processActions(f_src:FileUtils.File, f_dst:FileUtils.File, actions:list, generalInfo:dict):
@@ -366,20 +373,18 @@ class INTERNAL_VideoProcessing:
             commandList = []
             
             # Process (mandatory) 'Join' action.
-            newCommandList, f_joinTmpDst = INTERNAL_VideoProcessing.FFMPEGWrapper.processJoinAction(f_src, f_tmpBase, actions[0], generalInfo)
-            
+            joinAction = actions[0]
+            newCommandList, f_joinTmpDst = INTERNAL_VideoProcessing.FFMPEGWrapper.processJoinAction(f_src, f_tmpBase, joinAction, generalInfo)
+            commandList += newCommandList
             
             # Find, and process 'GIF' action, if present.
             if (len(actions) > 1):
                 GIFAction = actions[1]
-                f_gifTmpDst = FileUtils.File(
-                    FileUtils.File.Utils.Path.modifyName(
-                        FileUtils.File.Utils.Path.randomizeName(str(f_tmpBase)),
-                        extension='gif'
-                    )
-                )
-                commandList += INTERNAL_VideoProcessing.FFMPEGWrapper.processGIFAction(f_finalTmpDst, f_gifTmpDst, GIFAction, generalInfo)
+                newCommandList, f_gifTmpDst = INTERNAL_VideoProcessing.FFMPEGWrapper.processGIFAction(f_joinTmpDst, f_tmpBase, GIFAction, generalInfo)
+                commandList += newCommandList
                 f_finalTmpDst = f_gifTmpDst
+            else:
+                f_finalTmpDst = f_joinTmpDst
                 
             pprint(commandList, width=400)
             return
