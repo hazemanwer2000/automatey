@@ -7,6 +7,7 @@ import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Base.Graphics as Graphics
 
 from pprint import pprint 
 
@@ -120,6 +121,13 @@ class Modifiers:
             '''
             def __init__(self, factor):
                 self.factor = factor
+                
+        class AddBorder(INTERNAL_Utils.Filter):
+            '''
+            Adds a border.
+            '''
+            def __init__(self, border:Graphics.Border):
+                self.border = border
 
 class INTERNAL_VideoProcessing:
     
@@ -265,6 +273,7 @@ class INTERNAL_VideoProcessing:
                 'GaussianBlur' : ProcessUtils.CommandTemplate(r'gblur=sigma={{{SIGMA}}}'),
                 'Sharpen' : ProcessUtils.CommandTemplate(r'unsharp=luma_msize_x={{{KERNEL-SIZE}}}:luma_msize_y={{{KERNEL-SIZE}}}:luma_amount={{{FACTOR}}}'),
                 'Pixelate' : ProcessUtils.CommandTemplate(r'pixelize=width={{{PIXEL-SIZE}}}:height={{{PIXEL-SIZE}}}'),
+                'AddBorder' : ProcessUtils.CommandTemplate(r'pad=iw+{{{THICKNESS}}}*2:ih+{{{THICKNESS}}}*2:{{{THICKNESS}}}:{{{THICKNESS}}}:color={{{COLOR}}}'),
             }
             
             @staticmethod
@@ -305,6 +314,13 @@ class INTERNAL_VideoProcessing:
                 formatter.assertParameter('pixel-size', f"{modifier.factor:d}")
                 return str(formatter)
             
+            @staticmethod
+            def AddBorder(modifier:Modifiers.Filters.AddBorder):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['AddBorder'].createFormatter()
+                formatter.assertParameter('thickness', f"{modifier.border.thickness:d}")
+                formatter.assertParameter('color', '0x' + modifier.border.color.asHEX())
+                return str(formatter)
+            
         ModifierToVideoFilter = {
             # Filter(s)
             Modifiers.Filters.SepiaTone : VideoFilterConstructors.SepiaTone,
@@ -313,6 +329,7 @@ class INTERNAL_VideoProcessing:
             Modifiers.Filters.GaussianBlur : VideoFilterConstructors.GaussianBlur,
             Modifiers.Filters.Sharpen : VideoFilterConstructors.Sharpen,
             Modifiers.Filters.Pixelate : VideoFilterConstructors.Pixelate,
+            Modifiers.Filters.AddBorder : VideoFilterConstructors.AddBorder,
         }
 
         @staticmethod
