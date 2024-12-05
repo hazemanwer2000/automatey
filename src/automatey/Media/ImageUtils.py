@@ -10,64 +10,7 @@ import numpy as np
 
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
-import automatey.Base.ColorUtils as ColorUtils
-
-class Point:
-    '''
-    Representation of a point.
-    '''
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-class Border:
-    '''
-    Representation of a border.
-    '''
-    def __init__(self, thickness:int, color:ColorUtils.Color):
-        self.thickness = thickness
-        self.color = color
-    
-class Drawable:
-    pass
-
-class INTERNAL_Shape(Drawable):
-    '''
-    (Abstract) Representation of a shape.
-    '''
-    def __init__(self, fillColor:ColorUtils.Color, border:Border):
-        self.fillColor = fillColor
-        self.border = border
-        if (self.border == None):
-            self.border = Border(0, self.fillColor)
-
-class INTERNAL_Line(Drawable):
-    '''
-    (Abstract) Representation of a line.
-    '''
-    def __init__(self, thickness:int, color:ColorUtils.Color):
-        self.thickness = thickness
-        self.color = color
-
-class Drawables:
-
-    class Rectangle(INTERNAL_Shape):
-        '''
-        Representation of a rectangle.
-        '''
-        def __init__(self, fillColor:ColorUtils.Color, border:Border, topLeft:Point, bottomRight:Point):
-            INTERNAL_Shape.__init__(self, fillColor=fillColor, border=border)
-            self.topLeft = topLeft
-            self.bottomRight = bottomRight
-
-    class RectangularLine(INTERNAL_Line):
-        '''
-        Representation of a rectangular line.
-        '''
-        def __init__(self, thickness:int, color:ColorUtils.Color, topLeft:Point, bottomRight:Point):
-            INTERNAL_Line.__init__(self, thickness, color)
-            self.topLeft = topLeft
-            self.bottomRight = bottomRight
+import automatey.Base.Graphics as Graphics
 
 class INTERNAL_FrameProcessing:
     '''
@@ -124,7 +67,7 @@ class INTERNAL_FrameProcessing:
             return imgHandler
 
         @staticmethod
-        def addBorder(imgHandler, border:Border):
+        def addBorder(imgHandler, border:Graphics.Border):
             '''
             Adds a border.
             '''
@@ -138,7 +81,7 @@ class INTERNAL_FrameProcessing:
             return cv2.imread(str(f))
 
         @staticmethod
-        def convertRGBtoBGR(color:ColorUtils.Color):
+        def convertRGBtoBGR(color:Graphics.Color):
             Rvalue, Gvalue, Bvalue = color.asRGB()
             return (Bvalue, Gvalue, Rvalue)
         
@@ -258,7 +201,7 @@ class INTERNAL_FrameProcessing:
             return imgHandler
 
         @staticmethod
-        def crop(imgHandler, topLeft:Point, bottomRight:Point):
+        def crop(imgHandler, topLeft:Graphics.Point, bottomRight:Graphics.Point):
             '''
             Crop.
             
@@ -274,7 +217,7 @@ class INTERNAL_FrameProcessing:
             return imgHandler
         
         @staticmethod
-        def overlayRectangle(imgHandler, rectangle:Drawables.Rectangle):
+        def overlayRectangle(imgHandler, rectangle:Graphics.Rectangle):
             x1 = rectangle.topLeft.x - 1
             x2 = rectangle.bottomRight.x - 1
             
@@ -282,26 +225,17 @@ class INTERNAL_FrameProcessing:
             y2 = rectangle.bottomRight.y - 1
             
             borderColor = INTERNAL_FrameProcessing.CV2Wrapper.convertRGBtoBGR(rectangle.border.color)
-            fillColor = INTERNAL_FrameProcessing.CV2Wrapper.convertRGBtoBGR(rectangle.fillColor)
             
-            imgHandler = cv2.rectangle(imgHandler, (x1, y1), (x2, y2), borderColor, -1)
-            imgHandler = cv2.rectangle(imgHandler, 
-                                       (x1+rectangle.border.thickness, y1+rectangle.border.thickness),
-                                       (x2-rectangle.border.thickness, y2-rectangle.border.thickness),
-                                       fillColor, -1)
-            return imgHandler
-        
-        @staticmethod
-        def overlayRectangularLine(imgHandler, rectangularLine:Drawables.RectangularLine):
-            x1 = rectangularLine.topLeft.x - 1
-            x2 = rectangularLine.bottomRight.x - 1
-            
-            y1 = rectangularLine.topLeft.y - 1
-            y2 = rectangularLine.bottomRight.y - 1
-            
-            color = INTERNAL_FrameProcessing.CV2Wrapper.convertRGBtoBGR(rectangularLine.color)
-            
-            imgHandler = cv2.rectangle(imgHandler, (x1, y1), (x2, y2), color, rectangularLine.thickness)
+            if rectangle.fillColor == Graphics.Colors.TRANSPARENT:
+                imgHandler = cv2.rectangle(imgHandler, (x1, y1), (x2, y2), borderColor, rectangle.border.thickness)
+            else:
+                fillColor = INTERNAL_FrameProcessing.CV2Wrapper.convertRGBtoBGR(rectangle.fillColor)
+                imgHandler = cv2.rectangle(imgHandler, (x1, y1), (x2, y2), borderColor, -1)
+                imgHandler = cv2.rectangle(imgHandler, 
+                                        (x1+rectangle.border.thickness, y1+rectangle.border.thickness),
+                                        (x2-rectangle.border.thickness, y2-rectangle.border.thickness),
+                                        fillColor, -1)
+                
             return imgHandler
         
         @staticmethod
@@ -310,8 +244,7 @@ class INTERNAL_FrameProcessing:
             Add a drawable (e.g., Rectangle).
             '''
             fcnDict = {
-                Drawables.Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangle,
-                Drawables.RectangularLine: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangularLine,
+                Graphics.Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangle,
             }
             return fcnDict[type(shape)](imgHandler, shape)
 
@@ -468,7 +401,7 @@ class Image:
         '''
         self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.pixelate(self.imgHandler, factor)
 
-    def addBorder(self, border:Border):
+    def addBorder(self, border:Graphics.Border):
         '''
         Adds a border.
         '''
@@ -476,7 +409,7 @@ class Image:
         pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.addBorder(pillowImgHandler, border)
         self.imgHandler = INTERNAL_FrameConversion.PillowToCV2(pillowImgHandler)
     
-    def crop(self, topLeft:Point, bottomRight:Point):
+    def crop(self, topLeft:Graphics.Point, bottomRight:Graphics.Point):
         '''
         Crop.
         
@@ -484,7 +417,7 @@ class Image:
         '''
         self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.crop(self.imgHandler, topLeft, bottomRight)
         
-    def overlayDrawable(self, shape:Drawable):
+    def overlayDrawable(self, shape):
         '''
         Add a drawable (e.g., Rectangle).
         '''
@@ -663,13 +596,13 @@ class GIF:
         '''
         self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.pixelate, factor)
 
-    def addBorder(self, border:Border):
+    def addBorder(self, border:Graphics.Border):
         '''
         Adds a border.
         '''
         self.INTERNAL_PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.addBorder, border)
     
-    def crop(self, topLeft:Point, bottomRight:Point):
+    def crop(self, topLeft:Graphics.Point, bottomRight:Graphics.Point):
         '''
         Crop.
         
