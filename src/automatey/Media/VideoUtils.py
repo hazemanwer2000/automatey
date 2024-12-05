@@ -90,6 +90,13 @@ class Modifiers:
             def __init__(self, brightness=1.0, contrast=1.0):
                 self.brightness = brightness
                 self.contrast = contrast
+        
+        class GaussianBlur(INTERNAL_Utils.Filter):
+            '''
+            Applies gaussian blur.
+            '''
+            def __init__(self, kernelSize):
+                self.kernelSize = kernelSize
 
 class INTERNAL_VideoProcessing:
     
@@ -229,16 +236,21 @@ class INTERNAL_VideoProcessing:
         class VideoFilterConstructors:
             
             FilterTemplates = {
+                'SepiaTone' : ProcessUtils.CommandTemplate(r'colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131'),
+                'Grayscale' : ProcessUtils.CommandTemplate(r'format=gray'),
                 'BrightnessContrast' : ProcessUtils.CommandTemplate(r'eq=brightness={{{BRIGHTNESS}}}:contrast={{{CONTRAST}}}'),
+                'GaussianBlur' : ProcessUtils.CommandTemplate(r'gblur=sigma={{{SIGMA}}}'),
             }
             
             @staticmethod
             def SepiaTone(modifier:Modifiers.Filters.SepiaTone):
-                return 'colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131'
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['SepiaTone'].createFormatter()
+                return str(formatter)
             
             @staticmethod
             def Grayscale(modifier:Modifiers.Filters.Grayscale):
-                return 'format=gray'
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Grayscale'].createFormatter()
+                return str(formatter)
             
             @staticmethod
             def BrightnessContrast(modifier:Modifiers.Filters.BrightnessContrast):
@@ -247,10 +259,19 @@ class INTERNAL_VideoProcessing:
                 formatter.assertParameter('contrast', f"{modifier.contrast:.3f}")
                 return str(formatter)
             
+            @staticmethod
+            def GaussianBlur(modifier:Modifiers.Filters.GaussianBlur):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['GaussianBlur'].createFormatter()
+                # Sigma value is calibrated (Kernel-Size=3, Sigma-Value=0.5)
+                sigmaValue = modifier.kernelSize * (0.5 / 3)
+                formatter.assertParameter('sigma', f"{sigmaValue:.3f}")
+                return str(formatter)
+            
         ModifierToVideoFilter = {
             Modifiers.Filters.SepiaTone : VideoFilterConstructors.SepiaTone,
             Modifiers.Filters.Grayscale : VideoFilterConstructors.Grayscale,
             Modifiers.Filters.BrightnessContrast : VideoFilterConstructors.BrightnessContrast,
+            Modifiers.Filters.GaussianBlur : VideoFilterConstructors.GaussianBlur,
         }
 
         @staticmethod
