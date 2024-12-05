@@ -15,40 +15,20 @@ class Quality:
     class HIGH: pass
     class AVERAGE: pass
 
-class Action:
-    pass
+class INTERNAL_Utils:    
 
-class Modifier:
-    pass
-
-class Filter(Modifier):
-    pass
-
-class Transition(Modifier):
-    pass
-
-class Scalar(Modifier):
-    pass
-
-class AudioModifier:
-    pass
-
-class AudioTransition(AudioModifier):
-    pass
+    class Action:
+        pass
+    
+    class Modifier:
+        pass
+    
+    class Filter(Modifier):
+        pass
 
 class Actions:
 
-    class Modifiers:
-        
-        class Filters:
-            
-            class SepiaTone(Filter):
-                pass
-            
-            class Grayscale(Filter):
-                pass
-
-    class Trim(Action):
+    class Trim(INTERNAL_Utils.Action):
         '''
         Trim sequence.
         '''
@@ -66,7 +46,7 @@ class Actions:
             self.quality = quality
             self.modifiers = [] if (modifiers == None) else modifiers
 
-    class Join(Action):
+    class Join(INTERNAL_Utils.Action):
         '''
         Join sequence(s).
         '''
@@ -74,7 +54,7 @@ class Actions:
         def __init__(self, *trimActions):
             self.trimActions = trimActions
             
-    class GIF(Action):
+    class GIF(INTERNAL_Utils.Action):
         '''
         Output is a GIF.
         
@@ -162,7 +142,12 @@ class INTERNAL_VideoProcessing:
                 r'{{{INPUT-FILE}}}',
             )
         }
-        
+
+        QualityToCRF = {
+            Quality.AVERAGE : Constants['AverageCRF'],
+            Quality.HIGH : Constants['HighCRF'],
+        }
+
         @staticmethod
         def queryInfo(f_src:FileUtils.File, commandName) -> str:
             '''
@@ -231,11 +216,6 @@ class INTERNAL_VideoProcessing:
         @staticmethod
         def deriveAudioFilters(modifiers):
             return ''
-        
-        QualityToCRF = {
-            Quality.AVERAGE : Constants['AverageCRF'],
-            Quality.HIGH : Constants['HighCRF'],
-        }
         
         @staticmethod
         def processTrimAction(f_src:FileUtils.File, f_tmpBase:FileUtils.File, trimAction:Actions.Trim, generalInfo:dict) -> list:
@@ -367,25 +347,22 @@ class INTERNAL_VideoProcessing:
             
             return [str(command_GIFGenerate)], f_gifTmpDst
         
+        ActionToProcessor = {
+            Actions.Join : processJoinAction,
+            Actions.GIF : processGIFAction,
+        }
+        
         @staticmethod
         def processActions(f_src:FileUtils.File, f_dst:FileUtils.File, actions:list, generalInfo:dict):
             f_tmpDir = FileUtils.File.Utils.getTemporaryDirectory()
             f_tmpBase = f_tmpDir.traverseDirectory(f_src.getName())
             commandList = []
             
-            # Process (mandatory) 'Join' action.
-            joinAction = actions[0]
-            newCommandList, f_joinTmpDst = INTERNAL_VideoProcessing.FFMPEGWrapper.processJoinAction(f_src, f_tmpBase, joinAction, generalInfo)
-            commandList += newCommandList
-            
-            # Find, and process 'GIF' action, if present.
-            if (len(actions) > 1):
-                GIFAction = actions[1]
-                newCommandList, f_gifTmpDst = INTERNAL_VideoProcessing.FFMPEGWrapper.processGIFAction(f_joinTmpDst, f_tmpBase, GIFAction, generalInfo)
+            f_finalTmpDst = f_src
+            for action in actions:
+                actionProcessor = INTERNAL_VideoProcessing.FFMPEGWrapper.ActionToProcessor[type(action)]
+                newCommandList, f_finalTmpDst = actionProcessor(f_finalTmpDst, f_tmpBase, action, generalInfo)
                 commandList += newCommandList
-                f_finalTmpDst = f_gifTmpDst
-            else:
-                f_finalTmpDst = f_joinTmpDst
             
             pprint(commandList, width=400)
             
@@ -429,14 +406,14 @@ class Video:
     def getDimensions(self):
         return (self.generalInfo['width'], self.generalInfo['height'])
         
-    def registerAction(self, action:Action):
+    def registerAction(self, action):
         '''
         Register an action.
         
         Note,
         - Only a single 'Join' (mandatory), which consists of one or more 'Trim' action(s), and a 'GIF' (optional) are supported.
         - Modifier(s) may be applied to 'Trim' action(s).
-        - All action(s) are order sensitive.
+        - All action(s) and modifier(s) are order-sensitive.
         '''
         self.actions.append(action)
     
