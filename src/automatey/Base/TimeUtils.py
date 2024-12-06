@@ -6,6 +6,7 @@ class Constants:
     US_IN_HOUR = 3600000000
     US_IN_MINUTE = 60000000
     US_IN_SECOND = 1000000
+    US_IN_MS = 1000
 
 class Time:
     '''
@@ -58,6 +59,9 @@ class Time:
     
     def toSeconds(self) -> float:
         return (self.microseconds / Constants.US_IN_SECOND)
+
+    def toMilliseconds(self) -> float:
+        return (self.microseconds / Constants.US_IN_MS)
     
     def __add__(self, obj):
         return Time(self.microseconds + obj.microseconds)
@@ -87,4 +91,12 @@ class Time:
         Create from second(s).
         '''
         total_us = int(seconds*Constants.US_IN_SECOND)
+        return Time(total_us)
+
+    @staticmethod
+    def createFromMilliseconds(milliseconds:float):
+        '''
+        Create from milli-second(s).
+        '''
+        total_us = int(milliseconds*Constants.US_IN_MS)
         return Time(total_us)

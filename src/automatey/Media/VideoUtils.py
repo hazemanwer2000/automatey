@@ -156,7 +156,14 @@ class Modifiers:
         
         class FadeIn(INTERNAL_Utils.Transition):
             '''
-            Apply Fade-in (from black) effect.
+            Apply fade-in (from black) effect.
+            '''
+            def __init__(self, duration:TimeUtils.Time):
+                self.duration = duration
+
+        class FadeOut(INTERNAL_Utils.Transition):
+            '''
+            Apply fade-out (to black) effect.
             '''
             def __init__(self, duration:TimeUtils.Time):
                 self.duration = duration
@@ -311,6 +318,7 @@ class INTERNAL_VideoProcessing:
                 'Resize' : ProcessUtils.CommandTemplate(r'scale={{{WIDTH}}}:{{{HEIGHT}}}'),
                 # Transition(s)
                 'FadeIn' : ProcessUtils.CommandTemplate(r'fade=t=in:st=0:d={{{DURATION}}}'),
+                'FadeOut' : ProcessUtils.CommandTemplate(r"fade=t=out:st={{{OFFSET}}}):d={{{DURATION}}}"),
             }
             
             @staticmethod
@@ -387,6 +395,11 @@ class INTERNAL_VideoProcessing:
                 durationInSeconds = modifier.duration.toSeconds()
                 formatter.assertParameter('duration', f"{durationInSeconds:.3f}")
                 return str(formatter)
+            
+            @staticmethod
+            def FadeOut(modifier:Modifiers.Transitions.FadeOut):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['FadeOut'].createFormatter()
+                return str(formatter)
     
         ModifierToVideoFilter = {
             # Filter(s)
@@ -401,6 +414,7 @@ class INTERNAL_VideoProcessing:
             Modifiers.Filters.Resize : VideoFilterConstructors.Resize,
             # Transition(s)
             Modifiers.Transitions.FadeIn : VideoFilterConstructors.FadeIn,
+            Modifiers.Transitions.FadeOut : VideoFilterConstructors.FadeOut,
         }
 
         @staticmethod
