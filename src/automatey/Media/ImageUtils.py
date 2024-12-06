@@ -10,7 +10,7 @@ import numpy as np
 
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
-import automatey.Base.Graphics as Graphics
+import automatey.Abstract.Graphics as Graphics
 
 class INTERNAL_FrameProcessing:
     '''

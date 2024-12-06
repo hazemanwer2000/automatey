@@ -7,7 +7,7 @@ import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Base.ExceptionUtils as ExceptionUtils
-import automatey.Base.Graphics as Graphics
+import automatey.Abstract.Graphics as Graphics
 
 from pprint import pprint 
 
