@@ -128,6 +128,16 @@ class Modifiers:
             '''
             def __init__(self, border:Graphics.Border):
                 self.border = border
+                
+        class Crop(INTERNAL_Utils.Filter):
+            '''
+            Crop.
+            
+            Note that (1, 1) specifies the pixel at the top-left corner.
+            '''
+            def __init__(self, topLeft:Graphics.Point, bottomRight:Graphics.Point):
+                self.topLeft = topLeft
+                self.bottomRight = bottomRight
 
 class INTERNAL_VideoProcessing:
     
@@ -274,6 +284,7 @@ class INTERNAL_VideoProcessing:
                 'Sharpen' : ProcessUtils.CommandTemplate(r'unsharp=luma_msize_x={{{KERNEL-SIZE}}}:luma_msize_y={{{KERNEL-SIZE}}}:luma_amount={{{FACTOR}}}'),
                 'Pixelate' : ProcessUtils.CommandTemplate(r'pixelize=width={{{PIXEL-SIZE}}}:height={{{PIXEL-SIZE}}}'),
                 'AddBorder' : ProcessUtils.CommandTemplate(r'pad=iw+{{{THICKNESS}}}*2:ih+{{{THICKNESS}}}*2:{{{THICKNESS}}}:{{{THICKNESS}}}:color={{{COLOR}}}'),
+                'Crop' : ProcessUtils.CommandTemplate(r'crop={{{WIDTH}}}:{{{HEIGHT}}}:{{{X}}}:{{{Y}}}'), 
             }
             
             @staticmethod
@@ -321,6 +332,22 @@ class INTERNAL_VideoProcessing:
                 formatter.assertParameter('color', '0x' + modifier.border.color.asHEX())
                 return str(formatter)
             
+            @staticmethod
+            def Crop(modifier:Modifiers.Filters.Crop):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Crop'].createFormatter()
+                
+                x = modifier.topLeft.x - 1
+                y = modifier.topLeft.y - 1
+                width = modifier.bottomRight.x - modifier.topLeft.x + 1
+                height = modifier.bottomRight.y - modifier.topLeft.y + 1
+                
+                formatter.assertParameter('width', str(width))
+                formatter.assertParameter('height', str(height))
+                formatter.assertParameter('x', str(x))
+                formatter.assertParameter('y', str(y))
+                
+                return str(formatter)
+            
         ModifierToVideoFilter = {
             # Filter(s)
             Modifiers.Filters.SepiaTone : VideoFilterConstructors.SepiaTone,
@@ -330,6 +357,7 @@ class INTERNAL_VideoProcessing:
             Modifiers.Filters.Sharpen : VideoFilterConstructors.Sharpen,
             Modifiers.Filters.Pixelate : VideoFilterConstructors.Pixelate,
             Modifiers.Filters.AddBorder : VideoFilterConstructors.AddBorder,
+            Modifiers.Filters.Crop : VideoFilterConstructors.Crop,
         }
 
         @staticmethod
