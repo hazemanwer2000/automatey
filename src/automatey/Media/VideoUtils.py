@@ -33,6 +33,9 @@ class INTERNAL_Utils:
     class AudioModifier:
         pass
 
+    class AudioTransition(AudioModifier):
+        pass
+
 class Actions:
 
     class Trim(INTERNAL_Utils.Action):
@@ -164,6 +167,24 @@ class Modifiers:
         class FadeOut(INTERNAL_Utils.Transition):
             '''
             Apply fade-out (to black) effect.
+            '''
+            def __init__(self, duration:TimeUtils.Time):
+                self.duration = duration
+
+class AudioModifiers:
+    
+    class Transitions:
+        
+        class FadeIn(INTERNAL_Utils.AudioTransition):
+            '''
+            Apply fade-in effect.
+            '''
+            def __init__(self, duration:TimeUtils.Time):
+                self.duration = duration
+
+        class FadeOut(INTERNAL_Utils.AudioTransition):
+            '''
+            Apply fade-out effect.
             '''
             def __init__(self, duration:TimeUtils.Time):
                 self.duration = duration
@@ -437,10 +458,48 @@ class INTERNAL_VideoProcessing:
                 filterConstructor = INTERNAL_VideoProcessing.FFMPEGWrapper.ModifierToVideoFilter[type(modifier)]
                 filters.append(filterConstructor(modifier, generalInfo, specificInfo))
             return ','.join(filters)
+
+        class AudioFilterConstructors:
+            
+            FilterTemplates = {
+                # Transition(s)
+                'FadeIn' : ProcessUtils.CommandTemplate(r'afade=t=in:st=0:d={{{DURATION}}}'),
+                'FadeOut' : ProcessUtils.CommandTemplate(r"afade=t=out:st={{{OFFSET}}}:d={{{DURATION}}}"),
+            }
+
+            @staticmethod
+            def FadeIn(modifier:AudioModifiers.Transitions.FadeIn, generalInfo, specificInfo):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.AudioFilterConstructors.FilterTemplates['FadeIn'].createFormatter()
+                durationInSeconds = modifier.duration.toSeconds()
+                formatter.assertParameter('duration', f"{durationInSeconds:.3f}")
+                return str(formatter)
+            
+            @staticmethod
+            def FadeOut(modifier:AudioModifiers.Transitions.FadeOut, generalInfo, specificInfo):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.AudioFilterConstructors.FilterTemplates['FadeOut'].createFormatter()
+                
+                offsetTime:TimeUtils.Time = specificInfo['duration'] - modifier.duration
+                offsetInSeconds = offsetTime.toSeconds()
+                durationInSeconds = modifier.duration.toSeconds()
+                
+                formatter.assertParameter('offset', f"{offsetInSeconds:.3f}")
+                formatter.assertParameter('duration', f"{durationInSeconds:.3f}")
+                
+                return str(formatter)
+    
+        ModifierToAudioFilter = {
+            # Transition(s)
+            AudioModifiers.Transitions.FadeIn : AudioFilterConstructors.FadeIn,
+            AudioModifiers.Transitions.FadeOut : AudioFilterConstructors.FadeOut,
+        }
         
         @staticmethod
         def deriveAudioFilters(modifiers, generalInfo, specificInfo):
-            return ''
+            filters = []
+            for modifier in modifiers:
+                filterConstructor = INTERNAL_VideoProcessing.FFMPEGWrapper.ModifierToAudioFilter[type(modifier)]
+                filters.append(filterConstructor(modifier, generalInfo, specificInfo))
+            return ','.join(filters)
         
         @staticmethod
         def processTrimAction(f_src:FileUtils.File, f_tmpBase:FileUtils.File, trimAction:Actions.Trim, generalInfo:dict) -> list:
