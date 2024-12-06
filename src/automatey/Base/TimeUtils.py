@@ -7,6 +7,7 @@ class Constants:
     US_IN_MINUTE = 60000000
     US_IN_SECOND = 1000000
     US_IN_MS = 1000
+    MS_IN_SECOND = 1000
 
 class Time:
     '''

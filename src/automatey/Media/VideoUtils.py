@@ -237,7 +237,7 @@ class INTERNAL_VideoProcessing:
                 r'ffprobe',
                 r'-v error',
                 r'-select_streams v:0',
-                r'-show_entries stream=avg_frame_rate,width,height',
+                r'-show_entries stream=avg_frame_rate,width,height,duration',
                 r'-of default=noprint_wrappers=1',
                 r'{{{INPUT-FILE}}}',
             )
@@ -267,15 +267,19 @@ class INTERNAL_VideoProcessing:
         GeneralInfoFieldSpecification = {
             'width' : {
                 'label' : 'width',
-                'formatter' : lambda x: int(eval(x))
+                'formatter' : lambda x: int(x)
             },
             'height' : {
                 'label' : 'height',
-                'formatter' : lambda x: int(eval(x))
+                'formatter' : lambda x: int(x)
             },
             'avg_frame_rate' : {
                 'label' : 'fps',
                 'formatter' : lambda x: float(eval(x))
+            },
+            'duration' : {
+                'label' : 'duration',
+                'formatter' : lambda x: TimeUtils.Time.createFromSeconds(float(x))
             }
         }
         
@@ -296,6 +300,7 @@ class INTERNAL_VideoProcessing:
             result = result.strip()
             result = StringUtils.Regex.replaceAll(r'\s+', ' ', result)
             fields = result.split(' ')
+            
             for field in fields:
                 fieldName, fieldValue = field.split('=')
                 fieldSpecification = INTERNAL_VideoProcessing.FFMPEGWrapper.GeneralInfoFieldSpecification[fieldName]
@@ -615,6 +620,9 @@ class Video:
         
     def getFPS(self):
         return self.generalInfo['fps']
+
+    def getDuration(self) -> TimeUtils.Time:
+        return self.generalInfo['duration']
 
     def getDimensions(self):
         return (self.generalInfo['width'], self.generalInfo['height'])
