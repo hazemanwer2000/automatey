@@ -323,28 +323,28 @@ class INTERNAL_VideoProcessing:
                 'Resize' : ProcessUtils.CommandTemplate(r'scale={{{WIDTH}}}:{{{HEIGHT}}}'),
                 # Transition(s)
                 'FadeIn' : ProcessUtils.CommandTemplate(r'fade=t=in:st=0:d={{{DURATION}}}'),
-                'FadeOut' : ProcessUtils.CommandTemplate(r"fade=t=out:st={{{OFFSET}}}):d={{{DURATION}}}"),
+                'FadeOut' : ProcessUtils.CommandTemplate(r"fade=t=out:st={{{OFFSET}}}:d={{{DURATION}}}"),
             }
             
             @staticmethod
-            def SepiaTone(modifier:Modifiers.Filters.SepiaTone):
+            def SepiaTone(modifier:Modifiers.Filters.SepiaTone, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['SepiaTone'].createFormatter()
                 return str(formatter)
             
             @staticmethod
-            def Grayscale(modifier:Modifiers.Filters.Grayscale):
+            def Grayscale(modifier:Modifiers.Filters.Grayscale, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Grayscale'].createFormatter()
                 return str(formatter)
             
             @staticmethod
-            def BrightnessContrast(modifier:Modifiers.Filters.BrightnessContrast):
+            def BrightnessContrast(modifier:Modifiers.Filters.BrightnessContrast, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['BrightnessContrast'].createFormatter()
                 formatter.assertParameter('brightness', f"{modifier.brightness-1:.3f}")
                 formatter.assertParameter('contrast', f"{modifier.contrast:.3f}")
                 return str(formatter)
             
             @staticmethod
-            def GaussianBlur(modifier:Modifiers.Filters.GaussianBlur):
+            def GaussianBlur(modifier:Modifiers.Filters.GaussianBlur, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['GaussianBlur'].createFormatter()
                 # Sigma value is calibrated (Kernel-Size=3, Sigma-Value=0.5)
                 sigmaValue = modifier.kernelSize * (0.5 / 3)
@@ -352,27 +352,27 @@ class INTERNAL_VideoProcessing:
                 return str(formatter)
             
             @staticmethod
-            def Sharpen(modifier:Modifiers.Filters.Sharpen):
+            def Sharpen(modifier:Modifiers.Filters.Sharpen, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Sharpen'].createFormatter()
                 formatter.assertParameter('kernel-size', f"{modifier.kernelSize:d}")
                 formatter.assertParameter('factor', f"{modifier.factor:.3f}")
                 return str(formatter)
 
             @staticmethod
-            def Pixelate(modifier:Modifiers.Filters.Pixelate):
+            def Pixelate(modifier:Modifiers.Filters.Pixelate, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Pixelate'].createFormatter()
                 formatter.assertParameter('pixel-size', f"{modifier.factor:d}")
                 return str(formatter)
             
             @staticmethod
-            def AddBorder(modifier:Modifiers.Filters.AddBorder):
+            def AddBorder(modifier:Modifiers.Filters.AddBorder, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['AddBorder'].createFormatter()
                 formatter.assertParameter('thickness', f"{modifier.border.thickness:d}")
                 formatter.assertParameter('color', '0x' + modifier.border.color.asHEX())
                 return str(formatter)
             
             @staticmethod
-            def Crop(modifier:Modifiers.Filters.Crop):
+            def Crop(modifier:Modifiers.Filters.Crop, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Crop'].createFormatter()
                 
                 x = modifier.topLeft.x - 1
@@ -388,22 +388,30 @@ class INTERNAL_VideoProcessing:
                 return str(formatter)
             
             @staticmethod
-            def Resize(modifier:Modifiers.Filters.Resize):
+            def Resize(modifier:Modifiers.Filters.Resize, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Resize'].createFormatter()
                 formatter.assertParameter('width', str(modifier.width))
                 formatter.assertParameter('height', str(modifier.height))
                 return str(formatter)
 
             @staticmethod
-            def FadeIn(modifier:Modifiers.Transitions.FadeIn):
+            def FadeIn(modifier:Modifiers.Transitions.FadeIn, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['FadeIn'].createFormatter()
                 durationInSeconds = modifier.duration.toSeconds()
                 formatter.assertParameter('duration', f"{durationInSeconds:.3f}")
                 return str(formatter)
             
             @staticmethod
-            def FadeOut(modifier:Modifiers.Transitions.FadeOut):
+            def FadeOut(modifier:Modifiers.Transitions.FadeOut, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['FadeOut'].createFormatter()
+                
+                offsetTime:TimeUtils.Time = specificInfo['duration'] - modifier.duration
+                offsetInSeconds = offsetTime.toSeconds()
+                durationInSeconds = modifier.duration.toSeconds()
+                
+                formatter.assertParameter('offset', f"{offsetInSeconds:.3f}")
+                formatter.assertParameter('duration', f"{durationInSeconds:.3f}")
+                
                 return str(formatter)
     
         ModifierToVideoFilter = {
@@ -423,15 +431,15 @@ class INTERNAL_VideoProcessing:
         }
 
         @staticmethod
-        def deriveVideoFilters(modifiers):
+        def deriveVideoFilters(modifiers, generalInfo, specificInfo):
             filters = []
             for modifier in modifiers:
                 filterConstructor = INTERNAL_VideoProcessing.FFMPEGWrapper.ModifierToVideoFilter[type(modifier)]
-                filters.append(filterConstructor(modifier))
+                filters.append(filterConstructor(modifier, generalInfo, specificInfo))
             return ','.join(filters)
         
         @staticmethod
-        def deriveAudioFilters(modifiers):
+        def deriveAudioFilters(modifiers, generalInfo, specificInfo):
             return ''
         
         @staticmethod
@@ -456,6 +464,7 @@ class INTERNAL_VideoProcessing:
                 duration = trimAction.endTime - startTime
                 command_VideoTrim.assertSection('duration', {'time' : duration.toString(precision=3)})
             else:
+                duration = generalInfo['duration'] - startTime
                 command_VideoTrim.excludeSection('end-time')
             
             # If trimming is not at nearest key-frame, then it is possible to specify filter(s), and CRF value.
@@ -468,8 +477,13 @@ class INTERNAL_VideoProcessing:
                 modifiers = [modifier for modifier in trimAction.modifiers if issubclass(type(modifier), INTERNAL_Utils.Modifier)]
                 audioModifiers = [modifier for modifier in trimAction.modifiers if issubclass(type(modifier), INTERNAL_Utils.AudioModifier)]
                 
-                videoFilters:str = INTERNAL_VideoProcessing.FFMPEGWrapper.deriveVideoFilters(modifiers)
-                audioFilters:str = INTERNAL_VideoProcessing.FFMPEGWrapper.deriveAudioFilters(audioModifiers)
+                # Used to pass specific info (i.e., info specific to this cut of the video).
+                specificInfo = {
+                    'duration' : duration
+                }
+                
+                videoFilters:str = INTERNAL_VideoProcessing.FFMPEGWrapper.deriveVideoFilters(modifiers, generalInfo, specificInfo)
+                audioFilters:str = INTERNAL_VideoProcessing.FFMPEGWrapper.deriveAudioFilters(audioModifiers, generalInfo, specificInfo)
                 
                 if videoFilters == '':
                     command_VideoTrim.excludeSection('video-filter')
