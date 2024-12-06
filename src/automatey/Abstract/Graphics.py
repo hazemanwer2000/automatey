@@ -1,4 +1,6 @@
 
+import automatey.Base.ColorUtils as ColorUtils
+
 class Point:
     '''
     Representation of a point.
@@ -17,7 +19,7 @@ class Border:
     '''
     Representation of a border.
     '''
-    def __init__(self, thickness, color:Color):
+    def __init__(self, thickness, color:ColorUtils.Color):
         self.thickness = thickness
         self.color = color
         
@@ -28,7 +30,7 @@ class Shape:
     If the fill-color is 'None', the shape is internally transparent.
     '''
 
-    def __init__(self, fillColor:Color=Colors.TRANSPARENT, border:Border=None):
+    def __init__(self, fillColor:ColorUtils.Color=ColorUtils.Colors.TRANSPARENT, border:Border=None):
         self.fillColor = fillColor
         self.border = border
         
@@ -40,7 +42,7 @@ class Rectangle(Shape):
     '''
     Representation of a rectangle.
     '''
-    def __init__(self, topLeft:Point, bottomRight:Point, fillColor:Color=Colors.TRANSPARENT, border:Border=None):
+    def __init__(self, topLeft:Point, bottomRight:Point, fillColor:ColorUtils.Color=ColorUtils.Colors.TRANSPARENT, border:Border=None):
         Shape.__init__(self, fillColor=fillColor, border=border)
         self.topLeft = topLeft
         self.bottomRight = bottomRight
