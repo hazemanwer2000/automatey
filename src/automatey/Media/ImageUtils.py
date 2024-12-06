@@ -11,6 +11,7 @@ import numpy as np
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
 import automatey.Abstract.Graphics as Graphics
+import automatey.Base.ColorUtils as ColorUtils
 
 class INTERNAL_FrameProcessing:
     '''
@@ -81,7 +82,7 @@ class INTERNAL_FrameProcessing:
             return cv2.imread(str(f))
 
         @staticmethod
-        def convertRGBtoBGR(color:Graphics.Color):
+        def convertRGBtoBGR(color:ColorUtils.Color):
             Rvalue, Gvalue, Bvalue = color.asRGB()
             return (Bvalue, Gvalue, Rvalue)
         
@@ -226,7 +227,7 @@ class INTERNAL_FrameProcessing:
             
             borderColor = INTERNAL_FrameProcessing.CV2Wrapper.convertRGBtoBGR(rectangle.border.color)
             
-            if rectangle.fillColor == Graphics.Colors.TRANSPARENT:
+            if rectangle.fillColor == ColorUtils.Colors.TRANSPARENT:
                 imgHandler = cv2.rectangle(imgHandler, (x1, y1), (x2, y2), borderColor, rectangle.border.thickness)
             else:
                 fillColor = INTERNAL_FrameProcessing.CV2Wrapper.convertRGBtoBGR(rectangle.fillColor)
