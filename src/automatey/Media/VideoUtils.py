@@ -261,6 +261,15 @@ class INTERNAL_VideoProcessing:
                 r'-show_entries stream=avg_frame_rate,width,height,duration',
                 r'-of default=noprint_wrappers=1',
                 r'{{{INPUT-FILE}}}',
+            ),
+            'QueryKeyframes' : ProcessUtils.CommandTemplate(
+                r'ffprobe',
+                r'-v error',
+                r'-select_streams v:0',
+                r'-show_entries frame=pts_time,pict_type',
+                r'-of csv=print_section=0',
+                r'-skip_frame nokey',
+                r'{{{INPUT-FILE}}}',
             )
         }
 
@@ -328,6 +337,22 @@ class INTERNAL_VideoProcessing:
                 generalInfoDict[fieldSpecification['label']] = fieldSpecification['formatter'](fieldValue)
             
             return generalInfoDict
+
+        @staticmethod
+        def queryKeyframes(f_src:FileUtils.File) -> list:
+            '''
+            Get a list of all key-frame(s).
+            '''
+
+            # Fetch, and extract info from result.
+            result = INTERNAL_VideoProcessing.FFMPEGWrapper.queryInfo(f_src, 'QueryKeyframes')
+            result = result.strip()
+            result = StringUtils.Regex.replaceAll(r'\s+', ' ', result)
+            resultList = result.split(' ')
+            
+            keyframes = [TimeUtils.Time.createFromSeconds(float(x.split(',')[0])) for x in resultList]
+            
+            return keyframes
 
         class VideoFilterConstructors:
             
@@ -696,6 +721,12 @@ class Video:
 
     def getDuration(self) -> TimeUtils.Time:
         return self.generalInfo['duration']
+
+    def getKeyframes(self):
+        '''
+        Get a list of all key-frame(s).
+        '''
+        return INTERNAL_VideoProcessing.FFMPEGWrapper.queryKeyframes(self.f_src)
 
     def getDimensions(self):
         return (self.generalInfo['width'], self.generalInfo['height'])
