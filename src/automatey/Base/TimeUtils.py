@@ -56,6 +56,9 @@ class Time:
         
         return  (hours, minutes, seconds, remaining_us)
     
+    def toSeconds(self) -> float:
+        return (self.microseconds / Constants.US_IN_SECOND)
+    
     def __add__(self, obj):
         return Time(self.microseconds + obj.microseconds)
     
@@ -76,4 +79,12 @@ class Time:
         Create from Time-unit(s).
         '''
         total_us = int((((((hours * 60) + minutes) * 60) + seconds) * Constants.US_IN_SECOND) + microseconds)
+        return Time(total_us)
+
+    @staticmethod
+    def createFromSeconds(seconds:float):
+        '''
+        Create from second(s).
+        '''
+        total_us = int(seconds*Constants.US_IN_SECOND)
         return Time(total_us)

@@ -26,6 +26,9 @@ class INTERNAL_Utils:
     
     class Filter(Modifier):
         pass
+    
+    class Transition(Modifier):
+        pass
 
     class AudioModifier:
         pass
@@ -148,6 +151,15 @@ class Modifiers:
             def __init__(self, width, height):
                 self.width = width
                 self.height = height
+
+    class Transitions:
+        
+        class FadeIn(INTERNAL_Utils.Transition):
+            '''
+            Apply Fade-in (from black) effect.
+            '''
+            def __init__(self, duration:TimeUtils.Time):
+                self.duration = duration
 
 class INTERNAL_VideoProcessing:
     
@@ -287,6 +299,7 @@ class INTERNAL_VideoProcessing:
         class VideoFilterConstructors:
             
             FilterTemplates = {
+                # Filter(s)
                 'SepiaTone' : ProcessUtils.CommandTemplate(r'colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131'),
                 'Grayscale' : ProcessUtils.CommandTemplate(r'format=gray'),
                 'BrightnessContrast' : ProcessUtils.CommandTemplate(r'eq=brightness={{{BRIGHTNESS}}}:contrast={{{CONTRAST}}}'),
@@ -295,7 +308,9 @@ class INTERNAL_VideoProcessing:
                 'Pixelate' : ProcessUtils.CommandTemplate(r'pixelize=width={{{PIXEL-SIZE}}}:height={{{PIXEL-SIZE}}}'),
                 'AddBorder' : ProcessUtils.CommandTemplate(r'pad=iw+{{{THICKNESS}}}*2:ih+{{{THICKNESS}}}*2:{{{THICKNESS}}}:{{{THICKNESS}}}:color={{{COLOR}}}'),
                 'Crop' : ProcessUtils.CommandTemplate(r'crop={{{WIDTH}}}:{{{HEIGHT}}}:{{{X}}}:{{{Y}}}'), 
-                'Resize' : ProcessUtils.CommandTemplate(r'scale={{{WIDTH}}}:{{{HEIGHT}}}'), 
+                'Resize' : ProcessUtils.CommandTemplate(r'scale={{{WIDTH}}}:{{{HEIGHT}}}'),
+                # Transition(s)
+                'FadeIn' : ProcessUtils.CommandTemplate(r'fade=t=in:st=0:d={{{DURATION}}}'),
             }
             
             @staticmethod
@@ -365,7 +380,14 @@ class INTERNAL_VideoProcessing:
                 formatter.assertParameter('width', str(modifier.width))
                 formatter.assertParameter('height', str(modifier.height))
                 return str(formatter)
-            
+
+            @staticmethod
+            def FadeIn(modifier:Modifiers.Transitions.FadeIn):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['FadeIn'].createFormatter()
+                durationInSeconds = modifier.duration.toSeconds()
+                formatter.assertParameter('duration', f"{durationInSeconds:.3f}")
+                return str(formatter)
+    
         ModifierToVideoFilter = {
             # Filter(s)
             Modifiers.Filters.SepiaTone : VideoFilterConstructors.SepiaTone,
@@ -377,6 +399,8 @@ class INTERNAL_VideoProcessing:
             Modifiers.Filters.AddBorder : VideoFilterConstructors.AddBorder,
             Modifiers.Filters.Crop : VideoFilterConstructors.Crop,
             Modifiers.Filters.Resize : VideoFilterConstructors.Resize,
+            # Transition(s)
+            Modifiers.Transitions.FadeIn : VideoFilterConstructors.FadeIn,
         }
 
         @staticmethod
