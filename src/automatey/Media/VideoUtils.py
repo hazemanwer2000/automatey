@@ -139,6 +139,16 @@ class Modifiers:
                 self.topLeft = topLeft
                 self.bottomRight = bottomRight
 
+        class Resize(INTERNAL_Utils.Filter):
+            '''
+            Resize an image, given '(W, H)'.
+            
+            If either set to '-1', aspect ratio is preserved.
+            '''
+            def __init__(self, width, height):
+                self.width = width
+                self.height = height
+
 class INTERNAL_VideoProcessing:
     
     class FFMPEGWrapper:
@@ -285,6 +295,7 @@ class INTERNAL_VideoProcessing:
                 'Pixelate' : ProcessUtils.CommandTemplate(r'pixelize=width={{{PIXEL-SIZE}}}:height={{{PIXEL-SIZE}}}'),
                 'AddBorder' : ProcessUtils.CommandTemplate(r'pad=iw+{{{THICKNESS}}}*2:ih+{{{THICKNESS}}}*2:{{{THICKNESS}}}:{{{THICKNESS}}}:color={{{COLOR}}}'),
                 'Crop' : ProcessUtils.CommandTemplate(r'crop={{{WIDTH}}}:{{{HEIGHT}}}:{{{X}}}:{{{Y}}}'), 
+                'Resize' : ProcessUtils.CommandTemplate(r'scale={{{WIDTH}}}:{{{HEIGHT}}}'), 
             }
             
             @staticmethod
@@ -348,6 +359,13 @@ class INTERNAL_VideoProcessing:
                 
                 return str(formatter)
             
+            @staticmethod
+            def Resize(modifier:Modifiers.Filters.Resize):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Resize'].createFormatter()
+                formatter.assertParameter('width', str(modifier.width))
+                formatter.assertParameter('height', str(modifier.height))
+                return str(formatter)
+            
         ModifierToVideoFilter = {
             # Filter(s)
             Modifiers.Filters.SepiaTone : VideoFilterConstructors.SepiaTone,
@@ -358,6 +376,7 @@ class INTERNAL_VideoProcessing:
             Modifiers.Filters.Pixelate : VideoFilterConstructors.Pixelate,
             Modifiers.Filters.AddBorder : VideoFilterConstructors.AddBorder,
             Modifiers.Filters.Crop : VideoFilterConstructors.Crop,
+            Modifiers.Filters.Resize : VideoFilterConstructors.Resize,
         }
 
         @staticmethod
