@@ -20,6 +20,9 @@ class Color:
     def asHEX(self) -> str:
         '''
         Returns HEX code representation.
+        
+        Note,
+        - '#' is not included at the beginning of the hex-code.
         '''
         return f"{self.R:02x}" + f"{self.G:02x}" + f"{self.B:02x}"
     
@@ -33,6 +36,9 @@ class Color:
     def fromHEX(hexCode:str):
         '''
         Creates 'Color' from HEX code.
+        
+        Note,
+        - '#' is not expected at the beginning of the hex-code.
         '''
         RGBFormat = tuple(int(hexCode[i:i+2], 16) for i in (0, 2, 4))
         return Color(RGBFormat[0],

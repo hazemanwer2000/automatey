@@ -8,7 +8,7 @@ import automatey.OS.FileUtils as FileUtils
 
 class GIcon:
     '''
-    Icon, may be used in all element(s) of the GUI.
+    Icon, may be used with all element(s) of the GUI.
     '''
     
     def __init__(self, qIcon:QtGui.QIcon):
