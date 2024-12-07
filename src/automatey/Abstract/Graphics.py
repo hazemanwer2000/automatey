@@ -1,6 +1,25 @@
 
 import automatey.Base.ColorUtils as ColorUtils
 
+# GUI-oriented
+
+class Margin:
+    '''
+    Representation of a margin.
+    '''
+    
+    def __init__(self, top=0, left=0, bottom=0, right=0):
+        self.top = top
+        self.left = left
+        self.bottom = bottom
+        self.right = right
+        
+    @staticmethod
+    def createSymmetric(value):
+        return Margin(value, value, value, value)
+
+# Drawable(s)
+
 class Point:
     '''
     Representation of a point.
@@ -17,7 +36,7 @@ class Point:
     
 class Border:
     '''
-    Representation of a border.
+    (2D) Representation of a border.
     '''
     def __init__(self, thickness, color:ColorUtils.Color):
         self.thickness = thickness
@@ -25,7 +44,7 @@ class Border:
         
 class Shape:
     '''
-    Representation of a shape.
+    (2D) Representation of a shape.
     
     If the fill-color is 'None', the shape is internally transparent.
     '''
@@ -40,7 +59,7 @@ class Shape:
 
 class Rectangle(Shape):
     '''
-    Representation of a rectangle.
+    (2D) Representation of a rectangle.
     '''
     def __init__(self, topLeft:Point, bottomRight:Point, fillColor:ColorUtils.Color=ColorUtils.Colors.TRANSPARENT, border:Border=None):
         Shape.__init__(self, fillColor=fillColor, border=border)

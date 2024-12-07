@@ -6,6 +6,7 @@ import PyQt6.QtGui as QtGui
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
 import automatey.Base.ColorUtils as ColorUtils
+import automatey.Abstract.Graphics as Graphics
 
 class GLayouts:
     ''''
@@ -18,11 +19,19 @@ class GLayouts:
         A grid (e.g., 2x2) layout. 
         '''
         
-        def __init__(self):
+        def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
             super().__init__()
             
             # PyQt6: It is easier (i.e., compatible with more API(s)) if a layout is within a 'QWidget'.
-            self.setLayout(QtWidgets.QGridLayout())
+            layout = QtWidgets.QGridLayout()
+            self.setLayout(layout)
+            
+            # ? Other setting(s).
+            layout.setContentsMargins(elementMargin.left,
+                                    elementMargin.top,
+                                    elementMargin.right,
+                                    elementMargin.bottom)
+            layout.setSpacing(elementSpacing)
         
         def setElement(self, element, rowIdx, colIdx, rowSpan=1, colSpan=1):
             '''
