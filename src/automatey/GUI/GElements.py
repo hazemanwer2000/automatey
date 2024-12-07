@@ -2,6 +2,7 @@
 # External Libraries
 import PyQt6.QtWidgets as QtWidgets
 import PyQt6.QtGui as QtGui
+from PyQt6.QtCore import Qt
 
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
@@ -16,10 +17,14 @@ class GLayouts:
 
     class GGridLayout(QtWidgets.QWidget):
         '''
-        A grid (e.g., 2x2) layout. 
+        A grid (e.g., 2x2) layout.
+        
+        Note,
+        - By default, all row(s) and column(s) are stretchable.
+        - All index(s) are zero-based.
         '''
         
-        def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
+        def __init__(self, rowCount:int, colCount:int, elementMargin:Graphics.Margin, elementSpacing:int):
             super().__init__()
             
             # PyQt6: It is easier (i.e., compatible with more API(s)) if a layout is within a 'QWidget'.
@@ -32,23 +37,79 @@ class GLayouts:
                                     elementMargin.right,
                                     elementMargin.bottom)
             layout.setSpacing(elementSpacing)
+            
+            # ? Set all row(s) and column(s) as stretchable by default.
+            for i in range(rowCount):
+                layout.setRowStretch(i, 1)
+            for i in range(colCount):
+                layout.setColumnStretch(i, 1)
         
-        def setElement(self, element, rowIdx, colIdx, rowSpan=1, colSpan=1):
+        def GSetElement(self, element, rowIdx, colIdx, rowSpan=1, colSpan=1):
             '''
             Set an element in a specific location within the grid.
             '''
-            self.layout().addWidget(element, rowIdx, colIdx, rowSpan, colSpan)
+            layout:QtWidgets.QGridLayout = self.layout()
+            layout.addWidget(element, rowIdx, colIdx, rowSpan, colSpan)
+        
+        def GSetRowSize(self, rowIdx, size):
+            '''
+            Fix row size (i.e., no longer stretchable).
+            '''
+            layout:QtWidgets.QGridLayout = self.layout()
+            layout.setRowStretch(rowIdx, 0)
+            layout.setRowMinimumHeight(rowIdx, size)
 
-class GColorBlock(QtWidgets.QWidget):
+        def GSetColumnSize(self, colIdx, size):
+            '''
+            Fix column size (i.e., no longer stretchable).
+            '''
+            layout:QtWidgets.QGridLayout = self.layout()
+            layout.setColumnStretch(colIdx, 0)
+            layout.setColumnMinimumWidth(colIdx, size)
+
+class GScrollArea(QtWidgets.QScrollArea):
+    '''
+    Encapsulates any element, to allow for vertical/horizontal scrolling.
+    '''
     
-    def __init__(self, color:ColorUtils.Color):
+    def __init__(self, element,
+                 isVerticalScrollBar=False,
+                 isHorizontalScrollBar=False):
         super().__init__()
         
-        # ? Setting fill-color of widget.
-        self.setAutoFillBackground(True)
-        palette = self.palette()
-        palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor('#' + color.asHEX()))
-        self.setPalette(palette)
+        # ? Set element.
+        self.setWidgetResizable(True)
+        self.setWidget(element)
+        
+        # ? Specify if vertical/horizontal scrolling is always on.
+        
+        verticalScrollBarPolicy = (Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isVerticalScrollBar else (Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        horizontalScrollBarPolicy = (Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isHorizontalScrollBar else (Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        
+        self.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
+        self.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
+
+class GWidgets:
+    ''''
+    Note that,
+    - Widget(s) are treated as any other GUI element.
+    '''
+
+    class GColorBlock(QtWidgets.QWidget):
+        
+        def __init__(self, color:ColorUtils.Color):
+            super().__init__()
+            
+            # ? Setting fill-color of widget.
+            self.setAutoFillBackground(True)
+            palette = self.palette()
+            palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor('#' + color.asHEX()))
+            self.setPalette(palette)
+
+    class GButton(QtWidgets.QPushButton):
+        
+        def __init__(self, label:str):
+            super().__init__()
 
 class GApplication(QtWidgets.QApplication):
     '''

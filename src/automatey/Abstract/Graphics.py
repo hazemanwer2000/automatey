@@ -13,10 +13,13 @@ class Margin:
         self.left = left
         self.bottom = bottom
         self.right = right
-        
-    @staticmethod
-    def createSymmetric(value):
-        return Margin(value, value, value, value)
+
+class SymmetricMargin(Margin):
+    '''
+    Representation of a symmetric margin.
+    '''
+    def __init__(self, value):
+        Margin.__init__(self, value, value, value, value)
 
 # Drawable(s)
 
