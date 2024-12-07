@@ -29,5 +29,17 @@ class GIcon:
         return GIcon(QtWidgets.QApplication.instance().style().standardIcon(standardIcon.qStandardIcon))
 
     class GStandardIcon:
-        class Save:
+
+        class FileSave:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton
+
+        class MediaPlay:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaPlay
+        class MediaPause:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaPause
+        class MediaStop:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaStop
+        class MediaSeekForward:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaSeekForward
+        class MediaSeekBackward:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaSeekBackward

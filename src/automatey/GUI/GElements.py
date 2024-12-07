@@ -42,7 +42,7 @@ class GWindow(QtWidgets.QMainWindow):
     Multiple window(s) may be created.
     '''
     
-    def __init__(self, title:str, icon:GUtils.GIcon, minimumSize, rootLayout):
+    def __init__(self, title:str, icon:GUtils.GIcon, rootLayout, minimumSize, isSizeFixed=False):
         super().__init__()
         
         # ? Setting root layout.
@@ -52,7 +52,10 @@ class GWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.rootWidget)
         
         # ? All other settings.
-        self.setMinimumSize(minimumSize[0], minimumSize[1])
+        if (isSizeFixed):
+            self.setFixedSize(minimumSize[0], minimumSize[1])
+        else:
+            self.setMinimumSize(minimumSize[0], minimumSize[1])
         self.setWindowTitle(title)
         self.setWindowIcon(icon.qIcon)
     
