@@ -51,7 +51,7 @@ class GLayouts:
             layout:QtWidgets.QGridLayout = self.layout()
             layout.addWidget(element, rowIdx, colIdx, rowSpan, colSpan)
         
-        def GSetRowSize(self, rowIdx, size):
+        def GSetRowMinimumSize(self, rowIdx, size):
             '''
             Fix row size (i.e., no longer stretchable).
             '''
@@ -59,7 +59,7 @@ class GLayouts:
             layout.setRowStretch(rowIdx, 0)
             layout.setRowMinimumHeight(rowIdx, size)
 
-        def GSetColumnSize(self, colIdx, size):
+        def GSetColumnMinimumSize(self, colIdx, size):
             '''
             Fix column size (i.e., no longer stretchable).
             '''
@@ -110,6 +110,11 @@ class GWidgets:
         
         def __init__(self, label:str):
             super().__init__()
+            
+    class GLabel(QtWidgets.QLabel):
+
+        def __init__(self, label:str):
+            super().__init__(label)
 
 class GApplication(QtWidgets.QApplication):
     '''
