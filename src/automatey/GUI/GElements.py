@@ -97,7 +97,7 @@ class GWidgets:
 
     class GColorBlock(QtWidgets.QWidget):
         
-        def __init__(self, color:ColorUtils.Color):
+        def __init__(self, color:ColorUtils.Color, size=None):
             super().__init__()
             
             # ? Setting fill-color of widget.
@@ -105,6 +105,10 @@ class GWidgets:
             palette = self.palette()
             palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor('#' + color.asHEX()))
             self.setPalette(palette)
+            
+            # ? Set (i.e., fix) size, if specified.
+            if size != None:
+                self.setFixedSize(size[0], size[1])
 
     class GButton(QtWidgets.QPushButton):
         
@@ -123,8 +127,6 @@ class GApplication(QtWidgets.QApplication):
     Note:
     - An 'Application' instance must be the first construction, before any element.
     '''
-    
-    qStyle = None
     
     def __init__(self):
         super().__init__([])
