@@ -296,6 +296,12 @@ class Image:
             self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.createFromFile(f)
         else:
             self.imgHandler = INTERNAL_imgHandler
+    
+    def EXTERNAL_toCV2(self):
+        '''
+        Get CV2 representation.
+        '''
+        return self.imgHandler
 
     @staticmethod
     def INTERNAL_createFromCV2(imgHandler):

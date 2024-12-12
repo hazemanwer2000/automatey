@@ -8,6 +8,7 @@ from PyQt6.QtCore import Qt
 import automatey.GUI.GUtils as GUtils
 import automatey.Base.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as Graphics
+import automatey.Media.ImageUtils as ImageUtils
 
 class GLayouts:
     ''''
@@ -112,13 +113,22 @@ class GWidgets:
 
     class GButton(QtWidgets.QPushButton):
         
-        def __init__(self, label:str):
+        def __init__(self, text:str=None):
             super().__init__()
+            
+            self.setText(text)
             
     class GLabel(QtWidgets.QLabel):
 
-        def __init__(self, label:str):
-            super().__init__(label)
+        def __init__(self, text:str=None, img:GUtils.GImage=None):
+            super().__init__()
+            
+            if text != None:
+                self.setText(text)
+            
+            if img != None:
+                qImage = img.INTERNAL_toQImage()
+                self.setPixmap(QtGui.QPixmap.fromImage(qImage))
 
 class GApplication(QtWidgets.QApplication):
     '''
