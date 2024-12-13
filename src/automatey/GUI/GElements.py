@@ -320,6 +320,35 @@ class GApplication(QtWidgets.QApplication):
         '''
         self.exec()
 
+class GDialog(QtWidgets.QDialog):
+    
+    def __init__(self, title:str, icon:GUtils.GIcon, rootElement, minimumSize, isSizeFixed=False):
+        super().__init__()
+        
+        # ? All other settings.
+        if (isSizeFixed):
+            self.setFixedSize(minimumSize[0], minimumSize[1])
+        else:
+            self.setMinimumSize(minimumSize[0], minimumSize[1])
+        self.setWindowTitle(title)
+        self.setWindowIcon(icon.qIcon)
+        
+        # ? Setting root layout.
+        # PyQt: For Dialogs', layout must not be attached to a 'QWidget'.
+        layout = QtWidgets.QGridLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setRowStretch(0, 1)
+        layout.setColumnStretch(0, 1)
+        layout.addWidget(rootElement, 0, 0, 1, 1)
+        self.setLayout(layout)
+        
+    def GRun(self):
+        '''
+        Interrupt the current GUI event-loop, and run the dialog's.
+        '''
+        self.exec()
+
 class GWindow(QtWidgets.QMainWindow):
     '''
     Multiple window(s) may be created.
