@@ -79,4 +79,18 @@ class Colors:
     
     BLACK = Color(0, 0, 0)
     WHITE = Color(255, 255, 255)
+    
+    BROWN = Color.fromHEX('aa845a')
+    GREY = Color.fromHEX('bbbbbb')
+    
+    YELLOW = Color.fromHEX('f7ea78')
+    ORANGE = Color.fromHEX('f9b566')
+    RED = Color.fromHEX('f96666')
+    
+    GREEN = Color.fromHEX('2e8e3d')
+    BLUE = Color.fromHEX('71aeef')
+    
+    PURPLE = Color.fromHEX('9465d2')
+    PINK = Color.fromHEX('ff8da1')
+    
     TRANSPARENT = None
