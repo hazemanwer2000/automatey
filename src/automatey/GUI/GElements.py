@@ -9,6 +9,7 @@ import automatey.GUI.GUtils as GUtils
 import automatey.Base.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as Graphics
 import automatey.Media.ImageUtils as ImageUtils
+import automatey.OS.FileUtils as FileUtils
 
 class INTERNAL:
     
@@ -321,6 +322,9 @@ class GApplication(QtWidgets.QApplication):
         self.exec()
 
 class GDialog(QtWidgets.QDialog):
+    '''
+    A dialog is a blocking window (i.e., blocks execution of invoking GUI event-loop).
+    '''
     
     def __init__(self, title:str, icon:GUtils.GIcon, rootElement, minimumSize, isSizeFixed=False):
         super().__init__()
@@ -348,6 +352,35 @@ class GDialog(QtWidgets.QDialog):
         Interrupt the current GUI event-loop, and run the dialog's.
         '''
         self.exec()
+
+class GStandardDialog:
+    '''
+    Open a standard dialog, to get specific info.
+    '''
+    
+    @staticmethod
+    def selectExistingFile(initialDirectory:FileUtils.File):
+        '''
+        Select an existing file. Returns `None` if none were selected.
+        '''
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(None, directory=str(initialDirectory))
+        path = FileUtils.File(path) if (path != '') else None
+        return path
+
+    def selectExistingFiles(initialDirectory:FileUtils.File):
+        '''
+        Select existing files, returned as a list.
+        '''
+        paths, _ = QtWidgets.QFileDialog.getOpenFileNames(None, directory=str(initialDirectory))
+        return [FileUtils.File(path) for path in paths]
+    
+    def selectExistingDirectory(initialDirectory:FileUtils.File):
+        '''
+        Select existing directory.
+        '''
+        path = QtWidgets.QFileDialog.getExistingDirectory(None, directory=str(initialDirectory))
+        path = FileUtils.File(path) if (path != '') else None
+        return path
 
 class GWindow(QtWidgets.QMainWindow):
     '''
