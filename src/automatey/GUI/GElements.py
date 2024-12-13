@@ -409,6 +409,12 @@ class GWidgets:
             Get text.
             '''
             return self.text()
+
+        def GSetText(self, text):
+            '''
+            Set text.
+            '''
+            self.setPlainText(text)
             
         def INTERNAL_textChanged(self):
             if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
