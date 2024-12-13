@@ -3,10 +3,7 @@
 import PyQt6.QtWidgets as QtWidgets
 import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as QtCore
-import PyQt6.QtMultimediaWidgets as QtMultimediaWidgets
-import PyQt6.QtMultimedia as QtMultimedia
 import vlc
-import math
 
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
@@ -15,6 +12,7 @@ import automatey.Abstract.Graphics as Graphics
 import automatey.Media.ImageUtils as ImageUtils
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
+import automatey.Utils.MathUtils as MathUtils
 
 class INTERNAL:
     
@@ -473,6 +471,40 @@ class GWidgets:
             if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
 
+    class GSlider(QtWidgets.QSlider, INTERNAL.GEventManager):
+        
+        def __init__(self, valueRange, initValue, isHorizontal=True):
+            QtWidgets.QSlider.__init__(self)
+            INTERNAL.GEventManager.__init__(self)
+            
+            # ? Set orientation.
+            orientation = QtCore.Qt.Orientation.Horizontal if isHorizontal else QtCore.Qt.Orientation.Vertical
+            self.setOrientation(orientation)
+            
+            # PyQt6: Fix tick-interval at '1'.
+            self.setTickInterval(1) 
+            
+            # ? Set value-range, and init-value.
+            self.setRange(valueRange[0], valueRange[1])
+            self.setValue(initValue)
+            
+        def INTERNAL_mouseEvent(self, event):
+            # ? Update value.
+            ratio = event.position().x() / self.width()
+            value = MathUtils.mapValue(ratio, [0.0, 1.0], [self.minimum(), self.maximum()])
+            value = MathUtils.clampValue(value, self.minimum(), self.maximum())
+            self.setValue(int(value))
+            
+            # ? Call event-handler, if present.
+            
+            event.accept()
+            
+        def mousePressEvent(self, event):
+            self.INTERNAL_mouseEvent(event)
+        
+        def mouseMoveEvent(self, event):
+            self.INTERNAL_mouseEvent(event)
+
     class GVideoPlayer(QtWidgets.QWidget):
         
         def __init__(self):
@@ -494,8 +526,11 @@ class GWidgets:
             
             # ? Setting-up control-layout (i.e., layout for control-panel).
             
-            self.controlGridLayout = GLayouts.GGridLayout(1, 5, Graphics.SymmetricMargin(0), elementSpacing=5)
+            self.controlGridLayout = GLayouts.GGridLayout(1, 6, Graphics.SymmetricMargin(0), elementSpacing=5)
             layout.addWidget(self.controlGridLayout, 1, 0, 1, 1)
+            for i in range(6):
+                if i not in [4]:
+                    self.controlGridLayout.GSetColumnMinimumSize(i, 0)
             
             # ? Setting-up play-pause button.
             
@@ -534,6 +569,10 @@ class GWidgets:
             
             self.controlGridLayout.GSetElement(self.seekForwardButton, 0, 3, 1, 1)
 
+            # ? Setting-up seeker (i.e., slider).
+            self.seeker = GWidgets.GSlider([0, 100000], 0, isHorizontal=True)
+            self.controlGridLayout.GSetElement(self.seeker, 0, 4, 1, 1)
+
             # ? Setting-up (un-)mute button.
 
             self.unmuteButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaVolume),
@@ -547,7 +586,7 @@ class GWidgets:
             self.muteStackedLayout = GLayouts.GStackedLayout([self.muteButton, self.unmuteButton], self.unmuteButton)
             self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
             
-            self.controlGridLayout.GSetElement(self.muteStackedLayout, 0, 4, 1, 1)
+            self.controlGridLayout.GSetElement(self.muteStackedLayout, 0, 5, 1, 1)
         
         KeyHandlers = {
             # Seek forward/backward
