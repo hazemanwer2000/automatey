@@ -196,6 +196,38 @@ class GWidgets:
             
             self.addItems(itemList)
             self.setCurrentIndex(defaultIndex)
+            
+        def GGetItem(self):
+            '''
+            Get current item.
+            '''
+            return self.currentText()
+
+    class GList(QtWidgets.QListWidget):
+        '''
+        A list of items.
+        '''
+        
+        def __init__(self, itemList, isMultiSelection=False):
+            super().__init__()
+            
+            self.addItems(itemList)
+            
+            if isMultiSelection:
+                self.setSelectionMode(self.SelectionMode.MultiSelection)
+        
+        def GGetItems(self):
+            '''
+            Get current item(s).
+            '''
+            return [x.text() for x in self.selectedItems()]
+
+        def GGetItem(self):
+            '''
+            Get current item.
+            '''
+            currentItem = self.currentItem()
+            return None if (currentItem == None) else currentItem.text()
 
 class GApplication(QtWidgets.QApplication):
     '''
