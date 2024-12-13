@@ -431,6 +431,12 @@ class GWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(title)
         self.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
     
+    def setTitle(self, title):
+        '''
+        Set title of window.
+        '''
+        self.setWindowTitle(title)
+    
     def GShow(self):
         '''
         Show window.
