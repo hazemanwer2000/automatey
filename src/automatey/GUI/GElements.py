@@ -123,6 +123,26 @@ class GScrollArea(QtWidgets.QScrollArea):
         self.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
         self.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
 
+class GDecorations:
+
+    class GBorder(QtWidgets.QFrame):
+        
+        def __init__(self, element, elementMargin:Graphics.Margin):
+            super().__init__()
+            
+            # PyQt6: Stylizing 'QFrame' to mimic a border.
+            self.setFrameShape(QtWidgets.QFrame.Shape.Box)
+            self.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
+            
+            # ? Setting element.
+            layout = QtWidgets.QGridLayout(self)
+            layout.setSpacing(0)
+            layout.setContentsMargins(elementMargin.left,
+                                    elementMargin.top,
+                                    elementMargin.right,
+                                    elementMargin.bottom)
+            layout.addWidget(element, 0, 0, 1, 1)
+
 class GWidgets:
     ''''
     Note that,
