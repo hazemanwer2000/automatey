@@ -6,6 +6,7 @@ import PyQt6.QtCore as QtCore
 import PyQt6.QtMultimediaWidgets as QtMultimediaWidgets
 import PyQt6.QtMultimedia as QtMultimedia
 import vlc
+import math
 
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
@@ -490,7 +491,7 @@ class GWidgets:
             
             # ? Setting-up control-layout (i.e., layout for control-panel).
             
-            self.controlGridLayout = GLayouts.GGridLayout(1, 4, Graphics.SymmetricMargin(0), elementSpacing=5)
+            self.controlGridLayout = GLayouts.GGridLayout(1, 5, Graphics.SymmetricMargin(0), elementSpacing=5)
             layout.addWidget(self.controlGridLayout, 1, 0, 1, 1)
             
             # ? Setting-up play-pause button.
@@ -529,8 +530,24 @@ class GWidgets:
             self.seekForwardButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(lambda: self.INTERNAL_skipForward(TimeUtils.Time.createFromSeconds(3.0))))
             
             self.controlGridLayout.GSetElement(self.seekForwardButton, 0, 3, 1, 1)
+
+            # ? Setting-up (un-)mute button.
+
+            self.unmuteButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaVolume),
+                                               toolTip='Mute')
+            self.unmuteButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_mute))
+            
+            self.muteButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaVolumeMute),
+                                               toolTip='Un-mute')
+            self.muteButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_unmute))
+            
+            self.muteStackedLayout = GLayouts.GStackedLayout([self.muteButton, self.unmuteButton], self.unmuteButton)
+            self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
+            
+            self.controlGridLayout.GSetElement(self.muteStackedLayout, 0, 4, 1, 1)
         
         KeyHandlers = {
+            # Seek forward/backward
             QtCore.Qt.Key.Key_Comma:
                 (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipBackward(self, TimeUtils.Time.createFromSeconds(10.0))),
             QtCore.Qt.Key.Key_Period:
@@ -543,6 +560,12 @@ class GWidgets:
                 (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipBackward(self, TimeUtils.Time.createFromSeconds(1.0))),
             QtCore.Qt.Key.Key_Apostrophe:
                 (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipForward(self, TimeUtils.Time.createFromSeconds(1.0))),
+            
+            # Volume up/down
+            QtCore.Qt.Key.Key_Up:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_adjustVolume(self, 10)),
+            QtCore.Qt.Key.Key_Down:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_adjustVolume(self, -10)),
         }
         
         def keyPressEvent(self, event):
@@ -569,7 +592,18 @@ class GWidgets:
         
         def INTERNAL_stop(self):
             self.renderer.GStop()
-      
+        
+        def INTERNAL_adjustVolume(self, delta:int):
+            self.renderer.GAdjustVolume(delta)
+
+        def INTERNAL_mute(self):
+            self.renderer.GMute()
+            self.muteStackedLayout.GSetCurrentElement(self.muteButton)
+
+        def INTERNAL_unmute(self):
+            self.renderer.GUnmute()
+            self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
+
         def GRenderer(self):
             '''
             Get underlying `GVideoRenderer`.
@@ -587,6 +621,11 @@ class GWidgets:
             self.player = GWidgets.GVideoRenderer.VLCInstance.media_player_new()
             # Warning: OS-specific (Windows-OS)
             self.player.set_hwnd(self.winId())
+            
+            # ? Initial setting(s).
+            self.isMute = False
+            self.volume = 100
+            self.player.audio_set_volume(self.volume)
         
         def GLoad(self, f:FileUtils.File):
             media = GWidgets.GVideoRenderer.VLCInstance.media_new(str(f))
@@ -623,6 +662,23 @@ class GWidgets:
         def GSkipBackward(self, skipTime:TimeUtils.Time):
             newPosition = self.GGetPosition() - skipTime
             self.GSeekPosition(newPosition)
+
+        def GAdjustVolume(self, delta:int):
+            self.GSetVolume(self.volume + delta)
+        
+        def GSetVolume(self, value:int):
+            self.volume = value
+            self.volume = min(100, max(0, self.volume))
+            if not self.isMute:
+                self.player.audio_set_volume(self.volume)
+        
+        def GMute(self):
+            self.isMute = True
+            self.player.audio_set_volume(0)
+
+        def GUnmute(self):
+            self.isMute = False
+            self.player.audio_set_volume(self.volume)
 
 class GApplication(QtWidgets.QApplication):
     '''
