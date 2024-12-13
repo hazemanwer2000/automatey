@@ -194,18 +194,22 @@ class GWidgets:
         
         def INTERNAL_stateChanged(self, value):
             if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
-                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn(value != 0)
+                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
-    class GDropDownList(QtWidgets.QComboBox):
+    class GDropDownList(QtWidgets.QComboBox, INTERNAL.GEventManager):
         '''
         A drop-down list. Zero-index'ed.
         '''
         
         def __init__(self, itemList, defaultIndex=0):
-            super().__init__()
+            QtWidgets.QComboBox.__init__(self)
+            INTERNAL.GEventManager.__init__(self)
             
             self.addItems(itemList)
             self.setCurrentIndex(defaultIndex)
+            
+            # ? Event-handlers.
+            self.currentIndexChanged.connect(self.INTERNAL_currentIndexChanged)
             
         def GGetItem(self):
             '''
@@ -213,18 +217,26 @@ class GWidgets:
             '''
             return self.currentText()
 
-    class GList(QtWidgets.QListWidget):
+        def INTERNAL_currentIndexChanged(self, newIndex):
+            if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
+                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
+
+    class GList(QtWidgets.QListWidget, INTERNAL.GEventManager):
         '''
         A list of items.
         '''
         
         def __init__(self, itemList, isMultiSelection=False):
-            super().__init__()
+            QtWidgets.QListWidget.__init__(self)
+            INTERNAL.GEventManager.__init__(self)
             
             self.addItems(itemList)
             
             if isMultiSelection:
                 self.setSelectionMode(self.SelectionMode.MultiSelection)
+            
+            # ? Event-handlers.
+            self.itemSelectionChanged.connect(self.INTERNAL_itemSelectionChange)
         
         def GGetItems(self):
             '''
@@ -238,6 +250,10 @@ class GWidgets:
             '''
             currentItem = self.currentItem()
             return None if (currentItem == None) else currentItem.text()
+
+        def INTERNAL_itemSelectionChange(self):
+            if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
+                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
 class GApplication(QtWidgets.QApplication):
     '''
