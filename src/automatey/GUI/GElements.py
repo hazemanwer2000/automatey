@@ -279,7 +279,7 @@ class GWidgets:
             if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
-    class QLineEdit(QtWidgets.QLineEdit, INTERNAL.GEventManager):
+    class GLineEdit(QtWidgets.QLineEdit, INTERNAL.GEventManager):
         
         def __init__(self, placeholder:str=None):
             QtWidgets.QLineEdit.__init__(self)
@@ -291,6 +291,47 @@ class GWidgets:
             # ? Event-handlers.
             self.textChanged.connect(self.INTERNAL_textChanged)
         
+            # ? By default, font is 'Monospace'.
+            font = QtGui.QFont("Consolas")
+            font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
+            self.setFont(font)
+        
+        def GGetText(self):
+            '''
+            Get text.
+            '''
+            return self.text()
+            
+        def INTERNAL_textChanged(self):
+            if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
+                self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
+    
+    class GTextEdit(QtWidgets.QPlainTextEdit, INTERNAL.GEventManager):
+        
+        def __init__(self, placeholder:str=None):
+            QtWidgets.QTextEdit.__init__(self)
+            INTERNAL.GEventManager.__init__(self)
+            
+            if placeholder != None:
+                self.setPlaceholderText(placeholder)
+                
+            # ? Event-handlers.
+            self.textChanged.connect(self.INTERNAL_textChanged)
+            
+            # ? By default, font is 'Monospace'.
+            font = QtGui.QFont("Consolas")
+            font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
+            self.setFont(font)
+            
+        def keyPressEvent(self, event):
+            # PyQt6: When 'TAB' is pressed, insert space(s) instead.
+            if event.key() == QtCore.Qt.Key.Key_Tab:
+                cursor = self.textCursor()
+                cursor.insertText(" " * 2)
+                event.accept()
+            else:
+                super().keyPressEvent(event)
+
         def GGetText(self):
             '''
             Get text.
@@ -365,7 +406,7 @@ class GStandardDialog:
     '''
     
     @staticmethod
-    def selectExistingFile(initialDirectory:FileUtils.File):
+    def GSelectExistingFile(initialDirectory:FileUtils.File):
         '''
         Select an existing file. Returns `None` if none were selected.
         '''
@@ -374,7 +415,7 @@ class GStandardDialog:
         return path
 
     @staticmethod
-    def selectExistingFiles(initialDirectory:FileUtils.File):
+    def GSelectExistingFiles(initialDirectory:FileUtils.File):
         '''
         Select existing files, returned as a list.
         '''
@@ -382,7 +423,7 @@ class GStandardDialog:
         return [FileUtils.File(path) for path in paths]
     
     @staticmethod
-    def selectExistingDirectory(initialDirectory:FileUtils.File):
+    def GSelectExistingDirectory(initialDirectory:FileUtils.File):
         '''
         Select existing directory.
         '''
@@ -391,7 +432,7 @@ class GStandardDialog:
         return path
 
     @staticmethod
-    def selectFile(initialDirectory:FileUtils.File):
+    def GSelectFile(initialDirectory:FileUtils.File):
         '''
         Select a file. Returns `None` if none were selected.
         '''
@@ -400,7 +441,7 @@ class GStandardDialog:
         return path
     
     @staticmethod
-    def selectColor() -> ColorUtils.Color:
+    def GSelectColor() -> ColorUtils.Color:
         '''
         Select a color.
         '''
