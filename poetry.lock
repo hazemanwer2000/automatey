@@ -270,6 +270,17 @@ files = [
 ]
 
 [[package]]
+name = "python-vlc"
+version = "3.0.21203"
+description = "VLC bindings for python."
+optional = false
+python-versions = "*"
+files = [
+    {file = "python_vlc-3.0.21203-py3-none-any.whl", hash = "sha256:1613451a31b692ec276296ceeae0c0ba82bfc2d094dabf9aceb70f58944a6320"},
+    {file = "python_vlc-3.0.21203.tar.gz", hash = "sha256:52d0544b276b11e58b6c0b748c3e0518f94f74b1b4cd328c83a59eacabead1ec"},
+]
+
+[[package]]
 name = "send2trash"
 version = "1.8.3"
 description = "Send file to trash natively under Mac OS X, Windows and Linux"
@@ -288,4 +299,4 @@ win32 = ["pywin32"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "8f355b0d33c4829dcded69a3c8d54806c9df1db75f75f9deae118a57cdde240d"
+content-hash = "7515ce66a88fc8c0f4944fa3f760d2507be3c9b622fe5f266393b42618c94eaf"

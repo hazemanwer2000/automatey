@@ -13,6 +13,7 @@ opencv-python = "^4.10.0.84"
 pillow = "^11.0.0"
 imageio = "^2.36.0"
 pyqt6 = "^6.7.1"
+python-vlc = "^3.0.21203"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

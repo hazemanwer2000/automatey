@@ -3,6 +3,9 @@
 import PyQt6.QtWidgets as QtWidgets
 import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as QtCore
+import PyQt6.QtMultimediaWidgets as QtMultimediaWidgets
+import PyQt6.QtMultimedia as QtMultimedia
+import vlc
 
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
@@ -31,11 +34,13 @@ class GLayouts:
     '''
 
     class GStackedLayout(QtWidgets.QStackedWidget):
-        def __init__(self, elements):
+        def __init__(self, elements, initElement):
             super().__init__()
             
             for element in elements:
                 self.addWidget(element)
+            
+            self.setCurrentWidget(initElement)
                 
         def GSetCurrentElement(self, element):
             '''
@@ -460,6 +465,75 @@ class GWidgets:
         def INTERNAL_textChanged(self):
             if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
+
+    class GVideoPlayer(QtWidgets.QWidget):
+        
+        def __init__(self):
+            QtWidgets.QWidget.__init__(self)
+            
+            # ? Configruing root-layout.
+            layout = QtWidgets.QGridLayout()
+            layout.setRowStretch(0, 1)
+            layout.setRowStretch(1, 0)
+            layout.setRowMinimumHeight(1, 0)
+            layout.setColumnStretch(0, 1)
+            self.setLayout(layout)
+            
+            # ? Setting-up video-renderer.
+            self.renderer = GWidgets.GVideoRenderer()
+            layout.addWidget(self.renderer, 0, 0, 1, 1)
+            
+            # ? Setting-up control-layout (i.e., layout for control-panel).
+            
+            controlLayout = GLayouts.GGridLayout(1, 1, Graphics.SymmetricMargin(5), elementSpacing=5)
+            layout.addWidget(controlLayout, 1, 0, 1, 1)
+            
+            playButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPlay),
+                                               toolTip='Play')
+            playButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_play))
+            
+            pauseButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPause),
+                                               toolTip='Pause')
+            pauseButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_pause))
+            
+            playPauseStackedLayout = GLayouts.GStackedLayout([playButton, pauseButton])
+            self.
+            self.controlLayout.GSetElement(self.playButton, 0, 0, 1, 1)
+            
+        def INTERNAL_play(self):
+            self.renderer.GPlay()
+
+        def INTERNAL_pause(self):
+            self.renderer.GPause()
+        
+        def GRenderer(self):
+            '''
+            Get underlying `GVideoRenderer`.
+            '''
+            return self.renderer
+
+    class GVideoRenderer(QtWidgets.QFrame):
+        
+        VLCInstance = vlc.Instance()
+        
+        def __init__(self):
+            QtWidgets.QFrame.__init__(self)
+            
+            # ? Setting up VLC media-player.
+            self.player = GWidgets.GVideoRenderer.VLCInstance.media_player_new()
+            # Warning: OS-specific (Windows-OS)
+            self.player.set_hwnd(self.winId())
+        
+        def GLoad(self, f:FileUtils.File):
+            media = GWidgets.GVideoRenderer.VLCInstance.media_new(str(f))
+            self.player.set_media(media)
+            self.player.play()
+        
+        def GPlay(self):
+            self.player.play()
+
+        def GPause(self):
+            self.player.pause()
 
 class GApplication(QtWidgets.QApplication):
     '''
