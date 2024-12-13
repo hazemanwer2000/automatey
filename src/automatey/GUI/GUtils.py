@@ -81,3 +81,12 @@ class GIcon:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_TitleBarShadeButton
         class ScrollDown:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_TitleBarUnshadeButton
+
+class GEventHandler:
+    
+    def __init__(self, fcn):
+        self.fcn = fcn
+
+class GEventHandlers:
+    
+    class GClickEventHandler(GEventHandler): pass

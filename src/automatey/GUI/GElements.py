@@ -10,6 +10,19 @@ import automatey.Base.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as Graphics
 import automatey.Media.ImageUtils as ImageUtils
 
+class INTERNAL:
+    
+    class GEventManager:
+        
+        def __init__(self):
+            self.eventHandlers = dict()
+
+        def GSetEventHandler(self, eventHandler:GUtils.GEventHandler):
+            '''
+            Register an event.
+            '''
+            self.eventHandlers[type(eventHandler)] = eventHandler
+
 class GLayouts:
     ''''
     Note that,
@@ -97,6 +110,9 @@ class GWidgets:
     '''
 
     class GColorBlock(QtWidgets.QWidget):
+        '''
+        A simple color-block.
+        '''
         
         def __init__(self, color:ColorUtils.Color, size=None):
             super().__init__()
@@ -111,20 +127,36 @@ class GWidgets:
             if size != None:
                 self.setFixedSize(size[0], size[1])
 
-    class GButton(QtWidgets.QPushButton):
+    class GButton(QtWidgets.QPushButton, INTERNAL.GEventManager):
+        '''
+        Can handle an icon, as well as text.
+        '''
         
         def __init__(self, text:str=None, icon:GUtils.GIcon=None):
-            super().__init__()
+            QtWidgets.QPushButton.__init__(self)
+            INTERNAL.GEventManager.__init__(self)
             
+            # ? Set text (optional).
             if text != None:
                 self.setText(text)
             
+            # ? Set icon (optional).
             if icon != None:
                 self.setIcon(icon.qIcon)
                 if icon.size != None:
                     self.setIconSize(QtCore.QSize(icon.size[0], icon.size[1]))
             
+            # ? Event-handlers.
+            self.clicked.connect(self.INTERNAL_onClicked)
+            
+        def INTERNAL_onClicked(self):
+            if GUtils.GEventHandlers.GClickEventHandler in self.eventHandlers:
+                self.eventHandlers[GUtils.GEventHandlers.GClickEventHandler].fcn()
+            
     class GLabel(QtWidgets.QLabel):
+        '''
+        Can handle an image, as well as text.
+        '''
 
         def __init__(self, text:str=None, img:GUtils.GImage=None):
             super().__init__()
@@ -134,6 +166,20 @@ class GWidgets:
             
             if img != None:
                 self.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
+
+    class GCheckBox(QtWidgets.QCheckBox):
+        '''
+        Text, along with a check-box.
+        '''
+        
+        def __init__(self, text:str, isChecked=False):
+            super().__init__()
+            
+            self.setText(text)
+            
+            
+            self.setCheckState(QtCore.Qt.CheckState.Checked)
+
 
 class GApplication(QtWidgets.QApplication):
     '''
