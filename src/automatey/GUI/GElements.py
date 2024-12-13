@@ -125,7 +125,10 @@ class GScrollArea(QtWidgets.QScrollArea):
 
 class GDecorations:
 
-    class GBorder(QtWidgets.QFrame):
+    class GOutline(QtWidgets.QFrame):
+        '''
+        Adds an outline around the specified element.
+        '''
         
         def __init__(self, element, elementMargin:Graphics.Margin):
             super().__init__()
@@ -644,7 +647,7 @@ class GWindow(QtWidgets.QMainWindow):
             - Note, if `is-checkable`, `handler` receives a single `bool` argument.
         '''
         
-        toolbar = QtWidgets.QToolBar("My main toolbar")
+        toolbar = QtWidgets.QToolBar()
         toolbar.setMovable(False)
         toolbar.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.PreventContextMenu)
         
@@ -663,6 +666,34 @@ class GWindow(QtWidgets.QMainWindow):
         
         self.addToolBar(toolbar)
   
+    def GCreateMenu(self, menuName:str, contract):
+        '''
+        Creates a (sub-)menu based on a contract.
+        
+        Contract shall consist of a list of dictionaries, with optional `None` value(s) in-between, intepretted as separators.
+        
+        Each dictionary, representing a button, shall specify,
+        - `text`.
+        - `handler`.
+        - `is-checkable`, specifying whether button is checkable.
+            - Note, if `is-checkable`, `handler` receives a single `bool` argument.
+        '''
+        
+        menu = self.menuBar()
+        subMenu = menu.addMenu('&' + menuName)
+        
+        for term in contract:
+            if term == None:
+                subMenu.addSeparator()
+            else:
+                action = QtGui.QAction(
+                    term['text'],
+                    self
+                )
+                action.triggered.connect(term['handler'])
+                action.setCheckable(term['is-checkable'])
+                subMenu.addAction(action)
+
     def GShow(self):
         '''
         Show window.
