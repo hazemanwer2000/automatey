@@ -320,13 +320,19 @@ class GApplication(QtWidgets.QApplication):
         Runs the GUI event-loop.
         '''
         self.exec()
+    
+    def GSetIcon(self, icon:GUtils.GIcon):
+        '''
+        Set application-wide icon.
+        '''
+        self.icon = icon
 
 class GDialog(QtWidgets.QDialog):
     '''
     A dialog is a blocking window (i.e., blocks execution of invoking GUI event-loop).
     '''
     
-    def __init__(self, title:str, icon:GUtils.GIcon, rootElement, minimumSize, isSizeFixed=False):
+    def __init__(self, title:str, rootElement, minimumSize, isSizeFixed=False):
         super().__init__()
         
         # ? All other settings.
@@ -335,7 +341,7 @@ class GDialog(QtWidgets.QDialog):
         else:
             self.setMinimumSize(minimumSize[0], minimumSize[1])
         self.setWindowTitle(title)
-        self.setWindowIcon(icon.qIcon)
+        self.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
         
         # ? Setting root layout.
         # PyQt: For Dialogs', layout must not be attached to a 'QWidget'.
@@ -367,6 +373,7 @@ class GStandardDialog:
         path = FileUtils.File(path) if (path != '') else None
         return path
 
+    @staticmethod
     def selectExistingFiles(initialDirectory:FileUtils.File):
         '''
         Select existing files, returned as a list.
@@ -374,6 +381,7 @@ class GStandardDialog:
         paths, _ = QtWidgets.QFileDialog.getOpenFileNames(None, directory=str(initialDirectory))
         return [FileUtils.File(path) for path in paths]
     
+    @staticmethod
     def selectExistingDirectory(initialDirectory:FileUtils.File):
         '''
         Select existing directory.
@@ -382,12 +390,33 @@ class GStandardDialog:
         path = FileUtils.File(path) if (path != '') else None
         return path
 
+    @staticmethod
+    def selectFile(initialDirectory:FileUtils.File):
+        '''
+        Select a file. Returns `None` if none were selected.
+        '''
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(None, directory=str(initialDirectory))
+        path = FileUtils.File(path) if (path != '') else None
+        return path
+    
+    @staticmethod
+    def selectColor() -> ColorUtils.Color:
+        '''
+        Select a color.
+        '''
+        colorDialog = QtWidgets.QColorDialog(None)
+        colorDialog.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
+        colorSelected = None
+        if colorDialog.exec():
+            colorSelected = ColorUtils.Color.fromHEX(colorDialog.selectedColor().name()[1:])
+        return colorSelected
+
 class GWindow(QtWidgets.QMainWindow):
     '''
     Multiple window(s) may be created.
     '''
     
-    def __init__(self, title:str, icon:GUtils.GIcon, rootElement, minimumSize, isSizeFixed=False):
+    def __init__(self, title:str, rootElement, minimumSize, isSizeFixed=False):
         super().__init__()
         
         # ? Setting root layout.
@@ -400,7 +429,7 @@ class GWindow(QtWidgets.QMainWindow):
         else:
             self.setMinimumSize(minimumSize[0], minimumSize[1])
         self.setWindowTitle(title)
-        self.setWindowIcon(icon.qIcon)
+        self.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
     
     def GShow(self):
         '''
