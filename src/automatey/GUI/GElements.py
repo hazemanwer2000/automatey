@@ -186,6 +186,17 @@ class GWidgets:
             '''
             return True if (self.checkState() == QtCore.Qt.CheckState.Checked) else False
 
+    class GDropDownList(QtWidgets.QComboBox):
+        '''
+        A drop-down list. Zero-index'ed.
+        '''
+        
+        def __init__(self, itemList, defaultIndex=0):
+            super().__init__()
+            
+            self.addItems(itemList)
+            self.setCurrentIndex(defaultIndex)
+
 class GApplication(QtWidgets.QApplication):
     '''
     Only one instance of 'Application' is required.
