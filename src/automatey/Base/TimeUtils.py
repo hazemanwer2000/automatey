@@ -68,7 +68,8 @@ class Time:
         return Time(self.microseconds + obj.microseconds)
     
     def __sub__(self, obj):
-        return Time(self.microseconds - obj.microseconds)
+        diff = self.microseconds - obj.microseconds
+        return Time(max(diff, 0))
     
     def __eq__(self, obj):
         return self.microseconds == obj.microseconds

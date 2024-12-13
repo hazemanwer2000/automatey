@@ -211,6 +211,8 @@ class GWidgets:
                     self.color = newColor
                     self.INTERNAL_setColor(self.color)
                 event.accept()
+            else:
+                super().mousePressEvent(event)
 
     class GButton(QtWidgets.QPushButton, INTERNAL.GEventManager):
         '''
@@ -488,7 +490,7 @@ class GWidgets:
             
             # ? Setting-up control-layout (i.e., layout for control-panel).
             
-            self.controlGridLayout = GLayouts.GGridLayout(1, 2, Graphics.SymmetricMargin(0), elementSpacing=5)
+            self.controlGridLayout = GLayouts.GGridLayout(1, 4, Graphics.SymmetricMargin(0), elementSpacing=5)
             layout.addWidget(self.controlGridLayout, 1, 0, 1, 1)
             
             # ? Setting-up play-pause button.
@@ -513,12 +515,49 @@ class GWidgets:
             self.stopButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_stop))
             
             self.controlGridLayout.GSetElement(self.stopButton, 0, 1, 1, 1)
+
+            # ? Setting-up seek-forward/backward button(s).
+
+            self.seekBackwardButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaSeekBackward),
+                                               toolTip='Seek Backward')
+            self.seekBackwardButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(lambda: self.INTERNAL_skipBackward(TimeUtils.Time.createFromSeconds(3.0))))
+            
+            self.controlGridLayout.GSetElement(self.seekBackwardButton, 0, 2, 1, 1)
+
+            self.seekForwardButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaSeekForward),
+                                               toolTip='Seek Forward')
+            self.seekForwardButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(lambda: self.INTERNAL_skipForward(TimeUtils.Time.createFromSeconds(3.0))))
+            
+            self.controlGridLayout.GSetElement(self.seekForwardButton, 0, 3, 1, 1)
+        
+        KeyHandlers = {
+            QtCore.Qt.Key.Key_Comma:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipBackward(self, TimeUtils.Time.createFromSeconds(10.0))),
+            QtCore.Qt.Key.Key_Period:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipForward(self, TimeUtils.Time.createFromSeconds(10.0))),
+            QtCore.Qt.Key.Key_Left:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipBackward(self, TimeUtils.Time.createFromSeconds(3.0))),
+            QtCore.Qt.Key.Key_Right:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipForward(self, TimeUtils.Time.createFromSeconds(3.0))),
+            QtCore.Qt.Key.Key_Semicolon:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipBackward(self, TimeUtils.Time.createFromSeconds(1.0))),
+            QtCore.Qt.Key.Key_Apostrophe:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipForward(self, TimeUtils.Time.createFromSeconds(1.0))),
+        }
         
         def keyPressEvent(self, event):
-            if (event.key() == QtCore.Qt.Key.Key_Comma):
-                self.renderer.GSkip(TimeUtils.Time.createFromSeconds(1.0))
+            key = event.key()
+            if key in GWidgets.GVideoPlayer.KeyHandlers:
+                GWidgets.GVideoPlayer.KeyHandlers[key](self)
+                event.accept()
             else:
-                super().keyPressEvent(event)
+                super().keyPressEvent(event)                
+        
+        def INTERNAL_skipForward(self, skipTime:TimeUtils.Time):
+            self.renderer.GSkipForward(skipTime)
+
+        def INTERNAL_skipBackward(self, skipTime:TimeUtils.Time):
+            self.renderer.GSkipBackward(skipTime)
             
         def INTERNAL_play(self):
             self.renderer.GPlay()
@@ -575,10 +614,14 @@ class GWidgets:
         def GSeekPosition(self, position:TimeUtils.Time):
             self.player.set_time(int(position.toMilliseconds()))
         
-        def GSkip(self, skipTime:TimeUtils.Time):
+        def GSkipForward(self, skipTime:TimeUtils.Time):
             newPosition = self.GGetPosition() + skipTime
             if (newPosition > self.GGetLength()):
                 newPosition = TimeUtils.Time(0)
+            self.GSeekPosition(newPosition)
+
+        def GSkipBackward(self, skipTime:TimeUtils.Time):
+            newPosition = self.GGetPosition() - skipTime
             self.GSeekPosition(newPosition)
 
 class GApplication(QtWidgets.QApplication):
