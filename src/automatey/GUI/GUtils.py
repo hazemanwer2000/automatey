@@ -94,3 +94,12 @@ class GEventHandlers:
         On-click, expects zero arguments.
         '''
         pass
+
+    class GSelectionChangeEventHandler(GEventHandler):
+        '''
+        On-selection-change, expects one argument.
+        
+        For,
+        - CheckBox: New value is passed.
+        '''
+        pass

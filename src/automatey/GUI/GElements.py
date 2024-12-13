@@ -167,24 +167,34 @@ class GWidgets:
             if img != None:
                 self.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
 
-    class GCheckBox(QtWidgets.QCheckBox):
+    class GCheckBox(QtWidgets.QCheckBox, INTERNAL.GEventManager):
         '''
         Text, along with a check-box.
         '''
         
         def __init__(self, text:str, isChecked=False):
-            super().__init__()
+            QtWidgets.QCheckBox.__init__(self)
+            INTERNAL.GEventManager.__init__(self)
             
+            # ? Set text.
             self.setText(text)
             
+            # ? Set initial (check-)state.
             initCheckState = QtCore.Qt.CheckState.Checked if isChecked else QtCore.Qt.CheckState.Unchecked
             self.setCheckState(initCheckState)
+            
+            # ? Event-handlers.
+            self.stateChanged.connect(self.INTERNAL_stateChanged)
             
         def GIsChecked(self):
             '''
             (...)
             '''
             return True if (self.checkState() == QtCore.Qt.CheckState.Checked) else False
+        
+        def INTERNAL_stateChanged(self, value):
+            if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
+                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn(value != 0)
 
     class GDropDownList(QtWidgets.QComboBox):
         '''
