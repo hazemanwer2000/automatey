@@ -532,6 +532,40 @@ class GStandardDialog:
             colorSelected = ColorUtils.Color.fromHEX(colorDialog.selectedColor().name()[1:])
         return colorSelected
 
+    class GBackgroundActivity:
+        '''
+        Handles dialog, meant to block user until a background-activity completes.
+        '''
+        
+        qProgressDialog:QtWidgets.QProgressDialog = None
+        
+        @staticmethod
+        def GAwait():
+            '''
+            Opens up dialog.
+            
+            Note,
+            - Dialog does not block the GUI event-loop.
+            '''
+            # PyQt6: 'QProcessDialog' does not block the GUI event-loop.
+            progressDialog = QtWidgets.QProgressDialog("", "", 0, 0, None)
+            progressDialog.setWindowTitle("(...)")
+            progressDialog.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
+            progressDialog.setFixedSize(progressDialog.size())
+            progressDialog.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
+            progressDialog.setWindowFlag(QtCore.Qt.WindowType.WindowCloseButtonHint, False)
+            progressDialog.setCancelButton(None)
+            progressDialog.show()
+            GStandardDialog.GBackgroundActivity.qProgressDialog = progressDialog
+
+        @staticmethod
+        def GRelease():
+            '''
+            Closes dialog.
+            '''
+            GStandardDialog.GBackgroundActivity.qProgressDialog.close()
+            GStandardDialog.GBackgroundActivity.qProgressDialog = None
+
 class GWindow(QtWidgets.QMainWindow):
     '''
     Multiple window(s) may be created.
