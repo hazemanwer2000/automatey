@@ -132,7 +132,7 @@ class GWidgets:
         Can handle an icon, as well as text.
         '''
         
-        def __init__(self, text:str=None, icon:GUtils.GIcon=None):
+        def __init__(self, text:str=None, icon:GUtils.GIcon=None, toolTip=None):
             QtWidgets.QPushButton.__init__(self)
             INTERNAL.GEventManager.__init__(self)
             
@@ -145,6 +145,10 @@ class GWidgets:
                 self.setIcon(icon.qIcon)
                 if icon.size != None:
                     self.setIconSize(QtCore.QSize(icon.size[0], icon.size[1]))
+            
+            # ? Set status-tip (optional).
+            if toolTip != None:
+                self.setToolTip(toolTip)
             
             # ? Event-handlers.
             self.clicked.connect(self.INTERNAL_onClicked)
