@@ -12,6 +12,7 @@ import automatey.GUI.GUtils as GUtils
 import automatey.Base.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as Graphics
 import automatey.Media.ImageUtils as ImageUtils
+import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
 
 class INTERNAL:
@@ -487,8 +488,10 @@ class GWidgets:
             
             # ? Setting-up control-layout (i.e., layout for control-panel).
             
-            self.controlGridLayout = GLayouts.GGridLayout(1, 1, Graphics.SymmetricMargin(0), elementSpacing=5)
+            self.controlGridLayout = GLayouts.GGridLayout(1, 2, Graphics.SymmetricMargin(0), elementSpacing=5)
             layout.addWidget(self.controlGridLayout, 1, 0, 1, 1)
+            
+            # ? Setting-up play-pause button.
             
             self.playButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPlay),
                                                toolTip='Play')
@@ -503,6 +506,20 @@ class GWidgets:
             
             self.controlGridLayout.GSetElement(self.playPauseStackedLayout, 0, 0, 1, 1)
             
+            # ? Setting-up stop button.
+
+            self.stopButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaStop),
+                                               toolTip='Stop')
+            self.stopButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_stop))
+            
+            self.controlGridLayout.GSetElement(self.stopButton, 0, 1, 1, 1)
+        
+        def keyPressEvent(self, event):
+            if (event.key() == QtCore.Qt.Key.Key_Comma):
+                self.renderer.GSkip(TimeUtils.Time.createFromSeconds(1.0))
+            else:
+                super().keyPressEvent(event)
+            
         def INTERNAL_play(self):
             self.renderer.GPlay()
             self.playPauseStackedLayout.GSetCurrentElement(self.pauseButton)
@@ -511,6 +528,9 @@ class GWidgets:
             self.renderer.GPause()
             self.playPauseStackedLayout.GSetCurrentElement(self.playButton)
         
+        def INTERNAL_stop(self):
+            self.renderer.GStop()
+      
         def GRenderer(self):
             '''
             Get underlying `GVideoRenderer`.
@@ -535,10 +555,31 @@ class GWidgets:
             self.player.play()
         
         def GPlay(self):
-            self.player.play()
+            if not self.player.is_playing():
+                self.player.play()
 
         def GPause(self):
-            self.player.pause()
+            if self.player.is_playing():
+                self.player.pause()
+        
+        def GStop(self):
+            self.GPlay()
+            self.player.set_time(0)
+        
+        def GGetLength(self) -> TimeUtils.Time:
+            return TimeUtils.Time.createFromMilliseconds(self.player.get_length())
+        
+        def GGetPosition(self) -> TimeUtils.Time:
+            return TimeUtils.Time.createFromMilliseconds(self.player.get_time())
+        
+        def GSeekPosition(self, position:TimeUtils.Time):
+            self.player.set_time(int(position.toMilliseconds()))
+        
+        def GSkip(self, skipTime:TimeUtils.Time):
+            newPosition = self.GGetPosition() + skipTime
+            if (newPosition > self.GGetLength()):
+                newPosition = TimeUtils.Time(0)
+            self.GSeekPosition(newPosition)
 
 class GApplication(QtWidgets.QApplication):
     '''

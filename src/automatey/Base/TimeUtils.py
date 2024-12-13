@@ -70,6 +70,24 @@ class Time:
     def __sub__(self, obj):
         return Time(self.microseconds - obj.microseconds)
     
+    def __eq__(self, obj):
+        return self.microseconds == obj.microseconds
+
+    def __ne__(self, obj):
+        return self.microseconds != obj.microseconds
+
+    def __lt__(self, obj):
+        return self.microseconds < obj.microseconds
+
+    def __le__(self, obj):
+        return self.microseconds <= obj.microseconds
+
+    def __gt__(self, obj):
+        return self.microseconds > obj.microseconds
+
+    def __ge__(self, obj):
+        return self.microseconds >= obj.microseconds
+    
     @staticmethod
     def createFromString(formattedString:str):
         '''
