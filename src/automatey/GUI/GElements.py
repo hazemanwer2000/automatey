@@ -241,6 +241,9 @@ class GWidgets:
             # ? Event-handlers.
             self.clicked.connect(self.INTERNAL_onClicked)
             
+            # PyQt6: Force 'QButton' not to be focusable.
+            self.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
+            
         def INTERNAL_onClicked(self):
             if GUtils.GEventHandlers.GClickEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GClickEventHandler].fcn()
@@ -534,12 +537,12 @@ class GWidgets:
             # ? Setting-up (un-)mute button.
 
             self.unmuteButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaVolume),
-                                               toolTip='Mute')
-            self.unmuteButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_mute))
+                                               toolTip='(Un-)mute')
+            self.unmuteButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_toggleMute))
             
             self.muteButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaVolumeMute),
-                                               toolTip='Un-mute')
-            self.muteButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_unmute))
+                                               toolTip='(Un-)mute')
+            self.muteButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_toggleMute))
             
             self.muteStackedLayout = GLayouts.GStackedLayout([self.muteButton, self.unmuteButton], self.unmuteButton)
             self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
@@ -561,12 +564,23 @@ class GWidgets:
             QtCore.Qt.Key.Key_Apostrophe:
                 (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipForward(self, TimeUtils.Time.createFromSeconds(1.0))),
             
-            # Volume up/down
+            # Volume up/down/mute
             QtCore.Qt.Key.Key_Up:
                 (lambda self: GWidgets.GVideoPlayer.INTERNAL_adjustVolume(self, 10)),
             QtCore.Qt.Key.Key_Down:
                 (lambda self: GWidgets.GVideoPlayer.INTERNAL_adjustVolume(self, -10)),
+            QtCore.Qt.Key.Key_M:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_toggleMute(self)),
+
+            # Play/Pause
+            QtCore.Qt.Key.Key_Space:
+                (lambda self: GWidgets.GVideoPlayer.INTERNAL_togglePlay(self)),
         }
+
+        def enterEvent(self, event):
+            # PyQt6: Capture focus whenever 'EnterEvent' occurs.
+            self.setFocus()
+            event.accept()
         
         def keyPressEvent(self, event):
             key = event.key()
@@ -589,20 +603,27 @@ class GWidgets:
         def INTERNAL_pause(self):
             self.renderer.GPause()
             self.playPauseStackedLayout.GSetCurrentElement(self.playButton)
+
+        def INTERNAL_togglePlay(self):
+            if self.renderer.GIsPlaying():
+                self.INTERNAL_pause()
+            else:
+                self.INTERNAL_play()
         
         def INTERNAL_stop(self):
             self.renderer.GStop()
+            self.playPauseStackedLayout.GSetCurrentElement(self.pauseButton)
         
         def INTERNAL_adjustVolume(self, delta:int):
             self.renderer.GAdjustVolume(delta)
 
-        def INTERNAL_mute(self):
-            self.renderer.GMute()
-            self.muteStackedLayout.GSetCurrentElement(self.muteButton)
-
-        def INTERNAL_unmute(self):
-            self.renderer.GUnmute()
-            self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
+        def INTERNAL_toggleMute(self):
+            if self.renderer.GIsMute():
+                self.renderer.GUnmute()
+                self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
+            else:
+                self.renderer.GMute()
+                self.muteStackedLayout.GSetCurrentElement(self.muteButton)
 
         def GRenderer(self):
             '''
@@ -639,6 +660,9 @@ class GWidgets:
         def GPause(self):
             if self.player.is_playing():
                 self.player.pause()
+    
+        def GIsPlaying(self):
+            return self.player.is_playing()
         
         def GStop(self):
             self.GPlay()
@@ -679,6 +703,9 @@ class GWidgets:
         def GUnmute(self):
             self.isMute = False
             self.player.audio_set_volume(self.volume)
+
+        def GIsMute(self):
+            return self.isMute
 
 class GApplication(QtWidgets.QApplication):
     '''

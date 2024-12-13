@@ -12,6 +12,9 @@ class Constants:
 class Time:
     '''
     Representation of time, in micro-seconds.
+    
+    Note that,
+    - Negative value(s) are not supported.
     '''
     
     def __init__(self, microseconds:int):
