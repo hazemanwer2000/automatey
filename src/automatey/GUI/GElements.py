@@ -477,6 +477,8 @@ class GWidgets:
             layout.setRowStretch(1, 0)
             layout.setRowMinimumHeight(1, 0)
             layout.setColumnStretch(0, 1)
+            layout.setContentsMargins(5, 5, 5, 5)
+            layout.setSpacing(5)
             self.setLayout(layout)
             
             # ? Setting-up video-renderer.
@@ -485,26 +487,29 @@ class GWidgets:
             
             # ? Setting-up control-layout (i.e., layout for control-panel).
             
-            controlLayout = GLayouts.GGridLayout(1, 1, Graphics.SymmetricMargin(5), elementSpacing=5)
-            layout.addWidget(controlLayout, 1, 0, 1, 1)
+            self.controlGridLayout = GLayouts.GGridLayout(1, 1, Graphics.SymmetricMargin(0), elementSpacing=5)
+            layout.addWidget(self.controlGridLayout, 1, 0, 1, 1)
             
-            playButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPlay),
+            self.playButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPlay),
                                                toolTip='Play')
-            playButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_play))
+            self.playButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_play))
             
-            pauseButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPause),
+            self.pauseButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPause),
                                                toolTip='Pause')
-            pauseButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_pause))
+            self.pauseButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_pause))
             
-            playPauseStackedLayout = GLayouts.GStackedLayout([playButton, pauseButton])
-            self.
-            self.controlLayout.GSetElement(self.playButton, 0, 0, 1, 1)
+            self.playPauseStackedLayout = GLayouts.GStackedLayout([self.playButton, self.pauseButton], self.pauseButton)
+            self.playPauseStackedLayout.GSetCurrentElement(self.pauseButton)
+            
+            self.controlGridLayout.GSetElement(self.playPauseStackedLayout, 0, 0, 1, 1)
             
         def INTERNAL_play(self):
             self.renderer.GPlay()
+            self.playPauseStackedLayout.GSetCurrentElement(self.pauseButton)
 
         def INTERNAL_pause(self):
             self.renderer.GPause()
+            self.playPauseStackedLayout.GSetCurrentElement(self.playButton)
         
         def GRenderer(self):
             '''
