@@ -177,9 +177,14 @@ class GWidgets:
             
             self.setText(text)
             
+            initCheckState = QtCore.Qt.CheckState.Checked if isChecked else QtCore.Qt.CheckState.Unchecked
+            self.setCheckState(initCheckState)
             
-            self.setCheckState(QtCore.Qt.CheckState.Checked)
-
+        def GIsChecked(self):
+            '''
+            (...)
+            '''
+            return True if (self.checkState() == QtCore.Qt.CheckState.Checked) else False
 
 class GApplication(QtWidgets.QApplication):
     '''

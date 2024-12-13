@@ -89,4 +89,8 @@ class GEventHandler:
 
 class GEventHandlers:
     
-    class GClickEventHandler(GEventHandler): pass
+    class GClickEventHandler(GEventHandler):
+        '''
+        On-click, expects zero arguments.
+        '''
+        pass
