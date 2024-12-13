@@ -29,6 +29,25 @@ class GLayouts:
     - Layout(s) are treated as any other GUI element.
     '''
 
+    class GStackedLayout(QtWidgets.QStackedWidget):
+        def __init__(self, elements):
+            super().__init__()
+            
+            for element in elements:
+                self.addWidget(element)
+                
+        def GSetCurrentElement(self, element):
+            '''
+            Set the current element.
+            '''
+            self.setCurrentWidget(element)
+
+        def GSetCurrentElementByIndex(self, index):
+            '''
+            Set the current element.
+            '''
+            self.setCurrentIndex(index)
+
     class GGridLayout(QtWidgets.QWidget):
         '''
         A grid (e.g., 2x2) layout.
