@@ -2,7 +2,7 @@
 # External libraries
 import PyQt6.QtWidgets as QtWidgets
 import PyQt6.QtGui as QtGui
-from PyQt6.QtCore import Qt
+import PyQt6.QtCore as QtCore
 
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
@@ -30,32 +30,30 @@ class GImage:
         # PyQt: Derriving image.
         self.qImage = QtGui.QImage(cv2ImgHandler.data, originalSize[0], originalSize[1], QtGui.QImage.Format.Format_RGB888).rgbSwapped()
         if size != None:
-            self.qImage = self.qImage.scaled(size[0], size[1], Qt.AspectRatioMode.IgnoreAspectRatio)
-            
-    def INTERNAL_toQImage(self):
-        return self.qImage
+            self.qImage = self.qImage.scaled(size[0], size[1], QtCore.Qt.AspectRatioMode.IgnoreAspectRatio)
 
 class GIcon:
     '''
     Icon, may be used with all element(s) of the GUI.
     '''
     
-    def __init__(self, qIcon:QtGui.QIcon):
+    def __init__(self, qIcon:QtGui.QIcon, size=None):
         self.qIcon = qIcon
+        self.size = size
     
     @staticmethod
-    def GCreateFromFile(f:FileUtils.File):
+    def GCreateFromFile(f:FileUtils.File, size=None):
         '''
         Create from file.
         '''
-        return None
+        return GIcon(QtGui.QIcon(str(f)), size=size)
     
     @staticmethod
-    def GCreateFromLibrary(standardIcon):
+    def GCreateFromLibrary(standardIcon, size=None):
         '''
         Creates an Icon from the library (i.e., a standard icon).
         '''
-        return GIcon(QtWidgets.QApplication.instance().style().standardIcon(standardIcon.qStandardIcon))
+        return GIcon(QtWidgets.QApplication.instance().style().standardIcon(standardIcon.qStandardIcon), size=size)
 
     class GStandardIcon:
 

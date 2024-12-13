@@ -2,7 +2,7 @@
 # External Libraries
 import PyQt6.QtWidgets as QtWidgets
 import PyQt6.QtGui as QtGui
-from PyQt6.QtCore import Qt
+import PyQt6.QtCore as QtCore
 
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
@@ -84,8 +84,8 @@ class GScrollArea(QtWidgets.QScrollArea):
         
         # ? Specify if vertical/horizontal scrolling is always on.
         
-        verticalScrollBarPolicy = (Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isVerticalScrollBar else (Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        horizontalScrollBarPolicy = (Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isHorizontalScrollBar else (Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        verticalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isVerticalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        horizontalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isHorizontalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         
         self.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
         self.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
@@ -113,10 +113,16 @@ class GWidgets:
 
     class GButton(QtWidgets.QPushButton):
         
-        def __init__(self, text:str=None):
+        def __init__(self, text:str=None, icon:GUtils.GIcon=None):
             super().__init__()
             
-            self.setText(text)
+            if text != None:
+                self.setText(text)
+            
+            if icon != None:
+                self.setIcon(icon.qIcon)
+                if icon.size != None:
+                    self.setIconSize(QtCore.QSize(icon.size[0], icon.size[1]))
             
     class GLabel(QtWidgets.QLabel):
 
@@ -127,8 +133,7 @@ class GWidgets:
                 self.setText(text)
             
             if img != None:
-                qImage = img.INTERNAL_toQImage()
-                self.setPixmap(QtGui.QPixmap.fromImage(qImage))
+                self.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
 
 class GApplication(QtWidgets.QApplication):
     '''
