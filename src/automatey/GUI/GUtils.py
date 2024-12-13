@@ -88,18 +88,18 @@ class GEventHandler:
         self.fcn = fcn
 
 class GEventHandlers:
+    '''
+    Different event-handler(s).
+    
+    Note,
+    - All expect no argument(s), except otherwise specified.
+    '''
     
     class GClickEventHandler(GEventHandler):
-        '''
-        On-click, expects zero arguments.
-        '''
         pass
 
     class GSelectionChangeEventHandler(GEventHandler):
-        '''
-        On-selection-change, expects one argument.
-        
-        For,
-        - CheckBox: New value is passed.
-        '''
+        pass
+
+    class GTextChangeEventHandler(GEventHandler):
         pass

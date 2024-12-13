@@ -255,6 +255,28 @@ class GWidgets:
             if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
+    class QLineEdit(QtWidgets.QLineEdit, INTERNAL.GEventManager):
+        
+        def __init__(self, placeholder:str=None):
+            QtWidgets.QLineEdit.__init__(self)
+            INTERNAL.GEventManager.__init__(self)
+            
+            if placeholder != None:
+                self.setPlaceholderText(placeholder)
+                
+            # ? Event-handlers.
+            self.textChanged.connect(self.INTERNAL_textChanged)
+        
+        def GGetText(self):
+            '''
+            Get text.
+            '''
+            return self.text()
+            
+        def INTERNAL_textChanged(self):
+            if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
+                self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
+
 class GApplication(QtWidgets.QApplication):
     '''
     Only one instance of 'Application' is required.
