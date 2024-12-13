@@ -152,9 +152,9 @@ class GWidgets:
         Color displayer, and selector.
         '''
         
-        def __init__(self, color:ColorUtils.Color):
+        def __init__(self, initColor:ColorUtils.Color):
             super().__init__()
-            self.color = color
+            self.color = initColor
             
             # ? Set initial color.
             self.INTERNAL_setColor(self.color)
@@ -177,8 +177,10 @@ class GWidgets:
             
         def mousePressEvent(self, event):
             if event.button() == QtCore.Qt.MouseButton.LeftButton:
-                self.color = GStandardDialog.GSelectColor()
-                self.INTERNAL_setColor(self.color)
+                newColor = GStandardDialog.GSelectColor(initColor=self.color)
+                if newColor != None:
+                    self.color = newColor
+                    self.INTERNAL_setColor(self.color)
                 event.accept()
 
     class GButton(QtWidgets.QPushButton, INTERNAL.GEventManager):
@@ -511,12 +513,14 @@ class GStandardDialog:
         return path
     
     @staticmethod
-    def GSelectColor() -> ColorUtils.Color:
+    def GSelectColor(initColor:ColorUtils.Color=None) -> ColorUtils.Color:
         '''
         Select a color.
         '''
         colorDialog = QtWidgets.QColorDialog(None)
         colorDialog.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
+        if initColor != None:
+            colorDialog.setCurrentColor(QtGui.QColor('#' + initColor.asHEX()))
         colorSelected = None
         if colorDialog.exec():
             colorSelected = ColorUtils.Color.fromHEX(colorDialog.selectedColor().name()[1:])
