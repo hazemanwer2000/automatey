@@ -59,6 +59,8 @@ class GIcon:
 
         class FileSave:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton
+        class FileOpen:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_DirIcon
 
         class MediaPlay:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaPlay
@@ -70,3 +72,12 @@ class GIcon:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaSeekForward
         class MediaSeekBackward:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaSeekBackward
+        class MediaVolume:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaVolume
+        class MediaVolumeMute:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_MediaVolumeMuted
+
+        class ScrollUp:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_TitleBarShadeButton
+        class ScrollDown:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_TitleBarUnshadeButton
