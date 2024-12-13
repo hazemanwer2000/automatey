@@ -235,11 +235,17 @@ class GWidgets:
             # ? Event-handlers.
             self.currentIndexChanged.connect(self.INTERNAL_currentIndexChanged)
             
-        def GGetItem(self):
+        def GGetSelectedItem(self):
             '''
             Get current item.
             '''
             return self.currentText()
+        
+        def GGetSelectedItemByIndex(self):
+            '''
+            Get index of the current item.
+            '''
+            return self.currentIndex()
 
         def INTERNAL_currentIndexChanged(self, newIndex):
             if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
@@ -262,18 +268,48 @@ class GWidgets:
             # ? Event-handlers.
             self.itemSelectionChanged.connect(self.INTERNAL_itemSelectionChange)
         
-        def GGetItems(self):
+        def GGetSelectedItems(self):
             '''
             Get current item(s).
             '''
             return [x.text() for x in self.selectedItems()]
 
-        def GGetItem(self):
+        def GGetSelectedItem(self):
             '''
             Get current item.
             '''
             currentItem = self.currentItem()
             return None if (currentItem == None) else currentItem.text()
+
+        def GGetSelectedItemByIndex(self) -> int:
+            '''
+            Get index of current item. If none are selected, `-1` is returned.
+            '''
+            return self.currentRow()
+
+        def GAddItem(self, item):
+            '''
+            Add item to (end-of-)list.
+            '''
+            self.addItem(item)
+
+        def GInsertItemByIndex(self, item, index):
+            '''
+            Add item to (end-of-)list.
+            '''
+            self.insertItem(index, item)
+            
+        def GRemoveItemByIndex(self, index):
+            '''
+            Remove item at a specific index.
+            '''
+            self.takeItem(index)
+
+        def GRemoveAllItems(self):
+            '''
+            Remove all item(s).
+            '''
+            self.clear()
 
         def INTERNAL_itemSelectionChange(self):
             if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
