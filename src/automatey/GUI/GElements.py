@@ -472,6 +472,9 @@ class GWidgets:
                 self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
 
     class GSlider(QtWidgets.QSlider, INTERNAL.GEventManager):
+        '''
+        A slider (deals only with integer value(s)).
+        '''
         
         def __init__(self, valueRange, initValue, isHorizontal=True):
             QtWidgets.QSlider.__init__(self)
@@ -496,7 +499,9 @@ class GWidgets:
             self.setValue(int(value))
             
             # ? Call event-handler, if present.
-            
+            if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
+                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
+                
             event.accept()
             
         def mousePressEvent(self, event):
@@ -504,6 +509,18 @@ class GWidgets:
         
         def mouseMoveEvent(self, event):
             self.INTERNAL_mouseEvent(event)
+            
+        def GSetValue(self, value):
+            '''
+            Set value.
+            '''
+            self.setValue(value)
+
+        def GGetValue(self):
+            '''
+            Get value.
+            '''
+            return self.value()
 
     class GVideoPlayer(QtWidgets.QWidget):
         
