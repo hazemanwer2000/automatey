@@ -624,12 +624,45 @@ class GWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(title)
         self.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
     
-    def setTitle(self, title):
+    def GSetTitle(self, title):
         '''
         Set title of window.
         '''
         self.setWindowTitle(title)
-    
+
+    def GCreateToolbar(self, contract):
+        '''
+        Creates a Tool-bar based on a contract.
+        
+        Contract shall consist of a list of dictionaries, with optional `None` value(s) in-between, intepretted as separators.
+        
+        Each dictionary, representing a button, shall specify,
+        - `icon`.
+        - `tool-tip`.
+        - `handler`.
+        - `is-checkable`, specifying whether button is checkable.
+            - Note, if `is-checkable`, `handler` receives a single `bool` argument.
+        '''
+        
+        toolbar = QtWidgets.QToolBar("My main toolbar")
+        toolbar.setMovable(False)
+        toolbar.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.PreventContextMenu)
+        
+        for term in contract:
+            if term == None:
+                toolbar.addSeparator()
+            else:
+                action = QtGui.QAction(
+                    term['icon'].qIcon,
+                    term['tool-tip'],
+                    self
+                )
+                action.triggered.connect(term['handler'])
+                action.setCheckable(term['is-checkable'])
+                toolbar.addAction(action)
+        
+        self.addToolBar(toolbar)
+  
     def GShow(self):
         '''
         Show window.
