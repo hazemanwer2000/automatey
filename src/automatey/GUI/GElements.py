@@ -353,7 +353,7 @@ class GWidgets:
 
     class GLineEdit(QtWidgets.QLineEdit, INTERNAL.GEventManager):
         
-        def __init__(self, placeholder:str=None):
+        def __init__(self, placeholder:str=None, isEditable=True):
             QtWidgets.QLineEdit.__init__(self)
             INTERNAL.GEventManager.__init__(self)
             
@@ -367,6 +367,15 @@ class GWidgets:
             font = QtGui.QFont("Consolas")
             font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
             self.setFont(font)
+            
+            # ? Set editable-mode.
+            self.setEditable(isEditable)
+        
+        def setEditable(self, flag:bool):
+            '''
+            Set editable-mode.
+            '''
+            self.setReadOnly(not flag)
         
         def GGetText(self):
             '''
@@ -380,7 +389,7 @@ class GWidgets:
     
     class GTextEdit(QtWidgets.QPlainTextEdit, INTERNAL.GEventManager):
         
-        def __init__(self, placeholder:str=None):
+        def __init__(self, placeholder:str=None, isEditable=True):
             QtWidgets.QTextEdit.__init__(self)
             INTERNAL.GEventManager.__init__(self)
             
@@ -394,6 +403,15 @@ class GWidgets:
             font = QtGui.QFont("Consolas")
             font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
             self.setFont(font)
+
+            # ? Set editable-mode.
+            self.setEditable(isEditable)
+        
+        def setEditable(self, flag:bool):
+            '''
+            Set editable-mode.
+            '''
+            self.setReadOnly(not flag)
             
         def keyPressEvent(self, event):
             # PyQt6: When 'TAB' is pressed, insert space(s) instead.
