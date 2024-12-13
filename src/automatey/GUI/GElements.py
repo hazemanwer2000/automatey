@@ -147,6 +147,40 @@ class GWidgets:
             if size != None:
                 self.setFixedSize(size[0], size[1])
 
+    class GColorSelector(QtWidgets.QWidget):
+        '''
+        Color displayer, and selector.
+        '''
+        
+        def __init__(self, color:ColorUtils.Color):
+            super().__init__()
+            self.color = color
+            
+            # ? Set initial color.
+            self.INTERNAL_setColor(self.color)
+            
+            # ? Set (i.e., fix) size to a square-size.
+            self.setFixedSize(30, 30)
+            
+        def INTERNAL_setColor(self, color:ColorUtils.Color):
+            # ? Setting fill-color of widget.
+            self.setAutoFillBackground(True)
+            palette = self.palette()
+            palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor('#' + color.asHEX()))
+            self.setPalette(palette)
+            
+        def GGetColor(self) -> ColorUtils.Color:
+            '''
+            Get currently selected color.
+            '''
+            return self.color
+            
+        def mousePressEvent(self, event):
+            if event.button() == QtCore.Qt.MouseButton.LeftButton:
+                self.color = GStandardDialog.GSelectColor()
+                self.INTERNAL_setColor(self.color)
+                event.accept()
+
     class GButton(QtWidgets.QPushButton, INTERNAL.GEventManager):
         '''
         Can handle an icon, as well as text.
