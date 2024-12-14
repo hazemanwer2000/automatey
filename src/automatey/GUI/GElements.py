@@ -153,7 +153,7 @@ class GDecorations:
             layout.addWidget(element, 0, 0, 1, 1)
 
 class GWidgets:
-    ''''
+    '''
     Note that,
     - Widget(s) are treated as any other GUI element.
     '''
@@ -524,6 +524,9 @@ class GWidgets:
             return self.value()
 
     class GVideoPlayer(QtWidgets.QWidget):
+        '''
+        Renders a video, along with an associated player.
+        '''
         
         def __init__(self, f_video:FileUtils.File):
             QtWidgets.QWidget.__init__(self)
@@ -662,12 +665,18 @@ class GWidgets:
                 super().keyPressEvent(event)                
         
         def INTERNAL_EventHandler_seekerValueUpdate(self):
+            '''
+            Called via a timing event, to update the seeker.
+            '''
             ratio = int(self.renderer.GGetPosition()) / int( self.renderer.GGetLength())
             value = int(ratio * self.seekerMaxValue)
             self.seeker.GSetValue(value)
             return 0
         
         def INTERNAL_EventHandler_seekerValueChanged(self):
+            '''
+            Called via a selection-changed event, to seek into the video.
+            '''
             ratio = self.seeker.GGetValue() / self.seekerMaxValue
             videoLengthInMS = int(self.renderer.GGetLength().toMilliseconds())
             
@@ -716,7 +725,10 @@ class GWidgets:
             return self.renderer
 
     class GVideoRenderer(QtWidgets.QFrame):
-        
+        '''
+        Renders a video.
+        '''
+       
         def __init__(self):
             QtWidgets.QFrame.__init__(self)
             
@@ -738,7 +750,11 @@ class GWidgets:
                                              TimeUtils.Time.createFromMilliseconds(1))
         
         def INTERNAL_EventHandler_1ms(self):
-            
+            '''
+            Timing event, to handle:
+            - Robustness issue(s).
+            - Support video-on-repeat feature. 
+            '''
             # ? If position exceeds length (which is offset), seek '0'.
             position = self.GGetPosition()
             if (position > self.GGetLength()):
@@ -748,62 +764,119 @@ class GWidgets:
             return 0
         
         def GLoad(self, f:FileUtils.File):
+            '''
+            Load video.
+            
+            Note,
+            - Video auto-plays.
+            '''
             media = self.VLCInstance.media_new(str(f))
             self.player.set_media(media)
             self.player.play()
         
         def GPlay(self):
+            '''
+            Play video.
+            '''
             if not self.player.is_playing():
                 self.player.play()
 
         def GPause(self):
+            '''
+            Pause video.
+            '''
             if self.player.is_playing():
                 self.player.pause()
     
         def GIsPlaying(self):
+            '''
+            (...)
+            '''
             return self.player.is_playing()
         
         def GStop(self):
+            '''
+            Seek `0` and play.
+            '''
             self.GPlay()
             self.player.set_time(0)
         
         def GGetLength(self) -> TimeUtils.Time:
+            '''
+            Get video-length (not accurate).
+            '''
             return TimeUtils.Time.createFromMilliseconds(self.player.get_length()) - self.seekEndOffset
         
         def GGetPosition(self) -> TimeUtils.Time:
+            '''
+            (...)
+            '''
             return TimeUtils.Time.createFromMilliseconds(self.player.get_time())
         
         def GSeekPosition(self, position:TimeUtils.Time):
+            '''
+            Seek position. If out-of-bounds, `0` is seeked.
+            '''
             if (position > self.GGetLength()):
                 position = TimeUtils.Time(0)
             self.player.set_time(int(position.toMilliseconds()))
         
         def GSkipForward(self, skipTime:TimeUtils.Time):
+            '''
+            Skip forward. If out-of-bounds, `0` is seeked.
+            '''
             newPosition = self.GGetPosition() + skipTime
             self.GSeekPosition(newPosition)
 
         def GSkipBackward(self, skipTime:TimeUtils.Time):
+            '''
+            Skip backward. If out-of-bounds, `0` is seeked.
+            '''
             newPosition = self.GGetPosition() - skipTime
             self.GSeekPosition(newPosition)
 
         def GAdjustVolume(self, delta:int):
+            '''
+            Adjust volume (0-100). Value is clamped.
+            '''
             self.GSetVolume(self.volume + delta)
         
         def GSetVolume(self, value:int):
+            '''
+            Adjust volume (0-100). Value is clamped.
+            '''
             self.volume = value
             self.volume = min(100, max(0, self.volume))
             if not self.isMute:
                 self.player.audio_set_volume(self.volume)
         
         def GMute(self):
+            '''
+            Mute.
+            
+            Note,
+            - Volume adjustment(s) does not affect the mute feature.
+            '''
             self.isMute = True
             self.player.audio_set_volume(0)
 
         def GUnmute(self):
+            '''
+            Un-Mute.
+            
+            Note,
+            - Volume adjustment(s) does not affect the mute feature.
+            '''
             self.isMute = False
             self.player.audio_set_volume(self.volume)
 
         def GIsMute(self):
+            '''
+            (...)
+            
+            Note,
+            - Volume adjustment(s) does not affect the mute feature.
+            '''
             return self.isMute
 
 class GApplication(QtWidgets.QApplication):
