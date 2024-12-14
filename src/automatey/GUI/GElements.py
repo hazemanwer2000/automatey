@@ -10,7 +10,6 @@ import automatey.GUI.GUtils as GUtils
 import automatey.GUI.GConcurrency as GConcurrency
 import automatey.Base.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as Graphics
-import automatey.Media.ImageUtils as ImageUtils
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.MathUtils as MathUtils
@@ -593,7 +592,6 @@ class GWidgets:
 
             # ? Setting-up seeker (i.e., slider).
             
-            # ? ? Maximum has to be reduced by a few milli-seconds, to avoid invalid seek-time value(s).
             self.seekerMaxValue = 10000000
             self.seeker = GWidgets.GSlider(valueRange=[0, self.seekerMaxValue],
                                            initValue=0,
