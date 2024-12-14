@@ -7,6 +7,7 @@ import vlc
 
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
+import automatey.GUI.GConcurrency as GConcurrency
 import automatey.Base.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as Graphics
 import automatey.Media.ImageUtils as ImageUtils
@@ -524,7 +525,7 @@ class GWidgets:
 
     class GVideoPlayer(QtWidgets.QWidget):
         
-        def __init__(self):
+        def __init__(self, f_video:FileUtils.File):
             QtWidgets.QWidget.__init__(self)
             
             # ? Configruing root-layout.
@@ -539,6 +540,7 @@ class GWidgets:
             
             # ? Setting-up video-renderer.
             self.renderer = GWidgets.GVideoRenderer()
+            self.renderer.GLoad(f_video)
             layout.addWidget(self.renderer, 0, 0, 1, 1)
             
             # ? Setting-up control-layout (i.e., layout for control-panel).
@@ -587,8 +589,21 @@ class GWidgets:
             self.controlGridLayout.GSetElement(self.seekForwardButton, 0, 3, 1, 1)
 
             # ? Setting-up seeker (i.e., slider).
-            self.seeker = GWidgets.GSlider([0, 100000], 0, isHorizontal=True)
+            
+            # ? ? Maximum has to be reduced by a few milli-seconds, to avoid invalid seek-time value(s).
+            self.seekerMaxValue = 10000000
+            self.seeker = GWidgets.GSlider(valueRange=[0, self.seekerMaxValue],
+                                           initValue=0,
+                                           isHorizontal=True)
+            self.seeker.GSetEventHandler(GUtils.GEventHandlers.GSelectionChangeEventHandler(self.INTERNAL_EventHandler_seekerValueChanged))
+            
             self.controlGridLayout.GSetElement(self.seeker, 0, 4, 1, 1)
+            
+            self.seekerUpdateTimer = GConcurrency.GTimer(self.INTERNAL_EventHandler_seekerValueUpdate,
+                                                         TimeUtils.Time.createFromMilliseconds(1))
+            
+            # ? ? Offset video-length by a few milli-second(s).
+            self.videoLengthOffset = TimeUtils
 
             # ? Setting-up (un-)mute button.
 
@@ -646,6 +661,19 @@ class GWidgets:
             else:
                 super().keyPressEvent(event)                
         
+        def INTERNAL_EventHandler_seekerValueUpdate(self):
+            ratio = int(self.renderer.GGetPosition()) / int( self.renderer.GGetLength())
+            value = int(ratio * self.seekerMaxValue)
+            self.seeker.GSetValue(value)
+            return 0
+        
+        def INTERNAL_EventHandler_seekerValueChanged(self):
+            ratio = self.seeker.GGetValue() / self.seekerMaxValue
+            videoLengthInMS = int(self.renderer.GGetLength().toMilliseconds())
+            
+            seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoLengthInMS])
+            self.renderer.GSeekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
+        
         def INTERNAL_skipForward(self, skipTime:TimeUtils.Time):
             self.renderer.GSkipForward(skipTime)
 
@@ -689,13 +717,12 @@ class GWidgets:
 
     class GVideoRenderer(QtWidgets.QFrame):
         
-        VLCInstance = vlc.Instance()
-        
         def __init__(self):
             QtWidgets.QFrame.__init__(self)
             
             # ? Setting up VLC media-player.
-            self.player = GWidgets.GVideoRenderer.VLCInstance.media_player_new()
+            self.VLCInstance = vlc.Instance()
+            self.player = self.VLCInstance.media_player_new()
             # Warning: OS-specific (Windows-OS)
             self.player.set_hwnd(self.winId())
             
@@ -703,9 +730,25 @@ class GWidgets:
             self.isMute = False
             self.volume = 100
             self.player.audio_set_volume(self.volume)
+            
+            # ? For robustness, offsetting video-length by a few milli-seconds.
+            self.seekEndOffset = TimeUtils.Time.createFromMilliseconds(500)
+            # ? To support video-on-repeat, timer will be triggered every 1-ms.
+            self.timer = GConcurrency.GTimer(self.INTERNAL_EventHandler_1ms,
+                                             TimeUtils.Time.createFromMilliseconds(1))
+        
+        def INTERNAL_EventHandler_1ms(self):
+            
+            # ? If position exceeds length (which is offset), seek '0'.
+            position = self.GGetPosition()
+            if (position > self.GGetLength()):
+                position = TimeUtils.Time(0)
+                self.player.set_time(int(position.toMilliseconds()))
+            
+            return 0
         
         def GLoad(self, f:FileUtils.File):
-            media = GWidgets.GVideoRenderer.VLCInstance.media_new(str(f))
+            media = self.VLCInstance.media_new(str(f))
             self.player.set_media(media)
             self.player.play()
         
@@ -725,18 +768,18 @@ class GWidgets:
             self.player.set_time(0)
         
         def GGetLength(self) -> TimeUtils.Time:
-            return TimeUtils.Time.createFromMilliseconds(self.player.get_length())
+            return TimeUtils.Time.createFromMilliseconds(self.player.get_length()) - self.seekEndOffset
         
         def GGetPosition(self) -> TimeUtils.Time:
             return TimeUtils.Time.createFromMilliseconds(self.player.get_time())
         
         def GSeekPosition(self, position:TimeUtils.Time):
+            if (position > self.GGetLength()):
+                position = TimeUtils.Time(0)
             self.player.set_time(int(position.toMilliseconds()))
         
         def GSkipForward(self, skipTime:TimeUtils.Time):
             newPosition = self.GGetPosition() + skipTime
-            if (newPosition > self.GGetLength()):
-                newPosition = TimeUtils.Time(0)
             self.GSeekPosition(newPosition)
 
         def GSkipBackward(self, skipTime:TimeUtils.Time):

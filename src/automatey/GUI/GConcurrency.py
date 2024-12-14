@@ -4,6 +4,9 @@ import PyQt6.QtWidgets as QtWidgets
 import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as QtCore
 
+# Internal Libraries
+import automatey.Base.TimeUtils as TimeUtils
+
 class GThread(QtCore.QThread):
     '''
     A thread, with two handler(s):
@@ -76,3 +79,21 @@ class GQueue:
             data = self.queue.pop(0)
         self.mutex.unlock()
         return data
+
+class GTimer(QtCore.QTimer):
+    
+    '''
+    Timer, that keeps executing a runnable, as long as it returns `0`.
+    '''
+    
+    def __init__(self, fcn, period:TimeUtils.Time):
+        super().__init__()
+        
+        self.timeout.connect(self.INTERNAL_runnable)
+        
+        self.fcn = fcn
+        self.start(int(period.toMilliseconds()))
+    
+    def INTERNAL_runnable(self):
+        if self.fcn() != 0:
+            self.stop()
