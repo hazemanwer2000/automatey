@@ -59,3 +59,13 @@ class QPlainTextEdit(QtWidgets.QPlainTextEdit):
         if self.keyPressEventFcn != None:
             if (self.keyPressEventFcn(event) != 0):
                 QtWidgets.QPlainTextEdit.keyPressEvent(self, event)
+
+class QWidget(QtWidgets.QWidget):
+    
+    def __init__(self):
+        QtWidgets.QPlainTextEdit.__init__(self)
+        self.mousePressEventFcn = None
+        
+    def mousePressEvent(self, event):
+        if self.mousePressEventFcn != None:
+            self.mousePressEventFcn(event)

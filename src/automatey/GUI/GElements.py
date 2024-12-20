@@ -354,18 +354,33 @@ class Widgets:
             A simple color-block.
             '''
             
-            def __init__(self, color:ColorUtils.Color, size=None):
-                Widget.__init__(self, QtWidgets.QWidget())
+            def __init__(self, initColor:ColorUtils.Color, size=None):
+                Widget.__init__(self, PyQt6Wrapper.QWidget())
                 
+                # ? Setting fill-color of widget.
+                self.setColor(initColor)
+                self.color = initColor
+                
+                # ? Set (i.e., fix) size, if specified.
+                if size != None:
+                    self.qWidget.setFixedSize(size[0], size[1])
+
+            def setColor(self, color:ColorUtils.Color):
+                '''
+                Set color.
+                '''
                 # ? Setting fill-color of widget.
                 self.qWidget.setAutoFillBackground(True)
                 palette = self.qWidget.palette()
                 palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor('#' + color.asHEX()))
                 self.qWidget.setPalette(palette)
+                self.color = color
                 
-                # ? Set (i.e., fix) size, if specified.
-                if size != None:
-                    self.qWidget.setFixedSize(size[0], size[1])
+            def getColor(self) -> ColorUtils.Color:
+                '''
+                Get color.
+                '''
+                return self.color
 
         class Button(Widget, INTERNAL.EventManager):
             '''
@@ -693,43 +708,26 @@ class Widgets:
                 if GUtils.EventHandlers.TextChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.TextChangeEventHandler].fcn()
 
-    class GColorSelector(QtWidgets.QWidget):
-        '''
-        Color displayer, and selector.
-        '''
-        
-        def __init__(self, initColor:ColorUtils.Color):
-            super().__init__()
-            self.color = initColor
-            
-            # ? Set initial color.
-            self.INTERNAL_setColor(self.color)
-            
-            # ? Set (i.e., fix) size to a square-size.
-            self.setFixedSize(30, 30)
-            
-        def INTERNAL_setColor(self, color:ColorUtils.Color):
-            # ? Setting fill-color of widget.
-            self.setAutoFillBackground(True)
-            palette = self.palette()
-            palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor('#' + color.asHEX()))
-            self.setPalette(palette)
-            
-        def GGetColor(self) -> ColorUtils.Color:
+    class Complex:
+
+        class ColorSelector(Widget):
             '''
-            Get currently selected color.
+            Color displayer, and selector.
             '''
-            return self.color
             
-        def mousePressEvent(self, event):
-            if event.button() == QtCore.Qt.MouseButton.LeftButton:
-                newColor = StandardDialog.selectColor(initColor=self.color)
+            def __init__(self, initColor:ColorUtils.Color):
+                # ? Set initial color, and (fixed-)size.
+                self.colorBlock = Widgets.Basics.ColorBlock(initColor=initColor, size=[30, 30])
+                Widget.__init__(self, self.colorBlock.qWidget)
+                self.colorBlock.qWidget.mousePressEventFcn = self.INTERNAL_mousePressEvent
+            
+            def getColor(self):
+                return self.colorBlock.getColor()
+                
+            def INTERNAL_mousePressEvent(self, event):
+                newColor = StandardDialog.selectColor(initColor=self.colorBlock.getColor())
                 if newColor != None:
-                    self.color = newColor
-                    self.INTERNAL_setColor(self.color)
-                event.accept()
-            else:
-                super().mousePressEvent(event)
+                    self.colorBlock.setColor(newColor)
 
     class GVideoPlayer(QtWidgets.QWidget):
         '''
