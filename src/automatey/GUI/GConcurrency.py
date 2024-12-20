@@ -39,7 +39,7 @@ class GThread(QtCore.QThread):
     def run(self):
         self.mainFcn(self)
 
-class GQueue:
+class Queue:
     '''
     A thread-safe queue.
     '''
@@ -49,7 +49,7 @@ class GQueue:
         self.mutex = QtCore.QMutex()
         self.condition = QtCore.QWaitCondition()
     
-    def GEnqueue(self, data):
+    def enqueue(self, data):
         '''
         Enqueue data.
         '''
@@ -58,7 +58,7 @@ class GQueue:
         self.condition.wakeOne()
         self.mutex.unlock()
 
-    def GDequeue(self):
+    def dequeue(self):
         '''
         Dequeue data.
         '''
@@ -69,7 +69,7 @@ class GQueue:
         self.mutex.unlock()
         return data
     
-    def GTryDequeue(self):
+    def tryDequeue(self):
         '''
         Dequeue data, if data is available.
         '''
