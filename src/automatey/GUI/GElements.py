@@ -877,7 +877,7 @@ class GWidgets:
             '''
             return self.isMute
 
-class GApplication(QtWidgets.QApplication):
+class Application:
     '''
     Only one instance of 'Application' is required.
     
@@ -886,22 +886,23 @@ class GApplication(QtWidgets.QApplication):
     '''
     
     def __init__(self):
-        super().__init__([])
+        
+        self.qApplication = QtWidgets.QApplication([])
         
         # PyQt6: A cross-platform style called 'Fusion'.
         self.setStyle('Fusion')
         
-    def GRun(self):
+    def run(self):
         '''
         Runs the GUI event-loop.
         '''
-        self.exec()
+        self.qApplication.exec()
     
-    def GSetIcon(self, icon:GUtils.GIcon):
+    def setIcon(self, icon:GUtils.GIcon):
         '''
         Set application-wide icon.
         '''
-        self.icon = icon
+        self.qApplication.icon = icon
 
 class Dialog:
     '''
