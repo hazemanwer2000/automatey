@@ -48,3 +48,14 @@ class QLineEdit(QtWidgets.QLineEdit):
         if self.keyPressEventFcn != None:
             if (self.keyPressEventFcn(event) != 0):
                 QtWidgets.QLineEdit.keyPressEvent(self, event)
+
+class QPlainTextEdit(QtWidgets.QPlainTextEdit):
+    
+    def __init__(self):
+        QtWidgets.QPlainTextEdit.__init__(self)
+        self.keyPressEventFcn = None
+        
+    def keyPressEvent(self, event):
+        if self.keyPressEventFcn != None:
+            if (self.keyPressEventFcn(event) != 0):
+                QtWidgets.QPlainTextEdit.keyPressEvent(self, event)

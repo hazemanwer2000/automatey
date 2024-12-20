@@ -83,7 +83,8 @@ class EventHandler:
         self.fcn = fcn
     
     Key2QKey = {
-        Input.Key.Enter: QtCore.Qt.Key.Key_Return, 
+        Input.Key.Enter: QtCore.Qt.Key.Key_Return,
+        Input.Key.Space: QtCore.Qt.Key.Key_Space,
     }
 
 class EventHandlers:
@@ -109,16 +110,15 @@ class EventHandlers:
         - Registered handler shall expect the pressed `Key` is argument.
         '''
         
-        def __init__(self, fcns, keys:list):
-            self.fcns = fcns
-            self.keys = keys
+        def __init__(self, key2FcnDict:dict):
+            self.key2FcnDict = key2FcnDict
         
         def INTERNAL_checkIfQKeyRegistered(self, qKey):
             '''
             Check if `qKey` is registered. If not, `None` is returned. Otherwise, corresponding `key` is returned.
             '''
             foundKey = None
-            for key in self.keys:
+            for key in self.key2FcnDict:
                 if EventHandler.Key2QKey[key] == qKey:
                     foundKey = key
                     break

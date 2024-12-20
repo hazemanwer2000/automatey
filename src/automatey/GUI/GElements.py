@@ -624,7 +624,7 @@ class Widgets:
                 '''
                 Get text.
                 '''
-                return self.text()
+                return self.qWidget.text()
             
             def INTERNAL_keyPressEvent(self, event):
                 qKey = event.key()
@@ -632,7 +632,61 @@ class Widgets:
                     keyPressEventHandler:GUtils.EventHandlers.KeyPressEventHandler = self.eventHandlers[GUtils.EventHandlers.KeyPressEventHandler]
                     foundKey = keyPressEventHandler.INTERNAL_checkIfQKeyRegistered(qKey)
                     if foundKey != None:
-                        keyPressEventHandler.fcns[foundKey](foundKey)
+                        keyPressEventHandler.key2FcnDict[foundKey](foundKey)
+                        return 0
+                
+            def INTERNAL_textChanged(self):
+                if GUtils.EventHandlers.TextChangeEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.TextChangeEventHandler].fcn()
+
+        class TextEdit(Widget, INTERNAL.EventManager):
+            
+            def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False):
+                self.qWidget = PyQt6Wrapper.QPlainTextEdit()
+                INTERNAL.EventManager.__init__(self)
+                Widget.__init__(self, self.qWidget)
+                
+                if placeholder != None:
+                    self.qWidget.setPlaceholderText(placeholder)
+                    
+                # ? Event-handler(s).
+                self.qWidget.textChanged.connect(self.INTERNAL_textChanged)
+                self.qWidget.keyPressEventFcn = self.INTERNAL_keyPressEvent
+            
+                # ? By default, font is 'Monospace'.
+                if isMonospaced:
+                    font = QtGui.QFont("Consolas")
+                    font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
+                    self.qWidget.setFont(font)
+                
+                # ? Set editable-mode.
+                self.setEditable(isEditable)
+            
+            def setEditable(self, flag:bool):
+                '''
+                Set editable-mode.
+                '''
+                self.qWidget.setReadOnly(not flag)
+            
+            def getText(self):
+                '''
+                Get text.
+                '''
+                return self.qWidget.text()
+
+            def setText(self, text):
+                '''
+                Get text.
+                '''
+                return self.qWidget.setPlainText(text)
+            
+            def INTERNAL_keyPressEvent(self, event):
+                qKey = event.key()
+                if GUtils.EventHandlers.KeyPressEventHandler in self.eventHandlers:
+                    keyPressEventHandler:GUtils.EventHandlers.KeyPressEventHandler = self.eventHandlers[GUtils.EventHandlers.KeyPressEventHandler]
+                    foundKey = keyPressEventHandler.INTERNAL_checkIfQKeyRegistered(qKey)
+                    if foundKey != None:
+                        keyPressEventHandler.key2FcnDict[foundKey](foundKey)
                         return 0
                 
             def INTERNAL_textChanged(self):
@@ -676,57 +730,6 @@ class Widgets:
                 event.accept()
             else:
                 super().mousePressEvent(event)
-
-    class GTextEdit(QtWidgets.QPlainTextEdit, INTERNAL.EventManager):
-        
-        def __init__(self, placeholder:str=None, isEditable=True):
-            QtWidgets.QTextEdit.__init__(self)
-            INTERNAL.EventManager.__init__(self)
-            
-            if placeholder != None:
-                self.setPlaceholderText(placeholder)
-                
-            # ? Event-handlers.
-            self.textChanged.connect(self.INTERNAL_textChanged)
-            
-            # ? By default, font is 'Monospace'.
-            font = QtGui.QFont("Consolas")
-            font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
-            self.setFont(font)
-
-            # ? Set editable-mode.
-            self.setEditable(isEditable)
-        
-        def setEditable(self, flag:bool):
-            '''
-            Set editable-mode.
-            '''
-            self.setReadOnly(not flag)
-            
-        def keyPressEvent(self, event):
-            # PyQt6: When 'TAB' is pressed, insert space(s) instead.
-            if event.key() == QtCore.Qt.Key.Key_Tab:
-                cursor = self.textCursor()
-                cursor.insertText(" " * 2)
-                event.accept()
-            else:
-                super().keyPressEvent(event)
-
-        def GGetText(self):
-            '''
-            Get text.
-            '''
-            return self.text()
-
-        def GSetText(self, text):
-            '''
-            Set text.
-            '''
-            self.setPlainText(text)
-            
-        def INTERNAL_textChanged(self):
-            if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
-                self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
 
     class GVideoPlayer(QtWidgets.QWidget):
         '''
