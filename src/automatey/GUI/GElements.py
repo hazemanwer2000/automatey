@@ -28,32 +28,34 @@ class INTERNAL:
             '''
             self.eventHandlers[type(eventHandler)] = eventHandler
 
-class GLayouts:
+class Layouts:
     ''''
     Note that,
     - Layout(s) are treated as any other GUI element.
     '''
 
-    class GStackedLayout(QtWidgets.QStackedWidget):
+    class StackedLayout():
+        
         def __init__(self, elements, initElement):
-            super().__init__()
+            
+            self.qLayout = QtWidgets.QStackedLayout()
             
             for element in elements:
-                self.addWidget(element)
+                self.qLayout.addWidget(element)
             
-            self.setCurrentWidget(initElement)
+            self.qLayout.setCurrentWidget(initElement)
                 
-        def GSetCurrentElement(self, element):
+        def setCurrentElement(self, element):
             '''
             Set the current element.
             '''
-            self.setCurrentWidget(element)
+            self.qLayout.setCurrentWidget(element)
 
-        def GSetCurrentElementByIndex(self, index):
+        def setCurrentElementByIndex(self, index):
             '''
             Set the current element.
             '''
-            self.setCurrentIndex(index)
+            self.qLayout.setCurrentIndex(index)
 
     class GGridLayout(QtWidgets.QWidget):
         '''
