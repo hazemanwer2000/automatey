@@ -401,6 +401,21 @@ class Widgets:
                 if GUtils.EventHandlers.ClickEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.ClickEventHandler].fcn()
 
+        class Label:
+            '''
+            Can handle an image, as well as text.
+            '''
+
+            def __init__(self, text:str=None, img:GUtils.Image=None):
+                self.qWidget = QtWidgets.QLabel()
+                Widget.__init__(self, self.qWidget)
+                
+                if text != None:
+                    self.qWidget.setText(text)
+                
+                if img != None:
+                    self.qWidget.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
+
     class GColorSelector(QtWidgets.QWidget):
         '''
         Color displayer, and selector.
@@ -438,20 +453,6 @@ class Widgets:
                 event.accept()
             else:
                 super().mousePressEvent(event)
-         
-    class GLabel(QtWidgets.QLabel):
-        '''
-        Can handle an image, as well as text.
-        '''
-
-        def __init__(self, text:str=None, img:GUtils.Image=None):
-            super().__init__()
-            
-            if text != None:
-                self.setText(text)
-            
-            if img != None:
-                self.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
 
     class GCheckBox(QtWidgets.QCheckBox, INTERNAL.EventManager):
         '''

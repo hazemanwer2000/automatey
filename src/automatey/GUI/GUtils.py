@@ -7,28 +7,21 @@ import PyQt6.QtCore as QtCore
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
 import automatey.Media.ImageUtils as ImageUtils
+import automatey.Utils.MathUtils as MathUtils
 
 class Image:
     '''
     Image, may be used with all element(s) of the GUI.
     '''
     
-    def __init__(self, img:ImageUtils.Image, size=None):
+    def __init__(self, f:FileUtils.File, size=None):
+
+        self.qImage = QtGui.QImage(str(f))
         
-        cv2ImgHandler = img.EXTERNAL_toCV2()
-        
-        # ? Handling size.
-        originalSize = [cv2ImgHandler.shape[1], cv2ImgHandler.shape[0]]
+        # ? Case: Resizing is necessary.
         if size != None:
-            aspectRatio = originalSize[0] / originalSize[1]
-            if size[0] == -1:
-                size[0] = int(aspectRatio * size[1])
-            elif size[1] == -1:
-                size[1] = int(size[0] / aspectRatio)
-       
-        # PyQt: Derriving image.
-        self.qImage = QtGui.QImage(cv2ImgHandler.data, originalSize[0], originalSize[1], QtGui.QImage.Format.Format_RGB888).rgbSwapped()
-        if size != None:
+            originalSize = [self.qImage.width(), self.qImage.height()]
+            MathUtils.keepAspectRatio(size, originalSize)
             self.qImage = self.qImage.scaled(size[0], size[1], QtCore.Qt.AspectRatioMode.IgnoreAspectRatio)
 
 class Icon:
