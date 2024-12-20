@@ -80,20 +80,21 @@ class GQueue:
         self.mutex.unlock()
         return data
 
-class GTimer(QtCore.QTimer):
+class Timer:
     
     '''
     Timer, that keeps executing a runnable, as long as it returns `0`.
     '''
     
     def __init__(self, fcn, period:TimeUtils.Time):
-        super().__init__()
         
-        self.timeout.connect(self.INTERNAL_runnable)
+        self.qTimer = QtCore.QTimer()
+        
+        self.qTimer.timeout.connect(self.INTERNAL_runnable)
         
         self.fcn = fcn
-        self.start(int(period.toMilliseconds()))
+        self.qTimer.start(int(period.toMilliseconds()))
     
     def INTERNAL_runnable(self):
         if self.fcn() != 0:
-            self.stop()
+            self.qTimer.stop()
