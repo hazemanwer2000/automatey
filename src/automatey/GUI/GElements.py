@@ -43,7 +43,6 @@ class Layouts:
         
         Note,
         - By default, all row(s) and column(s) are stretchable.
-        - All index(s) are zero-based.
         '''
         
         def __init__(self, rowCount:int, colCount:int, elementMargin:Graphics.Margin, elementSpacing:int):
@@ -88,7 +87,8 @@ class Layouts:
         '''
         
         def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
-            Layout.__init__(self, QtWidgets.QVBoxLayout())
+            self.qLayout = QtWidgets.QVBoxLayout()
+            Layout.__init__(self, self.qLayout)
 
             # ? Other setting(s).
             self.qLayout.setContentsMargins(elementMargin.left,
@@ -111,13 +111,35 @@ class Layouts:
                                       widget.qWidget,
                                       alignment=Layouts.VerticalLayout.HorizontalAlignment2AlignmentFlag[alignment])
 
+        def removeWidgetAtIndex(self, idx=-1):
+            '''
+            Remove widget at index.
+            '''
+            if idx == -1:
+                idx = self.qLayout.count() - 1
+            self.removeWidget(self.qLayout.itemAt(idx).widget())
+
+        def removeWidget(self, widget):
+            '''
+            Remove widget.
+            '''
+            self.qLayout.removeWidget(widget)
+            widget.setParent(None)
+        
+        def getCount(self):
+            '''
+            Get number of widget(s).
+            '''
+            return self.qLayout.count()
+
     class HorizontalLayout(Layout):
         '''
         A horizontal layout.
         '''
         
         def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
-            Layout.__init__(self, QtWidgets.QHBoxLayout())
+            self.qLayout = QtWidgets.QHBoxLayout()
+            Layout.__init__(self, self.qLayout)
 
             # ? Other setting(s).
             self.qLayout.setContentsMargins(elementMargin.left,
@@ -131,6 +153,27 @@ class Layouts:
             Insert widget at index.
             '''
             self.qLayout.insertWidget(idx, widget.qWidget, alignment=QtCore.Qt.AlignmentFlag.AlignLeft)
+
+        def removeWidgetAtIndex(self, idx=-1):
+            '''
+            Remove widget at index.
+            '''
+            if idx == -1:
+                idx = self.qLayout.count() - 1
+            self.removeWidget(self.qLayout.itemAt(idx).widget())
+
+        def removeWidget(self, widget):
+            '''
+            Remove widget.
+            '''
+            self.qLayout.removeWidget(widget)
+            widget.setParent(None)
+
+        def getCount(self):
+            '''
+            Get number of widget(s).
+            '''
+            return self.qLayout.count()
 
 class Widget:
 
@@ -239,6 +282,24 @@ class Widgets:
                 '''
                 self.verticalLayout.insertWidget(widget, idx, alignment)
 
+            def removeWidgetAtIndex(self, idx=-1):
+                '''
+                Remove widget at index.
+                '''
+                self.verticalLayout.removeWidgetAtIndex(idx)
+
+            def removeWidget(self, widget):
+                '''
+                Remove widget.
+                '''
+                self.verticalLayout.removeWidget(widget)
+
+            def getCount(self):
+                '''
+                Get number of widget(s).
+                '''
+                return self.verticalLayout.getCount()
+
         class HorizontalContainer(Widget):
             '''
             A container, where widgets are arranged horizontally.
@@ -262,23 +323,77 @@ class Widgets:
                 '''
                 self.horizontalLayout.insertWidget(widget, idx)
 
-    class ColorBlock(Widget):
-        '''
-        A simple color-block.
-        '''
-        
-        def __init__(self, color:ColorUtils.Color, size=None):
-            Widget.__init__(self, QtWidgets.QWidget())
+            def removeWidgetAtIndex(self, idx=-1):
+                '''
+                Remove widget at index.
+                '''
+                self.horizontalLayout.removeWidgetAtIndex(idx)
+
+            def removeWidget(self, widget):
+                '''
+                Remove widget.
+                '''
+                self.horizontalLayout.removeWidget(widget)
+
+            def getCount(self):
+                '''
+                Get number of widget(s).
+                '''
+                return self.verticalLayout.getCount()
+
+    class Basic:
+
+        class ColorBlock(Widget):
+            '''
+            A simple color-block.
+            '''
             
-            # ? Setting fill-color of widget.
-            self.qWidget.setAutoFillBackground(True)
-            palette = self.qWidget.palette()
-            palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor('#' + color.asHEX()))
-            self.qWidget.setPalette(palette)
+            def __init__(self, color:ColorUtils.Color, size=None):
+                Widget.__init__(self, QtWidgets.QWidget())
+                
+                # ? Setting fill-color of widget.
+                self.qWidget.setAutoFillBackground(True)
+                palette = self.qWidget.palette()
+                palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor('#' + color.asHEX()))
+                self.qWidget.setPalette(palette)
+                
+                # ? Set (i.e., fix) size, if specified.
+                if size != None:
+                    self.qWidget.setFixedSize(size[0], size[1])
+
+        class Button(Widget, INTERNAL.EventManager):
+            '''
+            Can handle an icon, as well as text.
+            '''
             
-            # ? Set (i.e., fix) size, if specified.
-            if size != None:
-                self.qWidget.setFixedSize(size[0], size[1])
+            def __init__(self, text:str=None, icon:GUtils.Icon=None, toolTip=None):
+                self.qButton = QtWidgets.QPushButton()
+                Widget.__init__(self, self.qButton)
+                INTERNAL.EventManager.__init__(self)
+                
+                # ? Set text (optional).
+                if text != None:
+                    self.qButton.setText(text)
+                
+                # ? Set icon (optional).
+                if icon != None:
+                    self.qButton.setIcon(icon.qIcon)
+                    if icon.size != None:
+                        self.qButton.setIconSize(QtCore.QSize(icon.size[0], icon.size[1]))
+                
+                # ? Set status-tip (optional).
+                if toolTip != None:
+                    self.qButton.setToolTip(toolTip)
+                
+                # ? Event-handlers.
+                self.qButton.clicked.connect(self.INTERNAL_onClicked)
+                
+                # PyQt6: Force 'QButton' not to be focusable.
+                self.qButton.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
+                
+            def INTERNAL_onClicked(self):
+                if GUtils.EventHandlers.ClickEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.ClickEventHandler].fcn()
 
     class GColorSelector(QtWidgets.QWidget):
         '''
@@ -317,40 +432,7 @@ class Widgets:
                 event.accept()
             else:
                 super().mousePressEvent(event)
-
-    class GButton(QtWidgets.QPushButton, INTERNAL.EventManager):
-        '''
-        Can handle an icon, as well as text.
-        '''
-        
-        def __init__(self, text:str=None, icon:GUtils.Icon=None, toolTip=None):
-            QtWidgets.QPushButton.__init__(self)
-            INTERNAL.EventManager.__init__(self)
-            
-            # ? Set text (optional).
-            if text != None:
-                self.setText(text)
-            
-            # ? Set icon (optional).
-            if icon != None:
-                self.setIcon(icon.qIcon)
-                if icon.size != None:
-                    self.setIconSize(QtCore.QSize(icon.size[0], icon.size[1]))
-            
-            # ? Set status-tip (optional).
-            if toolTip != None:
-                self.setToolTip(toolTip)
-            
-            # ? Event-handlers.
-            self.clicked.connect(self.INTERNAL_onClicked)
-            
-            # PyQt6: Force 'QButton' not to be focusable.
-            self.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
-            
-        def INTERNAL_onClicked(self):
-            if GUtils.GEventHandlers.GClickEventHandler in self.eventHandlers:
-                self.eventHandlers[GUtils.GEventHandlers.GClickEventHandler].fcn()
-            
+         
     class GLabel(QtWidgets.QLabel):
         '''
         Can handle an image, as well as text.

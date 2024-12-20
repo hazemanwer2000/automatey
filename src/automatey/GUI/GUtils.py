@@ -81,6 +81,9 @@ class Icon:
         class ScrollDown:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_TitleBarUnshadeButton
 
+        class Discard:
+            qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_DialogDiscardButton
+
 class EventHandler:
     
     def __init__(self, fcn):
