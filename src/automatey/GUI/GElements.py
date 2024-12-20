@@ -510,6 +510,54 @@ class Widgets:
                 if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
 
+        class Slider(Widget, INTERNAL.EventManager):
+            '''
+            A slider (deals only with integer value(s)).
+            '''
+            
+            def __init__(self, valueRange, initValue, isHorizontal=True):
+                self.qWidget = PyQt6Wrapper.QSlider()
+                INTERNAL.EventManager.__init__(self)
+                Widget.__init__(self, self.qWidget)
+                
+                # ? Set orientation.
+                orientation = QtCore.Qt.Orientation.Horizontal if isHorizontal else QtCore.Qt.Orientation.Vertical
+                self.qWidget.setOrientation(orientation)
+                
+                # PyQt6: Fix tick-interval at '1'.
+                self.qWidget.setTickInterval(1)
+                
+                # ? Set value-range, and init-value.
+                self.qWidget.setRange(valueRange[0], valueRange[1])
+                self.qWidget.setValue(initValue)
+                
+                # ? Register Mouse Event(s).
+                self.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseEvent
+                self.qWidget.mousePressEventFcn = self.INTERNAL_mouseEvent
+                
+            def INTERNAL_mouseEvent(self, event):
+                # ? Update value.
+                ratio = event.position().x() / self.qWidget.width()
+                value = MathUtils.mapValue(ratio, [0.0, 1.0], [self.qWidget.minimum(), self.qWidget.maximum()])
+                value = MathUtils.clampValue(value, self.qWidget.minimum(), self.qWidget.maximum())
+                self.qWidget.setValue(int(value))
+                
+                # ? Call event-handler, if present.
+                if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
+                
+            def setValue(self, value):
+                '''
+                Set value.
+                '''
+                self.qWidget.setValue(value)
+
+            def getValue(self):
+                '''
+                Get value.
+                '''
+                return self.qWidget.value()
+
     class GColorSelector(QtWidgets.QWidget):
         '''
         Color displayer, and selector.
@@ -665,57 +713,6 @@ class Widgets:
         def INTERNAL_textChanged(self):
             if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
-
-    class GSlider(QtWidgets.QSlider, INTERNAL.EventManager):
-        '''
-        A slider (deals only with integer value(s)).
-        '''
-        
-        def __init__(self, valueRange, initValue, isHorizontal=True):
-            QtWidgets.QSlider.__init__(self)
-            INTERNAL.EventManager.__init__(self)
-            
-            # ? Set orientation.
-            orientation = QtCore.Qt.Orientation.Horizontal if isHorizontal else QtCore.Qt.Orientation.Vertical
-            self.setOrientation(orientation)
-            
-            # PyQt6: Fix tick-interval at '1'.
-            self.setTickInterval(1) 
-            
-            # ? Set value-range, and init-value.
-            self.setRange(valueRange[0], valueRange[1])
-            self.setValue(initValue)
-            
-        def INTERNAL_mouseEvent(self, event):
-            # ? Update value.
-            ratio = event.position().x() / self.width()
-            value = MathUtils.mapValue(ratio, [0.0, 1.0], [self.minimum(), self.maximum()])
-            value = MathUtils.clampValue(value, self.minimum(), self.maximum())
-            self.setValue(int(value))
-            
-            # ? Call event-handler, if present.
-            if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
-                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
-                
-            event.accept()
-            
-        def mousePressEvent(self, event):
-            self.INTERNAL_mouseEvent(event)
-        
-        def mouseMoveEvent(self, event):
-            self.INTERNAL_mouseEvent(event)
-            
-        def GSetValue(self, value):
-            '''
-            Set value.
-            '''
-            self.setValue(value)
-
-        def GGetValue(self):
-            '''
-            Get value.
-            '''
-            return self.value()
 
     class GVideoPlayer(QtWidgets.QWidget):
         '''

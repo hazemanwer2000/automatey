@@ -40,3 +40,19 @@ class QThread(QtCore.QThread):
     @QtCore.pyqtSlot()
     def run(self):
         self.mainFcn(self)
+
+class QSlider(QtWidgets.QSlider):
+    
+    def __init__(self):
+        QtWidgets.QSlider.__init__(self)
+        self.mousePressEventFcn = None
+        self.mouseMoveEventFcn = None
+         
+    def mousePressEvent(self, event):
+        if self.mousePressEventFcn != None:
+            self.mousePressEventFcn(event)
+    
+    def mouseMoveEvent(self, event):
+        if self.mouseMoveEventFcn != None:
+            self.mouseMoveEventFcn(event)
+        
