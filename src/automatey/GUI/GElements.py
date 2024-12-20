@@ -107,27 +107,26 @@ class Layouts:
             self.qLayout.setColumnStretch(colIdx, 0)
             self.qLayout.setColumnMinimumWidth(colIdx, size)
 
-class GScrollArea(QtWidgets.QScrollArea):
+class ScrollArea():
     '''
     Encapsulates any element, to allow for vertical/horizontal scrolling.
     '''
     
-    def __init__(self, element,
-                 isVerticalScrollBar=False,
-                 isHorizontalScrollBar=False):
-        super().__init__()
+    def __init__(self, element, isVerticalScrollBar=False, isHorizontalScrollBar=False):
+        
+        self.qScrollArea = QtWidgets.QScrollArea()
         
         # ? Set element.
-        self.setWidgetResizable(True)
-        self.setWidget(element)
+        self.qScrollArea.setWidgetResizable(True)
+        self.qScrollArea.setWidget(element)
         
         # ? Specify if vertical/horizontal scrolling is always on.
         
         verticalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isVerticalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         horizontalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isHorizontalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         
-        self.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
-        self.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
+        self.qScrollArea.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
+        self.qScrollArea.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
 
 class GDecorations:
 
