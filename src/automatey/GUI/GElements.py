@@ -935,13 +935,13 @@ class GDialog(QtWidgets.QDialog):
         '''
         self.exec()
 
-class GStandardDialog:
+class StandardDialog:
     '''
     Open a standard dialog, to get specific info.
     '''
     
     @staticmethod
-    def GSelectExistingFile(initialDirectory:FileUtils.File):
+    def selectExistingFile(initialDirectory:FileUtils.File):
         '''
         Select an existing file. Returns `None` if none were selected.
         '''
@@ -950,7 +950,7 @@ class GStandardDialog:
         return path
 
     @staticmethod
-    def GSelectExistingFiles(initialDirectory:FileUtils.File):
+    def selectExistingFiles(initialDirectory:FileUtils.File):
         '''
         Select existing files, returned as a list.
         '''
@@ -958,7 +958,7 @@ class GStandardDialog:
         return [FileUtils.File(path) for path in paths]
     
     @staticmethod
-    def GSelectExistingDirectory(initialDirectory:FileUtils.File):
+    def selectExistingDirectory(initialDirectory:FileUtils.File):
         '''
         Select existing directory.
         '''
@@ -967,7 +967,7 @@ class GStandardDialog:
         return path
 
     @staticmethod
-    def GSelectFile(initialDirectory:FileUtils.File):
+    def selectFile(initialDirectory:FileUtils.File):
         '''
         Select a file. Returns `None` if none were selected.
         '''
@@ -976,7 +976,7 @@ class GStandardDialog:
         return path
     
     @staticmethod
-    def GSelectColor(initColor:ColorUtils.Color=None) -> ColorUtils.Color:
+    def selectColor(initColor:ColorUtils.Color=None) -> ColorUtils.Color:
         '''
         Select a color.
         '''
@@ -989,7 +989,7 @@ class GStandardDialog:
             colorSelected = ColorUtils.Color.fromHEX(colorDialog.selectedColor().name()[1:])
         return colorSelected
 
-    class GBackgroundActivity:
+    class BackgroundActivity:
         '''
         Handles dialog, meant to block user until a background-activity completes.
         '''
@@ -997,7 +997,7 @@ class GStandardDialog:
         qProgressDialog:QtWidgets.QProgressDialog = None
         
         @staticmethod
-        def GAwait():
+        def awaitActivity():
             '''
             Opens up dialog.
             
@@ -1013,15 +1013,15 @@ class GStandardDialog:
             progressDialog.setWindowFlag(QtCore.Qt.WindowType.WindowCloseButtonHint, False)
             progressDialog.setCancelButton(None)
             progressDialog.show()
-            GStandardDialog.GBackgroundActivity.qProgressDialog = progressDialog
+            StandardDialog.BackgroundActivity.qProgressDialog = progressDialog
 
         @staticmethod
-        def GRelease():
+        def release():
             '''
             Closes dialog.
             '''
-            GStandardDialog.GBackgroundActivity.qProgressDialog.close()
-            GStandardDialog.GBackgroundActivity.qProgressDialog = None
+            StandardDialog.BackgroundActivity.qProgressDialog.close()
+            StandardDialog.BackgroundActivity.qProgressDialog = None
 
 class Window:
     '''
