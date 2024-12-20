@@ -54,7 +54,7 @@ class Icon:
         '''
         return Icon(QtWidgets.QApplication.instance().style().standardIcon(standardIcon.qStandardIcon), size=size)
 
-    class GStandardIcon:
+    class StandardIcon:
 
         class FileSave:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton

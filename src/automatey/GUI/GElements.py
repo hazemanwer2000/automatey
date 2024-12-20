@@ -226,7 +226,7 @@ class GWidgets:
             
         def mousePressEvent(self, event):
             if event.button() == QtCore.Qt.MouseButton.LeftButton:
-                newColor = GStandardDialog.GSelectColor(initColor=self.color)
+                newColor = StandardDialog.selectColor(initColor=self.color)
                 if newColor != None:
                     self.color = newColor
                     self.INTERNAL_setColor(self.color)
@@ -239,7 +239,7 @@ class GWidgets:
         Can handle an icon, as well as text.
         '''
         
-        def __init__(self, text:str=None, icon:GUtils.GIcon=None, toolTip=None):
+        def __init__(self, text:str=None, icon:GUtils.Icon=None, toolTip=None):
             QtWidgets.QPushButton.__init__(self)
             INTERNAL.EventManager.__init__(self)
             
@@ -272,7 +272,7 @@ class GWidgets:
         Can handle an image, as well as text.
         '''
 
-        def __init__(self, text:str=None, img:GUtils.GImage=None):
+        def __init__(self, text:str=None, img:GUtils.Image=None):
             super().__init__()
             
             if text != None:
@@ -568,7 +568,7 @@ class GWidgets:
             
             # ? Setting-up control-layout (i.e., layout for control-panel).
             
-            self.controlGridLayout = GLayouts.GGridLayout(1, 6, Graphics.SymmetricMargin(0), elementSpacing=5)
+            self.controlGridLayout = Layouts.GridLayout(1, 6, Graphics.SymmetricMargin(0), elementSpacing=5)
             layout.addWidget(self.controlGridLayout, 1, 0, 1, 1)
             for i in range(6):
                 if i not in [4]:
@@ -576,22 +576,22 @@ class GWidgets:
             
             # ? Setting-up play-pause button.
             
-            self.playButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPlay),
+            self.playButton = GWidgets.GButton(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.GStandardIcon.MediaPlay),
                                                toolTip='Play')
             self.playButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_play))
             
-            self.pauseButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPause),
+            self.pauseButton = GWidgets.GButton(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.GStandardIcon.MediaPause),
                                                toolTip='Pause')
             self.pauseButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_pause))
             
-            self.playPauseStackedLayout = GLayouts.GStackedLayout([self.playButton, self.pauseButton], self.pauseButton)
+            self.playPauseStackedLayout = Layouts.StackedLayout([self.playButton, self.pauseButton], self.pauseButton)
             self.playPauseStackedLayout.GSetCurrentElement(self.pauseButton)
             
             self.controlGridLayout.GSetElement(self.playPauseStackedLayout, 0, 0, 1, 1)
             
             # ? Setting-up stop button.
 
-            self.stopButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaStop),
+            self.stopButton = GWidgets.GButton(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.GStandardIcon.MediaStop),
                                                toolTip='Stop')
             self.stopButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_stop))
             
@@ -599,13 +599,13 @@ class GWidgets:
 
             # ? Setting-up seek-forward/backward button(s).
 
-            self.seekBackwardButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaSeekBackward),
+            self.seekBackwardButton = GWidgets.GButton(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.GStandardIcon.MediaSeekBackward),
                                                toolTip='Seek Backward')
             self.seekBackwardButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(lambda: self.INTERNAL_skipBackward(TimeUtils.Time.createFromSeconds(3.0))))
             
             self.controlGridLayout.GSetElement(self.seekBackwardButton, 0, 2, 1, 1)
 
-            self.seekForwardButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaSeekForward),
+            self.seekForwardButton = GWidgets.GButton(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.GStandardIcon.MediaSeekForward),
                                                toolTip='Seek Forward')
             self.seekForwardButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(lambda: self.INTERNAL_skipForward(TimeUtils.Time.createFromSeconds(3.0))))
             
@@ -629,15 +629,15 @@ class GWidgets:
 
             # ? Setting-up (un-)mute button.
 
-            self.unmuteButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaVolume),
+            self.unmuteButton = GWidgets.GButton(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.GStandardIcon.MediaVolume),
                                                toolTip='(Un-)mute')
             self.unmuteButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_toggleMute))
             
-            self.muteButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaVolumeMute),
+            self.muteButton = GWidgets.GButton(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.GStandardIcon.MediaVolumeMute),
                                                toolTip='(Un-)mute')
             self.muteButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_toggleMute))
             
-            self.muteStackedLayout = GLayouts.GStackedLayout([self.muteButton, self.unmuteButton], self.unmuteButton)
+            self.muteStackedLayout = Layouts.StackedLayout([self.muteButton, self.unmuteButton], self.unmuteButton)
             self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
             
             self.controlGridLayout.GSetElement(self.muteStackedLayout, 0, 5, 1, 1)
@@ -911,7 +911,7 @@ class Application:
         self.qApplication = QtWidgets.QApplication([])
         
         # PyQt6: A cross-platform style called 'Fusion'.
-        self.setStyle('Fusion')
+        self.qApplication.setStyle('Fusion')
         
     def run(self):
         '''
@@ -919,7 +919,7 @@ class Application:
         '''
         self.qApplication.exec()
     
-    def setIcon(self, icon:GUtils.GIcon):
+    def setIcon(self, icon:GUtils.Icon):
         '''
         Set application-wide icon.
         '''
