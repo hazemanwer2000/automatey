@@ -81,12 +81,12 @@ class Icon:
         class ScrollDown:
             qStandardIcon = QtWidgets.QStyle.StandardPixmap.SP_TitleBarUnshadeButton
 
-class GEventHandler:
+class EventHandler:
     
     def __init__(self, fcn):
         self.fcn = fcn
 
-class GEventHandlers:
+class EventHandlers:
     '''
     Different event-handler(s).
     
@@ -94,11 +94,11 @@ class GEventHandlers:
     - All expect no argument(s), except otherwise specified.
     '''
     
-    class GClickEventHandler(GEventHandler):
+    class ClickEventHandler(EventHandler):
         pass
 
-    class GSelectionChangeEventHandler(GEventHandler):
+    class SelectionChangeEventHandler(EventHandler):
         pass
 
-    class GTextChangeEventHandler(GEventHandler):
+    class TextChangeEventHandler(EventHandler):
         pass
