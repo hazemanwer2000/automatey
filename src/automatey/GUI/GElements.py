@@ -137,6 +137,27 @@ class Layouts:
                                       widget.qWidget,
                                       alignment=Layouts.VerticalLayout.HorizontalAlignment2AlignmentFlag[alignment])
 
+    class HorizontalLayout(Layout):
+        '''
+        A horizontal layout.
+        '''
+        
+        def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
+            Layout.__init__(self, QtWidgets.QHBoxLayout())
+
+            # ? Other setting(s).
+            self.qLayout.setContentsMargins(elementMargin.left,
+                                    elementMargin.top,
+                                    elementMargin.right,
+                                    elementMargin.bottom)
+            self.qLayout.setSpacing(elementSpacing)
+
+        def insertWidget(self, widget, idx=-1):
+            '''
+            Insert widget at index.
+            '''
+            self.qLayout.insertWidget(idx, widget.qWidget, alignment=QtCore.Qt.AlignmentFlag.AlignLeft)
+
 class Widget:
 
     def __init__(self, qWidget):
