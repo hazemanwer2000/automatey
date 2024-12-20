@@ -1023,7 +1023,7 @@ class GStandardDialog:
             GStandardDialog.GBackgroundActivity.qProgressDialog.close()
             GStandardDialog.GBackgroundActivity.qProgressDialog = None
 
-class GWindow(QtWidgets.QMainWindow):
+class Window:
     '''
     Multiple window(s) may be created.
     '''
@@ -1031,25 +1031,27 @@ class GWindow(QtWidgets.QMainWindow):
     def __init__(self, title:str, rootElement, minimumSize, isSizeFixed=False):
         super().__init__()
         
+        self.qWindow = QtWidgets.QMainWindow()
+        
         # ? Setting root layout.
         # PyQt: A layout must be attached to a 'QWidget' instance.
-        self.setCentralWidget(rootElement)
+        self.qWindow.setCentralWidget(rootElement)
         
         # ? All other settings.
         if (isSizeFixed):
-            self.setFixedSize(minimumSize[0], minimumSize[1])
+            self.qWindow.setFixedSize(minimumSize[0], minimumSize[1])
         else:
-            self.setMinimumSize(minimumSize[0], minimumSize[1])
-        self.setWindowTitle(title)
-        self.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
+            self.qWindow.setMinimumSize(minimumSize[0], minimumSize[1])
+        self.qWindow.setWindowTitle(title)
+        self.qWindow.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
     
-    def GSetTitle(self, title):
+    def setTitle(self, title):
         '''
         Set title of window.
         '''
-        self.setWindowTitle(title)
+        self.qWindow.setWindowTitle(title)
 
-    def GCreateToolbar(self, contract):
+    def createToolbar(self, contract):
         '''
         Creates a Tool-bar based on a contract.
         
@@ -1074,15 +1076,15 @@ class GWindow(QtWidgets.QMainWindow):
                 action = QtGui.QAction(
                     term['icon'].qIcon,
                     term['tool-tip'],
-                    self
+                    self.qWindow
                 )
                 action.triggered.connect(term['handler'])
                 action.setCheckable(term['is-checkable'])
                 toolbar.addAction(action)
         
-        self.addToolBar(toolbar)
+        self.qWindow.addToolBar(toolbar)
   
-    def GCreateMenu(self, menuName:str, contract):
+    def createMenu(self, menuName:str, contract):
         '''
         Creates a (sub-)menu based on a contract.
         
@@ -1095,7 +1097,7 @@ class GWindow(QtWidgets.QMainWindow):
             - Note, if `is-checkable`, `handler` receives a single `bool` argument.
         '''
         
-        menu = self.menuBar()
+        menu = self.qWindow.menuBar()
         subMenu = menu.addMenu('&' + menuName)
         
         for term in contract:
@@ -1104,20 +1106,20 @@ class GWindow(QtWidgets.QMainWindow):
             else:
                 action = QtGui.QAction(
                     term['text'],
-                    self
+                    self.qWindow
                 )
                 action.triggered.connect(term['handler'])
                 action.setCheckable(term['is-checkable'])
                 subMenu.addAction(action)
 
-    def GShow(self):
+    def show(self):
         '''
         Show window.
         '''
-        self.show()
+        self.qWindow.show()
 
-    def GHide(self):
+    def hide(self):
         '''
         Hide window.
         '''
-        self.hide()
+        self.qWindow.hide()
