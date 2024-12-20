@@ -14,6 +14,7 @@ import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.MathUtils as MathUtils
 import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
+import automatey.Base.ExceptionUtils as ExceptionUtils
 
 class INTERNAL:
     
@@ -22,14 +23,17 @@ class INTERNAL:
         def __init__(self):
             self.eventHandlers = dict()
 
-        def setEventHandler(self, eventHandler:GUtils.GEventHandler):
+        def setEventHandler(self, eventHandler:GUtils.EventHandler):
             '''
             Register an event.
             '''
             self.eventHandlers[type(eventHandler)] = eventHandler
 
 class Layout:
-    pass
+    
+    def __init__(self, qLayout):
+        
+        self.qLayout = qLayout
 
 class Layouts:
     ''''
@@ -39,22 +43,21 @@ class Layouts:
 
     class StackedLayout(Layout):
         
-        def __init__(self, elements, initElement):
+        def __init__(self, widgets, initWidget):
+            Layout.__init__(self, QtWidgets.QStackedLayout())
             
-            self.qLayout = QtWidgets.QStackedLayout()
+            for widget in widgets:
+                self.qLayout.addWidget(widget.qWidget)
             
-            for element in elements:
-                self.qLayout.addWidget(element)
-            
-            self.qLayout.setCurrentWidget(initElement)
+            self.qLayout.setCurrentWidget(initWidget.qWidget)
                 
-        def setCurrentElement(self, element):
+        def setCurrentWidget(self, widget):
             '''
             Set the current element.
             '''
-            self.qLayout.setCurrentWidget(element)
+            self.qLayout.setCurrentWidget(widget.qWidget)
 
-        def setCurrentElementByIndex(self, index):
+        def setCurrentWidgetByIndex(self, index):
             '''
             Set the current element.
             '''
@@ -70,9 +73,7 @@ class Layouts:
         '''
         
         def __init__(self, rowCount:int, colCount:int, elementMargin:Graphics.Margin, elementSpacing:int):
-            
-            # PyQt6: It is easier (i.e., compatible with more API(s)) if a layout is within a 'QWidget'.
-            self.qLayout = QtWidgets.QGridLayout()
+            Layout.__init__(self, QtWidgets.QGridLayout())
             
             # ? Other setting(s).
             self.qLayout.setContentsMargins(elementMargin.left,
@@ -87,11 +88,11 @@ class Layouts:
             for i in range(colCount):
                 self.qLayout.setColumnStretch(i, 1)
         
-        def setElement(self, element, rowIdx, colIdx, rowSpan=1, colSpan=1):
+        def setWidget(self, widget, rowIdx, colIdx, rowSpan=1, colSpan=1):
             '''
             Set an element in a specific location within the grid.
             '''
-            self.qLayout.addWidget(element, rowIdx, colIdx, rowSpan, colSpan)
+            self.qLayout.addWidget(widget.qWidget, rowIdx, colIdx, rowSpan, colSpan)
         
         def setRowMinimumSize(self, rowIdx, size):
             '''
@@ -107,37 +108,60 @@ class Layouts:
             self.qLayout.setColumnStretch(colIdx, 0)
             self.qLayout.setColumnMinimumWidth(colIdx, size)
 
-class ScrollArea():
+class Widget:
+
+    def __init__(self, qWidget, layout=None):
+        
+        self.qWidget = qWidget
+        self.layout = layout
+        
+    def getLayout(self):
+        '''
+        Get underlying layout.
+        
+        Note, if `fromLayout` was not used to create this widget, `None` is returned.
+        '''
+        return self.layout
+        
+    @staticmethod
+    def fromLayout(layout):
+        '''
+        Create widget from layout.
+        '''
+        qWidget = QtWidgets.QWidget()
+        qWidget.setLayout(layout.qLayout)
+        widget = Widget(qWidget, layout=layout)
+        return widget
+
+class ScrollArea(Widget):
     '''
     Encapsulates any element, to allow for vertical/horizontal scrolling.
     '''
     
-    def __init__(self, element, isVerticalScrollBar=False, isHorizontalScrollBar=False):
-        
-        self.qScrollArea = QtWidgets.QScrollArea()
+    def __init__(self, widget, isVerticalScrollBar=False, isHorizontalScrollBar=False):
+        Widget.__init__(QtWidgets.QScrollArea())
         
         # ? Set element.
-        self.qScrollArea.setWidgetResizable(True)
-        self.qScrollArea.setWidget(element)
+        self.qWidget.setWidgetResizable(True)
+        self.qWidget.setWidget(widget.qWidget)
         
         # ? Specify if vertical/horizontal scrolling is always on.
         
         verticalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isVerticalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         horizontalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isHorizontalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         
-        self.qScrollArea.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
-        self.qScrollArea.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
+        self.qWidget.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
+        self.qWidget.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
 
 class Decorations:
 
-    class Outline:
+    class Outline(Widget):
         '''
         Adds an outline around the specified element.
         '''
         
-        def __init__(self, element, elementMargin:Graphics.Margin):
-            
-            self.qWidget = QtWidgets.QFrame(self)
+        def __init__(self, widget, elementMargin:Graphics.Margin):
+            Widget.__init__(self, QtWidgets.QFrame())
             
             # PyQt6: Stylizing 'QFrame' to mimic a border.
             self.qWidget.setFrameShape(QtWidgets.QFrame.Shape.Box)
@@ -145,6 +169,7 @@ class Decorations:
             
             # ? Setting element.
             layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
+            layout.setWidget(widget, 0, 0, 1, 1)
             self.qWidget.setLayout(layout.qLayout)
 
 class GWidgets:
@@ -905,7 +930,7 @@ class Dialog:
     A dialog is a blocking window (i.e., blocks execution of invoking GUI event-loop).
     '''
     
-    def __init__(self, title:str, rootElement, minimumSize, isSizeFixed=False):
+    def __init__(self, title:str, rootLayout:Layout, minimumSize, isSizeFixed=False):
         
         self.qDialog = QtWidgets.QDialog()
         
@@ -918,7 +943,7 @@ class Dialog:
         self.qDialog.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
         
         # ? Setting root layout.
-        self.qDialog.setLayout(PyQt6Wrapper.Utils.Element2Layout(rootElement))
+        self.qDialog.setLayout(rootLayout.qLayout)
         
     def run(self):
         '''
@@ -1019,14 +1044,13 @@ class Window:
     Multiple window(s) may be created.
     '''
     
-    def __init__(self, title:str, rootElement, minimumSize, isSizeFixed=False):
+    def __init__(self, title:str, rootLayout:Layout, minimumSize, isSizeFixed=False):
         super().__init__()
         
         self.qWindow = QtWidgets.QMainWindow()
         
         # ? Setting root layout.
-        # PyQt: A layout must be attached to a 'QWidget' instance.
-        self.qWindow.setCentralWidget(rootElement)
+        self.qWindow.setCentralWidget(PyQt6Wrapper.Utils.QLayout2QWidget(rootLayout.qLayout))
         
         # ? All other settings.
         if (isSizeFixed):

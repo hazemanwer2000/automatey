@@ -19,3 +19,9 @@ class ValidationError(Error):
     To be raised in complex validation failure(s).
     '''
     pass
+
+class ImplementationError(Error):
+    '''
+    To be raised when the implementation is itself faulty.
+    '''
+    pass

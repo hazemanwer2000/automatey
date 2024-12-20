@@ -7,14 +7,20 @@ import PyQt6.QtCore as QtCore
 class Utils:
     
     @staticmethod
-    def Element2Layout(element):
-        layout = QtWidgets.QGridLayout()
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setRowStretch(0, 1)
-        layout.setColumnStretch(0, 1)
-        layout.addWidget(element, 0, 0, 1, 1)
-        return layout
+    def QWidget2QLayout(qWidget):
+        qLayout = QtWidgets.QGridLayout()
+        qLayout.setSpacing(0)
+        qLayout.setContentsMargins(0, 0, 0, 0)
+        qLayout.setRowStretch(0, 1)
+        qLayout.setColumnStretch(0, 1)
+        qLayout.addWidget(qWidget, 0, 0, 1, 1)
+        return qLayout
+
+    @staticmethod
+    def QLayout2QWidget(qLayout):
+        qWidget = QtWidgets.QWidget()
+        qWidget.setLayout(qLayout)
+        return qWidget
 
 class QThread(QtCore.QThread):
     
