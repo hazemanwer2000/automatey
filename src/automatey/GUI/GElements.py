@@ -903,21 +903,22 @@ class GApplication(QtWidgets.QApplication):
         '''
         self.icon = icon
 
-class GDialog(QtWidgets.QDialog):
+class Dialog:
     '''
     A dialog is a blocking window (i.e., blocks execution of invoking GUI event-loop).
     '''
     
     def __init__(self, title:str, rootElement, minimumSize, isSizeFixed=False):
-        super().__init__()
+        
+        self.qDialog = QtWidgets.QDialog()
         
         # ? All other settings.
         if (isSizeFixed):
-            self.setFixedSize(minimumSize[0], minimumSize[1])
+            self.qDialog.setFixedSize(minimumSize[0], minimumSize[1])
         else:
-            self.setMinimumSize(minimumSize[0], minimumSize[1])
-        self.setWindowTitle(title)
-        self.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
+            self.qDialog.setMinimumSize(minimumSize[0], minimumSize[1])
+        self.qDialog.setWindowTitle(title)
+        self.qDialog.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
         
         # ? Setting root layout.
         # PyQt: For Dialogs', layout must not be attached to a 'QWidget'.
@@ -927,13 +928,13 @@ class GDialog(QtWidgets.QDialog):
         layout.setRowStretch(0, 1)
         layout.setColumnStretch(0, 1)
         layout.addWidget(rootElement, 0, 0, 1, 1)
-        self.setLayout(layout)
+        self.qDialog.setLayout(layout)
         
-    def GRun(self):
+    def run(self):
         '''
         Interrupt the current GUI event-loop, and run the dialog's.
         '''
-        self.exec()
+        self.qDialog.exec()
 
 class StandardDialog:
     '''
