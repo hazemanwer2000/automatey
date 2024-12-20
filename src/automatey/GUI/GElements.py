@@ -17,12 +17,12 @@ import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
 
 class INTERNAL:
     
-    class GEventManager:
+    class EventManager:
         
         def __init__(self):
             self.eventHandlers = dict()
 
-        def GSetEventHandler(self, eventHandler:GUtils.GEventHandler):
+        def setEventHandler(self, eventHandler:GUtils.GEventHandler):
             '''
             Register an event.
             '''
@@ -214,14 +214,14 @@ class GWidgets:
             else:
                 super().mousePressEvent(event)
 
-    class GButton(QtWidgets.QPushButton, INTERNAL.GEventManager):
+    class GButton(QtWidgets.QPushButton, INTERNAL.EventManager):
         '''
         Can handle an icon, as well as text.
         '''
         
         def __init__(self, text:str=None, icon:GUtils.GIcon=None, toolTip=None):
             QtWidgets.QPushButton.__init__(self)
-            INTERNAL.GEventManager.__init__(self)
+            INTERNAL.EventManager.__init__(self)
             
             # ? Set text (optional).
             if text != None:
@@ -261,14 +261,14 @@ class GWidgets:
             if img != None:
                 self.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
 
-    class GCheckBox(QtWidgets.QCheckBox, INTERNAL.GEventManager):
+    class GCheckBox(QtWidgets.QCheckBox, INTERNAL.EventManager):
         '''
         Text, along with a check-box.
         '''
         
         def __init__(self, text:str, isChecked=False):
             QtWidgets.QCheckBox.__init__(self)
-            INTERNAL.GEventManager.__init__(self)
+            INTERNAL.EventManager.__init__(self)
             
             # ? Set text.
             self.setText(text)
@@ -290,14 +290,14 @@ class GWidgets:
             if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
-    class GDropDownList(QtWidgets.QComboBox, INTERNAL.GEventManager):
+    class GDropDownList(QtWidgets.QComboBox, INTERNAL.EventManager):
         '''
         A drop-down list. Zero-index'ed.
         '''
         
         def __init__(self, itemList, defaultIndex=0):
             QtWidgets.QComboBox.__init__(self)
-            INTERNAL.GEventManager.__init__(self)
+            INTERNAL.EventManager.__init__(self)
             
             self.addItems(itemList)
             self.setCurrentIndex(defaultIndex)
@@ -321,14 +321,14 @@ class GWidgets:
             if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
-    class GList(QtWidgets.QListWidget, INTERNAL.GEventManager):
+    class GList(QtWidgets.QListWidget, INTERNAL.EventManager):
         '''
         A list of items.
         '''
         
         def __init__(self, itemList, isMultiSelection=False):
             QtWidgets.QListWidget.__init__(self)
-            INTERNAL.GEventManager.__init__(self)
+            INTERNAL.EventManager.__init__(self)
             
             self.addItems(itemList)
             
@@ -385,11 +385,11 @@ class GWidgets:
             if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
-    class GLineEdit(QtWidgets.QLineEdit, INTERNAL.GEventManager):
+    class GLineEdit(QtWidgets.QLineEdit, INTERNAL.EventManager):
         
         def __init__(self, placeholder:str=None, isEditable=True):
             QtWidgets.QLineEdit.__init__(self)
-            INTERNAL.GEventManager.__init__(self)
+            INTERNAL.EventManager.__init__(self)
             
             if placeholder != None:
                 self.setPlaceholderText(placeholder)
@@ -421,11 +421,11 @@ class GWidgets:
             if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
     
-    class GTextEdit(QtWidgets.QPlainTextEdit, INTERNAL.GEventManager):
+    class GTextEdit(QtWidgets.QPlainTextEdit, INTERNAL.EventManager):
         
         def __init__(self, placeholder:str=None, isEditable=True):
             QtWidgets.QTextEdit.__init__(self)
-            INTERNAL.GEventManager.__init__(self)
+            INTERNAL.EventManager.__init__(self)
             
             if placeholder != None:
                 self.setPlaceholderText(placeholder)
@@ -472,14 +472,14 @@ class GWidgets:
             if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
 
-    class GSlider(QtWidgets.QSlider, INTERNAL.GEventManager):
+    class GSlider(QtWidgets.QSlider, INTERNAL.EventManager):
         '''
         A slider (deals only with integer value(s)).
         '''
         
         def __init__(self, valueRange, initValue, isHorizontal=True):
             QtWidgets.QSlider.__init__(self)
-            INTERNAL.GEventManager.__init__(self)
+            INTERNAL.EventManager.__init__(self)
             
             # ? Set orientation.
             orientation = QtCore.Qt.Orientation.Horizontal if isHorizontal else QtCore.Qt.Orientation.Vertical
@@ -558,11 +558,11 @@ class GWidgets:
             
             self.playButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPlay),
                                                toolTip='Play')
-            self.playButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_play))
+            self.playButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_play))
             
             self.pauseButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaPause),
                                                toolTip='Pause')
-            self.pauseButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_pause))
+            self.pauseButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_pause))
             
             self.playPauseStackedLayout = GLayouts.GStackedLayout([self.playButton, self.pauseButton], self.pauseButton)
             self.playPauseStackedLayout.GSetCurrentElement(self.pauseButton)
@@ -573,7 +573,7 @@ class GWidgets:
 
             self.stopButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaStop),
                                                toolTip='Stop')
-            self.stopButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_stop))
+            self.stopButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_stop))
             
             self.controlGridLayout.GSetElement(self.stopButton, 0, 1, 1, 1)
 
@@ -581,13 +581,13 @@ class GWidgets:
 
             self.seekBackwardButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaSeekBackward),
                                                toolTip='Seek Backward')
-            self.seekBackwardButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(lambda: self.INTERNAL_skipBackward(TimeUtils.Time.createFromSeconds(3.0))))
+            self.seekBackwardButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(lambda: self.INTERNAL_skipBackward(TimeUtils.Time.createFromSeconds(3.0))))
             
             self.controlGridLayout.GSetElement(self.seekBackwardButton, 0, 2, 1, 1)
 
             self.seekForwardButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaSeekForward),
                                                toolTip='Seek Forward')
-            self.seekForwardButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(lambda: self.INTERNAL_skipForward(TimeUtils.Time.createFromSeconds(3.0))))
+            self.seekForwardButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(lambda: self.INTERNAL_skipForward(TimeUtils.Time.createFromSeconds(3.0))))
             
             self.controlGridLayout.GSetElement(self.seekForwardButton, 0, 3, 1, 1)
 
@@ -597,7 +597,7 @@ class GWidgets:
             self.seeker = GWidgets.GSlider(valueRange=[0, self.seekerMaxValue],
                                            initValue=0,
                                            isHorizontal=True)
-            self.seeker.GSetEventHandler(GUtils.GEventHandlers.GSelectionChangeEventHandler(self.INTERNAL_EventHandler_seekerValueChanged))
+            self.seeker.setEventHandler(GUtils.GEventHandlers.GSelectionChangeEventHandler(self.INTERNAL_EventHandler_seekerValueChanged))
             
             self.controlGridLayout.GSetElement(self.seeker, 0, 4, 1, 1)
             
@@ -611,11 +611,11 @@ class GWidgets:
 
             self.unmuteButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaVolume),
                                                toolTip='(Un-)mute')
-            self.unmuteButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_toggleMute))
+            self.unmuteButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_toggleMute))
             
             self.muteButton = GWidgets.GButton(icon=GUtils.GIcon.GCreateFromLibrary(GUtils.GIcon.GStandardIcon.MediaVolumeMute),
                                                toolTip='(Un-)mute')
-            self.muteButton.GSetEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_toggleMute))
+            self.muteButton.setEventHandler(GUtils.GEventHandlers.GClickEventHandler(self.INTERNAL_toggleMute))
             
             self.muteStackedLayout = GLayouts.GStackedLayout([self.muteButton, self.unmuteButton], self.unmuteButton)
             self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
