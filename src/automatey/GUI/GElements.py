@@ -446,6 +446,70 @@ class Widgets:
                 if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
 
+        class List(Widget, INTERNAL.EventManager):
+            '''
+            A list of items.
+            '''
+            
+            def __init__(self, itemList, isMultiSelection=False):
+                self.qWidget = QtWidgets.QListWidget()
+                INTERNAL.EventManager.__init__(self)
+                Widget.__init__(self, self.qWidget)
+                
+                self.qWidget.addItems(itemList)
+                
+                if isMultiSelection:
+                    self.qWidget.setSelectionMode(self.qWidget.SelectionMode.MultiSelection)
+                
+                # PyQt6: Enforce that the scroll-bar is always present.
+                self.qWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+                
+                # ? Event-handlers.
+                self.qWidget.itemSelectionChanged.connect(self.INTERNAL_itemSelectionChange)
+            
+            def getAllSelected(self):
+                '''
+                Get current item(s).
+                '''
+                return [x.text() for x in self.qWidget.selectedItems()]
+
+            def getSelected(self):
+                '''
+                Get current item.
+                '''
+                currentItem = self.qWidget.currentItem()
+                return None if (currentItem == None) else currentItem.text()
+
+            def getSelectedByIndex(self) -> int:
+                '''
+                Get index of current item. If none are selected, `-1` is returned.
+                '''
+                return self.qWidget.currentRow()
+
+            def insert(self, item, index=-1):
+                '''
+                Insert item at index.
+                '''
+                if index == -1: 
+                    index = self.qWidget.count()
+                self.qWidget.insertItem(index, item)
+                
+            def removeByIndex(self, index):
+                '''
+                Remove item at a specific index.
+                '''
+                self.qWidget.takeItem(index)
+
+            def removeAll(self):
+                '''
+                Remove all item(s).
+                '''
+                self.qWidget.clear()
+
+            def INTERNAL_itemSelectionChange(self):
+                if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
+
     class GColorSelector(QtWidgets.QWidget):
         '''
         Color displayer, and selector.
@@ -512,70 +576,6 @@ class Widgets:
             return self.currentIndex()
 
         def INTERNAL_currentIndexChanged(self, newIndex):
-            if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
-                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
-
-    class GList(QtWidgets.QListWidget, INTERNAL.EventManager):
-        '''
-        A list of items.
-        '''
-        
-        def __init__(self, itemList, isMultiSelection=False):
-            QtWidgets.QListWidget.__init__(self)
-            INTERNAL.EventManager.__init__(self)
-            
-            self.addItems(itemList)
-            
-            if isMultiSelection:
-                self.setSelectionMode(self.SelectionMode.MultiSelection)
-            
-            # ? Event-handlers.
-            self.itemSelectionChanged.connect(self.INTERNAL_itemSelectionChange)
-        
-        def GGetSelectedItems(self):
-            '''
-            Get current item(s).
-            '''
-            return [x.text() for x in self.selectedItems()]
-
-        def GGetSelectedItem(self):
-            '''
-            Get current item.
-            '''
-            currentItem = self.currentItem()
-            return None if (currentItem == None) else currentItem.text()
-
-        def GGetSelectedItemByIndex(self) -> int:
-            '''
-            Get index of current item. If none are selected, `-1` is returned.
-            '''
-            return self.currentRow()
-
-        def GAddItem(self, item):
-            '''
-            Add item to (end-of-)list.
-            '''
-            self.addItem(item)
-
-        def GInsertItemByIndex(self, item, index):
-            '''
-            Add item to (end-of-)list.
-            '''
-            self.insertItem(index, item)
-            
-        def GRemoveItemByIndex(self, index):
-            '''
-            Remove item at a specific index.
-            '''
-            self.takeItem(index)
-
-        def GRemoveAllItems(self):
-            '''
-            Remove all item(s).
-            '''
-            self.clear()
-
-        def INTERNAL_itemSelectionChange(self):
             if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
                 self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
