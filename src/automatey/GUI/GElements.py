@@ -192,6 +192,9 @@ class Widgets:
     class Containers:
         
         class StackedContainer(Widget):
+            '''
+            A container, where widgets are stacked on-top of one-another.
+            '''
             
             def __init__(self, widgets, initWidget):
                 Widget.__init__(self, QtWidgets.QStackedWidget())
@@ -212,6 +215,52 @@ class Widgets:
                 Set the current element.
                 '''
                 self.qWidget.setCurrentIndex(index)
+
+        class VerticalContainer(Widget):
+            '''
+            A container, where widgets are arranged vertically.
+            '''
+            
+            def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
+                Widget.__init__(self, QtWidgets.QWidget())
+                
+                # ? Setting up grid (root-)layout.
+                self.gridLayout = Layouts.GridLayout(2, 1, elementMargin=elementMargin, elementSpacing=0)
+                self.gridLayout.setRowMinimumSize(0, 0)
+                self.qWidget.setLayout(self.gridLayout.qLayout)
+                
+                # ? Setting up vertical layout.
+                self.verticalLayout = Layouts.VerticalLayout(elementMargin=Graphics.SymmetricMargin(0), elementSpacing=elementSpacing)
+                self.gridLayout.setWidget(Widget.fromLayout(self.verticalLayout), 0, 0)
+
+            def insertWidget(self, widget, idx=-1, alignment=Graphics.Alignment.Horizontal.Center):
+                '''
+                Insert widget at index.
+                '''
+                self.verticalLayout.insertWidget(widget, idx, alignment)
+
+        class HorizontalContainer(Widget):
+            '''
+            A container, where widgets are arranged horizontally.
+            '''
+            
+            def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
+                Widget.__init__(self, QtWidgets.QWidget())
+                
+                # ? Setting up grid (root-)layout.
+                self.gridLayout = Layouts.GridLayout(1, 2, elementMargin=elementMargin, elementSpacing=0)
+                self.gridLayout.setColumnMinimumSize(0, 0)
+                self.qWidget.setLayout(self.gridLayout.qLayout)
+                
+                # ? Setting up vertical layout.
+                self.horizontalLayout = Layouts.HorizontalLayout(elementMargin=Graphics.SymmetricMargin(0), elementSpacing=elementSpacing)
+                self.gridLayout.setWidget(Widget.fromLayout(self.horizontalLayout), 0, 0)
+
+            def insertWidget(self, widget, idx=-1):
+                '''
+                Insert widget at index.
+                '''
+                self.horizontalLayout.insertWidget(widget, idx)
 
     class ColorBlock(Widget):
         '''
