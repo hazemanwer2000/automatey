@@ -128,28 +128,24 @@ class ScrollArea():
         self.qScrollArea.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
         self.qScrollArea.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
 
-class GDecorations:
+class Decorations:
 
-    class GOutline(QtWidgets.QFrame):
+    class Outline:
         '''
         Adds an outline around the specified element.
         '''
         
         def __init__(self, element, elementMargin:Graphics.Margin):
-            super().__init__()
+            
+            self.qWidget = QtWidgets.QFrame(self)
             
             # PyQt6: Stylizing 'QFrame' to mimic a border.
-            self.setFrameShape(QtWidgets.QFrame.Shape.Box)
-            self.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
+            self.qWidget.setFrameShape(QtWidgets.QFrame.Shape.Box)
+            self.qWidget.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
             
             # ? Setting element.
-            layout = QtWidgets.QGridLayout(self)
-            layout.setSpacing(0)
-            layout.setContentsMargins(elementMargin.left,
-                                    elementMargin.top,
-                                    elementMargin.right,
-                                    elementMargin.bottom)
-            layout.addWidget(element, 0, 0, 1, 1)
+            layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
+            self.qWidget.setLayout(layout.qLayout)
 
 class GWidgets:
     '''
