@@ -6,7 +6,6 @@ import PyQt6.QtCore as QtCore
 
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
-import automatey.Media.ImageUtils as ImageUtils
 import automatey.Utils.MathUtils as MathUtils
 
 class Image:

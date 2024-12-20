@@ -416,6 +416,36 @@ class Widgets:
                 if img != None:
                     self.qWidget.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
 
+        class CheckBox(Widget, INTERNAL.EventManager):
+            '''
+            Text, along with a check-box.
+            '''
+            
+            def __init__(self, text:str, isChecked=False):
+                self.qWidget = QtWidgets.QCheckBox()
+                INTERNAL.EventManager.__init__(self)
+                Widget.__init__(self, self.qWidget)
+                
+                # ? Set text.
+                self.qWidget.setText(text)
+                
+                # ? Set initial (check-)state.
+                initCheckState = QtCore.Qt.CheckState.Checked if isChecked else QtCore.Qt.CheckState.Unchecked
+                self.qWidget.setCheckState(initCheckState)
+                
+                # ? Event-handlers.
+                self.qWidget.stateChanged.connect(self.INTERNAL_stateChanged)
+                
+            def isChecked(self):
+                '''
+                (...)
+                '''
+                return True if (self.qWidget.checkState() == QtCore.Qt.CheckState.Checked) else False
+            
+            def INTERNAL_stateChanged(self, value):
+                if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
+
     class GColorSelector(QtWidgets.QWidget):
         '''
         Color displayer, and selector.
@@ -453,35 +483,6 @@ class Widgets:
                 event.accept()
             else:
                 super().mousePressEvent(event)
-
-    class GCheckBox(QtWidgets.QCheckBox, INTERNAL.EventManager):
-        '''
-        Text, along with a check-box.
-        '''
-        
-        def __init__(self, text:str, isChecked=False):
-            QtWidgets.QCheckBox.__init__(self)
-            INTERNAL.EventManager.__init__(self)
-            
-            # ? Set text.
-            self.setText(text)
-            
-            # ? Set initial (check-)state.
-            initCheckState = QtCore.Qt.CheckState.Checked if isChecked else QtCore.Qt.CheckState.Unchecked
-            self.setCheckState(initCheckState)
-            
-            # ? Event-handlers.
-            self.stateChanged.connect(self.INTERNAL_stateChanged)
-            
-        def GIsChecked(self):
-            '''
-            (...)
-            '''
-            return True if (self.checkState() == QtCore.Qt.CheckState.Checked) else False
-        
-        def INTERNAL_stateChanged(self, value):
-            if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
-                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
     class GDropDownList(QtWidgets.QComboBox, INTERNAL.EventManager):
         '''
