@@ -28,13 +28,16 @@ class INTERNAL:
             '''
             self.eventHandlers[type(eventHandler)] = eventHandler
 
+class Layout:
+    pass
+
 class Layouts:
     ''''
     Note that,
     - Layout(s) are treated as any other GUI element.
     '''
 
-    class StackedLayout():
+    class StackedLayout(Layout):
         
         def __init__(self, elements, initElement):
             
@@ -57,7 +60,7 @@ class Layouts:
             '''
             self.qLayout.setCurrentIndex(index)
 
-    class GGridLayout(QtWidgets.QWidget):
+    class GridLayout(Layout):
         '''
         A grid (e.g., 2x2) layout.
         
@@ -67,47 +70,42 @@ class Layouts:
         '''
         
         def __init__(self, rowCount:int, colCount:int, elementMargin:Graphics.Margin, elementSpacing:int):
-            super().__init__()
             
             # PyQt6: It is easier (i.e., compatible with more API(s)) if a layout is within a 'QWidget'.
-            layout = QtWidgets.QGridLayout()
-            self.setLayout(layout)
+            self.qLayout = QtWidgets.QGridLayout()
             
             # ? Other setting(s).
-            layout.setContentsMargins(elementMargin.left,
+            self.qLayout.setContentsMargins(elementMargin.left,
                                     elementMargin.top,
                                     elementMargin.right,
                                     elementMargin.bottom)
-            layout.setSpacing(elementSpacing)
+            self.qLayout.setSpacing(elementSpacing)
             
             # ? Set all row(s) and column(s) as stretchable by default.
             for i in range(rowCount):
-                layout.setRowStretch(i, 1)
+                self.qLayout.setRowStretch(i, 1)
             for i in range(colCount):
-                layout.setColumnStretch(i, 1)
+                self.qLayout.setColumnStretch(i, 1)
         
-        def GSetElement(self, element, rowIdx, colIdx, rowSpan=1, colSpan=1):
+        def setElement(self, element, rowIdx, colIdx, rowSpan=1, colSpan=1):
             '''
             Set an element in a specific location within the grid.
             '''
-            layout:QtWidgets.QGridLayout = self.layout()
-            layout.addWidget(element, rowIdx, colIdx, rowSpan, colSpan)
+            self.qLayout.addWidget(element, rowIdx, colIdx, rowSpan, colSpan)
         
-        def GSetRowMinimumSize(self, rowIdx, size):
+        def setRowMinimumSize(self, rowIdx, size):
             '''
             Fix row size (i.e., no longer stretchable).
             '''
-            layout:QtWidgets.QGridLayout = self.layout()
-            layout.setRowStretch(rowIdx, 0)
-            layout.setRowMinimumHeight(rowIdx, size)
+            self.qLayout.setRowStretch(rowIdx, 0)
+            self.qLayout.setRowMinimumHeight(rowIdx, size)
 
-        def GSetColumnMinimumSize(self, colIdx, size):
+        def setColumnMinimumSize(self, colIdx, size):
             '''
             Fix column size (i.e., no longer stretchable).
             '''
-            layout:QtWidgets.QGridLayout = self.layout()
-            layout.setColumnStretch(colIdx, 0)
-            layout.setColumnMinimumWidth(colIdx, size)
+            self.qLayout.setColumnStretch(colIdx, 0)
+            self.qLayout.setColumnMinimumWidth(colIdx, size)
 
 class GScrollArea(QtWidgets.QScrollArea):
     '''
