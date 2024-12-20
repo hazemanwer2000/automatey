@@ -421,13 +421,14 @@ class Widgets:
             Text, along with a check-box.
             '''
             
-            def __init__(self, text:str, isChecked=False):
+            def __init__(self, text:str=None, isChecked=False):
                 self.qWidget = QtWidgets.QCheckBox()
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
                 
                 # ? Set text.
-                self.qWidget.setText(text)
+                if text != None:
+                    self.qWidget.setText(text)
                 
                 # ? Set initial (check-)state.
                 initCheckState = QtCore.Qt.CheckState.Checked if isChecked else QtCore.Qt.CheckState.Unchecked
