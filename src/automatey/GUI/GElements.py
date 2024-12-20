@@ -139,7 +139,7 @@ class ScrollArea(Widget):
     '''
     
     def __init__(self, widget, isVerticalScrollBar=False, isHorizontalScrollBar=False):
-        Widget.__init__(QtWidgets.QScrollArea())
+        Widget.__init__(self, QtWidgets.QScrollArea())
         
         # ? Set element.
         self.qWidget.setWidgetResizable(True)
@@ -172,29 +172,29 @@ class Decorations:
             layout.setWidget(widget, 0, 0, 1, 1)
             self.qWidget.setLayout(layout.qLayout)
 
-class GWidgets:
+class Widgets:
     '''
     Note that,
     - Widget(s) are treated as any other GUI element.
     '''
 
-    class GColorBlock(QtWidgets.QWidget):
+    class ColorBlock(Widget):
         '''
         A simple color-block.
         '''
         
         def __init__(self, color:ColorUtils.Color, size=None):
-            super().__init__()
+            Widget.__init__(self, QtWidgets.QWidget())
             
             # ? Setting fill-color of widget.
-            self.setAutoFillBackground(True)
-            palette = self.palette()
+            self.qWidget.setAutoFillBackground(True)
+            palette = self.qWidget.palette()
             palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor('#' + color.asHEX()))
-            self.setPalette(palette)
+            self.qWidget.setPalette(palette)
             
             # ? Set (i.e., fix) size, if specified.
             if size != None:
-                self.setFixedSize(size[0], size[1])
+                self.qWidget.setFixedSize(size[0], size[1])
 
     class GColorSelector(QtWidgets.QWidget):
         '''
