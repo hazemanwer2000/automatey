@@ -3,11 +3,12 @@
 import PyQt6.QtWidgets as QtWidgets
 import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as QtCore
+import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
 
 # Internal Libraries
 import automatey.Base.TimeUtils as TimeUtils
 
-class GThread(QtCore.QThread):
+class Thread:
     '''
     A thread, with two handler(s):
     - Main handler, that is called once only, when thread is ran.
@@ -16,28 +17,21 @@ class GThread(QtCore.QThread):
         - Note that, it receives a `dict` as argument.
     '''
     
-    notifySignal = QtCore.pyqtSignal(dict)
-    
     def __init__(self, mainFcn, notifyFcn):
-        QtCore.QThread.__init__(self)
-        self.mainFcn = mainFcn
-        self.notifySignal.connect(notifyFcn)
-    
-    def GRun(self):
+        
+        self.qThread = PyQt6Wrapper.QThread(mainFcn, notifyFcn)
+        
+    def run(self):
         '''
         Run thread.
         '''
-        self.start()
+        self.qThread.start()
     
-    def GNotify(self, data:dict):
+    def notify(self, data:dict):
         '''
         Notify (with data).
         '''
-        self.notifySignal.emit(data)
-
-    @QtCore.pyqtSlot()
-    def run(self):
-        self.mainFcn(self)
+        self.qThread.WNotify(data)
 
 class Queue:
     '''

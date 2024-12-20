@@ -15,3 +15,19 @@ class Utils:
         layout.setColumnStretch(0, 1)
         layout.addWidget(element, 0, 0, 1, 1)
         return layout
+
+class QThread(QtCore.QThread):
+    
+    notifySignal = QtCore.pyqtSignal(dict)
+    
+    def __init__(self, mainFcn, notifyFcn):
+        QtCore.QThread.__init__(self)
+        self.mainFcn = mainFcn
+        self.notifySignal.connect(notifyFcn)
+
+    def WNotify(self, data:dict):
+        self.notifySignal.emit(data)
+
+    @QtCore.pyqtSlot()
+    def run(self):
+        self.mainFcn(self)
