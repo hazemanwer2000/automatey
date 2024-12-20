@@ -148,31 +148,11 @@ class Widget:
         widget = Widget(qWidget)
         return widget
 
-class ScrollArea(Widget):
-    '''
-    Encapsulates any element, to allow for vertical/horizontal scrolling.
-    '''
-    
-    def __init__(self, widget, isVerticalScrollBar=False, isHorizontalScrollBar=False):
-        Widget.__init__(self, QtWidgets.QScrollArea())
-        
-        # ? Set element.
-        self.qWidget.setWidgetResizable(True)
-        self.qWidget.setWidget(widget.qWidget)
-        
-        # ? Specify if vertical/horizontal scrolling is always on.
-        
-        verticalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isVerticalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        horizontalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isHorizontalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        
-        self.qWidget.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
-        self.qWidget.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
-
 class Widgets:
 
     class Decorators:
 
-        class OutlineDecorator(Widget):
+        class Outline(Widget):
             '''
             Adds an outline around the specified element.
             '''
@@ -182,12 +162,32 @@ class Widgets:
                 
                 # PyQt6: Stylizing 'QFrame' to mimic a border.
                 self.qWidget.setFrameShape(QtWidgets.QFrame.Shape.Box)
-                self.qWidget.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
+                self.qWidget.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
                 
                 # ? Setting element.
                 layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
                 layout.setWidget(widget, 0, 0, 1, 1)
                 self.qWidget.setLayout(layout.qLayout)
+
+        class ScrollArea(Widget):
+            '''
+            Encapsulates any element, to allow for vertical/horizontal scrolling.
+            '''
+            
+            def __init__(self, widget, isVerticalScrollBar=False, isHorizontalScrollBar=False):
+                Widget.__init__(self, QtWidgets.QScrollArea())
+                
+                # ? Set element.
+                self.qWidget.setWidgetResizable(True)
+                self.qWidget.setWidget(widget.qWidget)
+                
+                # ? Specify if vertical/horizontal scrolling is always on.
+                
+                verticalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isVerticalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+                horizontalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isHorizontalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+                
+                self.qWidget.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
+                self.qWidget.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
 
     class Containers:
         
