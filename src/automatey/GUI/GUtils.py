@@ -7,6 +7,7 @@ import PyQt6.QtCore as QtCore
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.MathUtils as MathUtils
+import automatey.Abstract.Input as Input
 
 class Image:
     '''
@@ -80,6 +81,10 @@ class EventHandler:
     
     def __init__(self, fcn):
         self.fcn = fcn
+    
+    Key2QKey = {
+        Input.Key.Enter: QtCore.Qt.Key.Key_Return, 
+    }
 
 class EventHandlers:
     '''
@@ -96,4 +101,28 @@ class EventHandlers:
         pass
 
     class TextChangeEventHandler(EventHandler):
+        pass
+    
+    class KeyEventHandler(EventHandler):
+        '''
+        Note that,
+        - Registered handler shall expect the pressed `Key` is argument.
+        '''
+        
+        def __init__(self, fcns, keys:list):
+            self.fcns = fcns
+            self.keys = keys
+        
+        def INTERNAL_checkIfQKeyRegistered(self, qKey):
+            '''
+            Check if `qKey` is registered. If not, `None` is returned. Otherwise, corresponding `key` is returned.
+            '''
+            foundKey = None
+            for key in self.keys:
+                if EventHandler.Key2QKey[key] == qKey:
+                    foundKey = key
+                    break
+            return foundKey
+
+    class KeyPressEventHandler(KeyEventHandler):
         pass

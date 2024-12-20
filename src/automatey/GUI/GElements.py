@@ -347,7 +347,7 @@ class Widgets:
                 '''
                 return self.verticalLayout.getCount()
 
-    class Basic:
+    class Basics:
 
         class ColorBlock(Widget):
             '''
@@ -591,6 +591,54 @@ class Widgets:
                 if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
 
+        class LineEdit(Widget, INTERNAL.EventManager):
+            
+            def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False):
+                self.qWidget = PyQt6Wrapper.QLineEdit()
+                INTERNAL.EventManager.__init__(self)
+                Widget.__init__(self, self.qWidget)
+                
+                if placeholder != None:
+                    self.qWidget.setPlaceholderText(placeholder)
+                    
+                # ? Event-handler(s).
+                self.qWidget.textChanged.connect(self.INTERNAL_textChanged)
+                self.qWidget.keyPressEventFcn = self.INTERNAL_keyPressEvent
+            
+                # ? By default, font is 'Monospace'.
+                if isMonospaced:
+                    font = QtGui.QFont("Consolas")
+                    font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
+                    self.qWidget.setFont(font)
+                
+                # ? Set editable-mode.
+                self.setEditable(isEditable)
+            
+            def setEditable(self, flag:bool):
+                '''
+                Set editable-mode.
+                '''
+                self.qWidget.setReadOnly(not flag)
+            
+            def getText(self):
+                '''
+                Get text.
+                '''
+                return self.text()
+            
+            def INTERNAL_keyPressEvent(self, event):
+                qKey = event.key()
+                if GUtils.EventHandlers.KeyPressEventHandler in self.eventHandlers:
+                    keyPressEventHandler:GUtils.EventHandlers.KeyPressEventHandler = self.eventHandlers[GUtils.EventHandlers.KeyPressEventHandler]
+                    foundKey = keyPressEventHandler.INTERNAL_checkIfQKeyRegistered(qKey)
+                    if foundKey != None:
+                        keyPressEventHandler.fcns[foundKey](foundKey)
+                        return 0
+                
+            def INTERNAL_textChanged(self):
+                if GUtils.EventHandlers.TextChangeEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.TextChangeEventHandler].fcn()
+
     class GColorSelector(QtWidgets.QWidget):
         '''
         Color displayer, and selector.
@@ -629,42 +677,6 @@ class Widgets:
             else:
                 super().mousePressEvent(event)
 
-    class GLineEdit(QtWidgets.QLineEdit, INTERNAL.EventManager):
-        
-        def __init__(self, placeholder:str=None, isEditable=True):
-            QtWidgets.QLineEdit.__init__(self)
-            INTERNAL.EventManager.__init__(self)
-            
-            if placeholder != None:
-                self.setPlaceholderText(placeholder)
-                
-            # ? Event-handlers.
-            self.textChanged.connect(self.INTERNAL_textChanged)
-        
-            # ? By default, font is 'Monospace'.
-            font = QtGui.QFont("Consolas")
-            font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
-            self.setFont(font)
-            
-            # ? Set editable-mode.
-            self.setEditable(isEditable)
-        
-        def setEditable(self, flag:bool):
-            '''
-            Set editable-mode.
-            '''
-            self.setReadOnly(not flag)
-        
-        def GGetText(self):
-            '''
-            Get text.
-            '''
-            return self.text()
-            
-        def INTERNAL_textChanged(self):
-            if GUtils.GEventHandlers.GTextChangeEventHandler in self.eventHandlers:
-                self.eventHandlers[GUtils.GEventHandlers.GTextChangeEventHandler].fcn()
-    
     class GTextEdit(QtWidgets.QPlainTextEdit, INTERNAL.EventManager):
         
         def __init__(self, placeholder:str=None, isEditable=True):
@@ -1223,7 +1235,7 @@ class Window:
         self.qWindow = QtWidgets.QMainWindow()
         
         # ? Setting root layout.
-        self.qWindow.setCentralWidget(PyQt6Wrapper.Utils.QLayout2QWidget(rootLayout.qLayout))
+        self.qWindow.setCentralWidget(Widget.fromLayout(rootLayout).qWidget)
         
         # ? All other settings.
         if (isSizeFixed):
