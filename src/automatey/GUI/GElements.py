@@ -36,32 +36,6 @@ class Layout:
         self.qLayout = qLayout
 
 class Layouts:
-    ''''
-    Note that,
-    - Layout(s) are treated as any other GUI element.
-    '''
-
-    class StackedLayout(Layout):
-        
-        def __init__(self, widgets, initWidget):
-            Layout.__init__(self, QtWidgets.QStackedLayout())
-            
-            for widget in widgets:
-                self.qLayout.addWidget(widget.qWidget)
-            
-            self.qLayout.setCurrentWidget(initWidget.qWidget)
-                
-        def setCurrentWidget(self, widget):
-            '''
-            Set the current element.
-            '''
-            self.qLayout.setCurrentWidget(widget.qWidget)
-
-        def setCurrentWidgetByIndex(self, index):
-            '''
-            Set the current element.
-            '''
-            self.qLayout.setCurrentIndex(index)
 
     class GridLayout(Layout):
         '''
@@ -194,30 +168,50 @@ class ScrollArea(Widget):
         self.qWidget.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
         self.qWidget.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
 
-class Decorations:
-
-    class Outline(Widget):
-        '''
-        Adds an outline around the specified element.
-        '''
-        
-        def __init__(self, widget, elementMargin:Graphics.Margin):
-            Widget.__init__(self, QtWidgets.QFrame())
-            
-            # PyQt6: Stylizing 'QFrame' to mimic a border.
-            self.qWidget.setFrameShape(QtWidgets.QFrame.Shape.Box)
-            self.qWidget.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-            
-            # ? Setting element.
-            layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
-            layout.setWidget(widget, 0, 0, 1, 1)
-            self.qWidget.setLayout(layout.qLayout)
-
 class Widgets:
-    '''
-    Note that,
-    - Widget(s) are treated as any other GUI element.
-    '''
+
+    class Decorators:
+
+        class OutlineDecorator(Widget):
+            '''
+            Adds an outline around the specified element.
+            '''
+            
+            def __init__(self, widget, elementMargin:Graphics.Margin):
+                Widget.__init__(self, QtWidgets.QFrame())
+                
+                # PyQt6: Stylizing 'QFrame' to mimic a border.
+                self.qWidget.setFrameShape(QtWidgets.QFrame.Shape.Box)
+                self.qWidget.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
+                
+                # ? Setting element.
+                layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
+                layout.setWidget(widget, 0, 0, 1, 1)
+                self.qWidget.setLayout(layout.qLayout)
+
+    class Containers:
+        
+        class StackedContainer(Widget):
+            
+            def __init__(self, widgets, initWidget):
+                Widget.__init__(self, QtWidgets.QStackedWidget())
+                
+                for widget in widgets:
+                    self.qWidget.addWidget(widget.qWidget)
+                
+                self.qWidget.setCurrentWidget(initWidget.qWidget)
+                    
+            def setCurrentWidget(self, widget):
+                '''
+                Set the current element.
+                '''
+                self.qWidget.setCurrentWidget(widget.qWidget)
+
+            def setCurrentWidgetByIndex(self, index):
+                '''
+                Set the current element.
+                '''
+                self.qWidget.setCurrentIndex(index)
 
     class ColorBlock(Widget):
         '''
