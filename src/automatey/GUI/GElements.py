@@ -480,7 +480,7 @@ class Widgets:
                 currentItem = self.qWidget.currentItem()
                 return None if (currentItem == None) else currentItem.text()
 
-            def getSelectedByIndex(self) -> int:
+            def getSelectedIndex(self) -> int:
                 '''
                 Get index of current item. If none are selected, `-1` is returned.
                 '''
@@ -558,6 +558,38 @@ class Widgets:
                 '''
                 return self.qWidget.value()
 
+        class DropDownList(QtWidgets.QComboBox, INTERNAL.EventManager):
+            '''
+            A drop-down list.
+            '''
+            
+            def __init__(self, itemList, defaultIndex=0):
+                self.qWidget = QtWidgets.QComboBox()
+                INTERNAL.EventManager.__init__(self)
+                Widget.__init__(self, self.qWidget)
+                
+                self.qWidget.addItems(itemList)
+                self.qWidget.setCurrentIndex(defaultIndex)
+                
+                # ? Event-handlers.
+                self.qWidget.currentIndexChanged.connect(self.INTERNAL_currentIndexChanged)
+                
+            def getSelected(self):
+                '''
+                Get current item.
+                '''
+                return self.currentText()
+            
+            def getSelectedIndex(self):
+                '''
+                Get index of the current item.
+                '''
+                return self.currentIndex()
+
+            def INTERNAL_currentIndexChanged(self, newIndex):
+                if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
+
     class GColorSelector(QtWidgets.QWidget):
         '''
         Color displayer, and selector.
@@ -595,37 +627,6 @@ class Widgets:
                 event.accept()
             else:
                 super().mousePressEvent(event)
-
-    class GDropDownList(QtWidgets.QComboBox, INTERNAL.EventManager):
-        '''
-        A drop-down list. Zero-index'ed.
-        '''
-        
-        def __init__(self, itemList, defaultIndex=0):
-            QtWidgets.QComboBox.__init__(self)
-            INTERNAL.EventManager.__init__(self)
-            
-            self.addItems(itemList)
-            self.setCurrentIndex(defaultIndex)
-            
-            # ? Event-handlers.
-            self.currentIndexChanged.connect(self.INTERNAL_currentIndexChanged)
-            
-        def GGetSelectedItem(self):
-            '''
-            Get current item.
-            '''
-            return self.currentText()
-        
-        def GGetSelectedItemByIndex(self):
-            '''
-            Get index of the current item.
-            '''
-            return self.currentIndex()
-
-        def INTERNAL_currentIndexChanged(self, newIndex):
-            if GUtils.GEventHandlers.GSelectionChangeEventHandler in self.eventHandlers:
-                self.eventHandlers[GUtils.GEventHandlers.GSelectionChangeEventHandler].fcn()
 
     class GLineEdit(QtWidgets.QLineEdit, INTERNAL.EventManager):
         
