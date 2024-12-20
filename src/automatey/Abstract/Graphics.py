@@ -21,6 +21,18 @@ class SymmetricMargin(Margin):
     def __init__(self, value):
         Margin.__init__(self, value, value, value, value)
 
+class Alignment:
+    
+    class Horizontal:
+        class Left: pass
+        class Right: pass
+        class Center: pass
+        
+    class Vertical:
+        class Top: pass
+        class Bottom: pass
+        class Center: pass
+
 # Drawable(s)
 
 class Point:

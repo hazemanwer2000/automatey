@@ -108,20 +108,40 @@ class Layouts:
             self.qLayout.setColumnStretch(colIdx, 0)
             self.qLayout.setColumnMinimumWidth(colIdx, size)
 
+    class VerticalLayout(Layout):
+        '''
+        A vertical layout.
+        '''
+        
+        def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
+            Layout.__init__(self, QtWidgets.QVBoxLayout())
+
+            # ? Other setting(s).
+            self.qLayout.setContentsMargins(elementMargin.left,
+                                    elementMargin.top,
+                                    elementMargin.right,
+                                    elementMargin.bottom)
+            self.qLayout.setSpacing(elementSpacing)
+
+        HorizontalAlignment2AlignmentFlag = {
+            Graphics.Alignment.Horizontal.Left: QtCore.Qt.AlignmentFlag.AlignLeft,
+            Graphics.Alignment.Horizontal.Right: QtCore.Qt.AlignmentFlag.AlignRight,
+            Graphics.Alignment.Horizontal.Center: QtCore.Qt.AlignmentFlag.AlignHCenter,
+        }
+
+        def insertWidget(self, widget, idx=-1, alignment=Graphics.Alignment.Horizontal.Center):
+            '''
+            Insert widget at index.
+            '''
+            self.qLayout.insertWidget(idx, 
+                                      widget.qWidget,
+                                      alignment=Layouts.VerticalLayout.HorizontalAlignment2AlignmentFlag[alignment])
+
 class Widget:
 
-    def __init__(self, qWidget, layout=None):
+    def __init__(self, qWidget):
         
         self.qWidget = qWidget
-        self.layout = layout
-        
-    def getLayout(self):
-        '''
-        Get underlying layout.
-        
-        Note, if `fromLayout` was not used to create this widget, `None` is returned.
-        '''
-        return self.layout
         
     @staticmethod
     def fromLayout(layout):
@@ -130,7 +150,7 @@ class Widget:
         '''
         qWidget = QtWidgets.QWidget()
         qWidget.setLayout(layout.qLayout)
-        widget = Widget(qWidget, layout=layout)
+        widget = Widget(qWidget)
         return widget
 
 class ScrollArea(Widget):
