@@ -8,13 +8,12 @@ import PyQt6.QtCore as QtCore
 import automatey.OS.FileUtils as FileUtils
 import automatey.Media.ImageUtils as ImageUtils
 
-class GImage:
+class Image:
     '''
     Image, may be used with all element(s) of the GUI.
     '''
     
     def __init__(self, img:ImageUtils.Image, size=None):
-        super().__init__()
         
         cv2ImgHandler = img.EXTERNAL_toCV2()
         
@@ -32,7 +31,7 @@ class GImage:
         if size != None:
             self.qImage = self.qImage.scaled(size[0], size[1], QtCore.Qt.AspectRatioMode.IgnoreAspectRatio)
 
-class GIcon:
+class Icon:
     '''
     Icon, may be used with all element(s) of the GUI.
     '''
@@ -42,18 +41,18 @@ class GIcon:
         self.size = size
     
     @staticmethod
-    def GCreateFromFile(f:FileUtils.File, size=None):
+    def createFromFile(f:FileUtils.File, size=None):
         '''
         Create from file.
         '''
-        return GIcon(QtGui.QIcon(str(f)), size=size)
+        return Icon(QtGui.QIcon(str(f)), size=size)
     
     @staticmethod
-    def GCreateFromLibrary(standardIcon, size=None):
+    def createFromLibrary(standardIcon, size=None):
         '''
         Creates an Icon from the library (i.e., a standard icon).
         '''
-        return GIcon(QtWidgets.QApplication.instance().style().standardIcon(standardIcon.qStandardIcon), size=size)
+        return Icon(QtWidgets.QApplication.instance().style().standardIcon(standardIcon.qStandardIcon), size=size)
 
     class GStandardIcon:
 
