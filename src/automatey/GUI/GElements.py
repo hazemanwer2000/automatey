@@ -177,9 +177,15 @@ class Layouts:
 
 class Widget:
 
-    def __init__(self, qWidget):
+    def __init__(self, qWidget:QtWidgets.QWidget):
         
         self.qWidget = qWidget
+
+    def discard(self):
+        '''
+        Discard widget (i.e., to save memory). Must be called before removing all reference(s) of widget.
+        '''
+        self.qWidget.deleteLater()
         
     @staticmethod
     def fromLayout(layout):
