@@ -13,6 +13,7 @@ import automatey.Abstract.Graphics as Graphics
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.MathUtils as MathUtils
+import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
 
 class INTERNAL:
     
@@ -922,14 +923,7 @@ class Dialog:
         self.qDialog.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
         
         # ? Setting root layout.
-        # PyQt: For Dialogs', layout must not be attached to a 'QWidget'.
-        layout = QtWidgets.QGridLayout()
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setRowStretch(0, 1)
-        layout.setColumnStretch(0, 1)
-        layout.addWidget(rootElement, 0, 0, 1, 1)
-        self.qDialog.setLayout(layout)
+        self.qDialog.setLayout(PyQt6Wrapper.Utils.Element2Layout(rootElement))
         
     def run(self):
         '''
