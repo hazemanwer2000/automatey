@@ -10,6 +10,7 @@ import automatey.GUI.GUtils as GUtils
 import automatey.GUI.GConcurrency as GConcurrency
 import automatey.Base.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as Graphics
+import automatey.Abstract.Input as Input
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
 import automatey.Resources as Resources
@@ -410,7 +411,7 @@ class Widgets:
                 # ? Event-handlers.
                 self.qButton.clicked.connect(self.INTERNAL_onClicked)
                 
-                # PyQt6: Force 'QButton' not to be focusable.
+                # PyQt6: Force widget not to be focusable.
                 self.qButton.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
                 
             def INTERNAL_onClicked(self):
@@ -432,6 +433,9 @@ class Widgets:
                 if img != None:
                     self.qWidget.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
 
+                # PyQt6: Force widget not to be focusable.
+                self.qWidget.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
+
         class CheckBox(Widget, INTERNAL.EventManager):
             '''
             Text, along with a check-box.
@@ -452,6 +456,9 @@ class Widgets:
                 
                 # ? Event-handlers.
                 self.qWidget.stateChanged.connect(self.INTERNAL_stateChanged)
+                
+                # PyQt6: Force widget not to be focusable.
+                self.qWidget.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
                 
             def isChecked(self):
                 '''
@@ -551,6 +558,9 @@ class Widgets:
                 # ? Register Mouse Event(s).
                 self.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseEvent
                 self.qWidget.mousePressEventFcn = self.INTERNAL_mouseEvent
+
+                # PyQt6: Force widget not to be focusable.
+                self.qWidget.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
                 
             def INTERNAL_mouseEvent(self, event):
                 # ? Update value.
@@ -648,7 +658,7 @@ class Widgets:
                     keyPressEventHandler:GUtils.EventHandlers.KeyPressEventHandler = self.eventHandlers[GUtils.EventHandlers.KeyPressEventHandler]
                     foundKey = keyPressEventHandler.INTERNAL_checkIfQKeyRegistered(qKey)
                     if foundKey != None:
-                        keyPressEventHandler.key2FcnDict[foundKey](foundKey)
+                        keyPressEventHandler.key2FcnDict[foundKey]()
                         return 0
                 
             def INTERNAL_textChanged(self):
@@ -702,7 +712,7 @@ class Widgets:
                     keyPressEventHandler:GUtils.EventHandlers.KeyPressEventHandler = self.eventHandlers[GUtils.EventHandlers.KeyPressEventHandler]
                     foundKey = keyPressEventHandler.INTERNAL_checkIfQKeyRegistered(qKey)
                     if foundKey != None:
-                        keyPressEventHandler.key2FcnDict[foundKey](foundKey)
+                        keyPressEventHandler.key2FcnDict[foundKey]()
                         return 0
                 
             def INTERNAL_textChanged(self):
@@ -719,13 +729,16 @@ class Widgets:
             '''
         
             def __init__(self):
-                self.qWidget = QtWidgets.QFrame()
+                self.qWidget = PyQt6Wrapper.QFrame()
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
                 
                 # ? Setting up VLC media-player.
                 self.VLCInstance = vlc.Instance('--quiet')
                 self.player = self.VLCInstance.media_player_new()
+                # ? ? Configure player to ignore mouse/key event(s).
+                vlc.libvlc_video_set_mouse_input(self.player, 0)
+                vlc.libvlc_video_set_key_input(self.player, 0)
                 # (!) OS-specific (Windows-OS)
                 self.player.set_hwnd(self.qWidget.winId())
                 
@@ -744,6 +757,22 @@ class Widgets:
                 #       If `True`, it is re-loaded. 
                 self.videoLengthOffset = TimeUtils.Time.createFromMilliseconds(500)
                 self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent_1ms, TimeUtils.Time.createFromMilliseconds(1))
+                
+                # ? Set event-handler(s).
+                self.qWidget.keyPressEventFcn = self.INTERNAL_keyPressEvent
+                self.qWidget.enterEventFcn = self.INTERNAL_enterEvent
+            
+            def INTERNAL_keyPressEvent(self, event):
+                qKey = event.key()
+                if GUtils.EventHandlers.KeyPressEventHandler in self.eventHandlers:
+                    keyPressEventHandler:GUtils.EventHandlers.KeyPressEventHandler = self.eventHandlers[GUtils.EventHandlers.KeyPressEventHandler]
+                    foundKey = keyPressEventHandler.INTERNAL_checkIfQKeyRegistered(qKey)
+                    if foundKey != None:
+                        keyPressEventHandler.key2FcnDict[foundKey]()
+                    
+            def INTERNAL_enterEvent(self, event):
+                # ? Gain focus (to be able to handle key-press(es)), when mouse enters widget's area.
+                self.qWidget.setFocus()
             
             def INTERNAL_timingEvent_1ms(self):
                 # ? If position exceeds length (which is offset), seek '0'.
@@ -970,7 +999,12 @@ class Widgets:
                 panelWorkingIdx += 1
                 
                 # ? Every XXX-ms, a timer fires, to guarantee the seeker is sync'ed with the video (as it progresses).
-                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent_1ms, TimeUtils.Time.createFromMilliseconds(1))         
+                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent_1ms, TimeUtils.Time.createFromMilliseconds(1))
+                
+                # ? Set-up key shortcut(s).
+                self.renderer.setEventHandler(GUtils.EventHandlers.KeyPressEventHandler({
+                    Input.Key.Space: self.togglePlay,
+                }))
             
             def load(self, f:FileUtils.File):
                 '''
@@ -1005,6 +1039,12 @@ class Widgets:
 
             def seekBackward(self, skipTime:TimeUtils.Time):
                 self.renderer.seekBackward(skipTime)
+            
+            def togglePlay(self):
+                if self.renderer.isPlaying():
+                    self.pause()
+                else:
+                    self.play()
                 
             def play(self):
                 self.playPauseButton.setCurrentWidget(self.pauseButton)

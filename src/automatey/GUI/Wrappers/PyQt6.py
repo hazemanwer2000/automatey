@@ -38,6 +38,21 @@ class QSlider(QtWidgets.QSlider):
         if self.mouseMoveEventFcn != None:
             self.mouseMoveEventFcn(event)
 
+class QFrame(QtWidgets.QFrame):
+    
+    def __init__(self):
+        QtWidgets.QFrame.__init__(self)
+        self.keyPressEventFcn = None
+        self.enterEventFcn = None
+         
+    def enterEvent(self, event):
+        if self.enterEventFcn != None:
+            self.enterEventFcn(event)
+
+    def keyPressEvent(self, event):
+        if self.keyPressEventFcn != None:
+            self.keyPressEventFcn(event)
+
 class QLineEdit(QtWidgets.QLineEdit):
     
     def __init__(self):
