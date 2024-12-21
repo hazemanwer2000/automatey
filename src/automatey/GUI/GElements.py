@@ -898,6 +898,14 @@ class Widgets:
             A video player.
             '''
             
+            Constants = {
+                'Skip-Time' : {
+                    'L3' : TimeUtils.Time.createFromSeconds(10.0),
+                    'L2' : TimeUtils.Time.createFromSeconds(3.0),
+                    'L1' : TimeUtils.Time.createFromSeconds(1.0),
+                }
+            }
+            
             def __init__(self):
                 # ? Setting up root (...)
                 self.rootLayout = Layouts.GridLayout(2, 1, Graphics.SymmetricMargin(5), 5)
@@ -922,157 +930,83 @@ class Widgets:
                         self.panelLayout.setColumnMinimumSize(idx, 0)
                 # ? ? Setting-up play-pause button.
                 self.playButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaPlay), toolTip='Play')
-                self.playButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_play))
+                self.playButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_playButton_clickEvent))
                 self.pauseButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaPause), toolTip='Pause')
-                self.pauseButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_pause))
+                self.pauseButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_pauseButton_clickEvent))
                 self.playPauseButton = Widgets.Containers.StackedContainer([self.playButton, self.pauseButton], self.pauseButton)
                 self.panelLayout.setWidget(self.playPauseButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
-                # ? ? Setting-up stop button.
-                self.stopButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaStop), toolTip='Stop')
-                self.stopButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_stop))
-                self.panelLayout.setWidget(self.stopButton, 0, panelWorkingIdx)
+                # ? ? Setting-up restart button.
+                self.restartButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaStop), toolTip='Stop')
+                self.restartButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_restartButton_clickEvent))
+                self.panelLayout.setWidget(self.restartButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 # ? ? Setting-up seek-backward button.
                 self.seekBackwardButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaSeekBackward), toolTip='Seek Backward')
-                self.seekBackwardButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: self.INTERNAL_skipBackward(TimeUtils.Time.createFromSeconds(3.0))))
+                self.seekBackwardButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: self.INTERNAL_seekForwardButton_clickEvent(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2'])))
                 self.panelLayout.setWidget(self.seekBackwardButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 # ? ? Setting-up seek-forward button.
                 self.seekForwardButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaSeekForward), toolTip='Seek Forward')
-                self.seekForwardButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: self.INTERNAL_skipForward(TimeUtils.Time.createFromSeconds(3.0))))
+                self.seekForwardButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: self.INTERNAL_seekForwardButton_clickEvent(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2'])))
                 self.panelLayout.setWidget(self.seekForwardButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 # ? ? Setting-up seeker (i.e., slider).
                 # ? ? ? Max. value is set arbitrarily, and value-mapping is used to derive video position.
                 self.seekerMaxValue = 10000000
                 self.seeker = Widgets.Basics.Slider(valueRange=[0, self.seekerMaxValue], initValue=0, isHorizontal=True)
-                self.seeker.setEventHandler(GUtils.EventHandlers.SelectionChangeEventHandler(self.INTERNAL_EventHandler_seekerValueChanged))
+                self.seeker.setEventHandler(GUtils.EventHandlers.SelectionChangeEventHandler(self.INTERNAL_seeker_selectionChangeEvent))
                 self.panelLayout.setWidget(self.seekForwardButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
-
-
-                # ? Setting-up (un-)mute button.
-
-                self.unmuteButton = Widgets.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.GStandardIcon.MediaVolume),
-                                                toolTip='(Un-)mute')
-                self.unmuteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_toggleMute))
+                # ? ? Setting-up (un-)mute button.
+                self.unmuteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaVolumeMute), toolTip='(Un-)mute')
+                self.unmuteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_unmuteButton_clickEvent))
+                self.muteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaVolume), toolTip='(Un-)mute')
+                self.muteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_muteButton_clickEvent))
+                self.muteContainer = Widgets.Containers.StackedContainer([self.muteButton, self.unmuteButton], self.muteButton)
+                self.panelLayout.setWidget(self.muteContainer, 0, panelWorkingIdx)
+                panelWorkingIdx += 1
                 
-                self.muteButton = Widgets.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.GStandardIcon.MediaVolumeMute),
-                                                toolTip='(Un-)mute')
-                self.muteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_toggleMute))
-                
-                self.muteStackedLayout = Layouts.StackedLayout([self.muteButton, self.unmuteButton], self.unmuteButton)
-                self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
-                
-                self.controlGridLayout.GSetElement(self.muteStackedLayout, 0, 5, 1, 1)
-                
-                
-                
-
                 # ? Every XXX-ms, a timer fires, to guarantee the seeker is sync'ed with the video (as it progresses).
-                self.seekerUpdateTimer = GConcurrency.Timer(self.INTERNAL_EventHandler_seekerValueUpdate, TimeUtils.Time.createFromMilliseconds(1))
+                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent_1ms, TimeUtils.Time.createFromMilliseconds(1))         
             
-            KeyHandlers = {
-                # Seek forward/backward
-                QtCore.Qt.Key.Key_Comma:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipBackward(self, TimeUtils.Time.createFromSeconds(10.0))),
-                QtCore.Qt.Key.Key_Period:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipForward(self, TimeUtils.Time.createFromSeconds(10.0))),
-                QtCore.Qt.Key.Key_Left:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipBackward(self, TimeUtils.Time.createFromSeconds(3.0))),
-                QtCore.Qt.Key.Key_Right:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipForward(self, TimeUtils.Time.createFromSeconds(3.0))),
-                QtCore.Qt.Key.Key_Semicolon:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipBackward(self, TimeUtils.Time.createFromSeconds(1.0))),
-                QtCore.Qt.Key.Key_Apostrophe:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_skipForward(self, TimeUtils.Time.createFromSeconds(1.0))),
-                
-                # Volume up/down/mute
-                QtCore.Qt.Key.Key_Up:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_adjustVolume(self, 10)),
-                QtCore.Qt.Key.Key_Down:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_adjustVolume(self, -10)),
-                QtCore.Qt.Key.Key_M:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_toggleMute(self)),
-
-                # Play/Pause
-                QtCore.Qt.Key.Key_Space:
-                    (lambda self: GWidgets.GVideoPlayer.INTERNAL_togglePlay(self)),
-            }
-
-            def enterEvent(self, event):
-                # PyQt6: Capture focus whenever 'EnterEvent' occurs.
-                self.setFocus()
-                event.accept()
-            
-            def keyPressEvent(self, event):
-                key = event.key()
-                if key in GWidgets.GVideoPlayer.KeyHandlers:
-                    GWidgets.GVideoPlayer.KeyHandlers[key](self)
-                    event.accept()
-                else:
-                    super().keyPressEvent(event)                
-            
-            def INTERNAL_EventHandler_seekerValueUpdate(self):
-                '''
-                Called via a timing event, to update the seeker.
-                '''
-                ratio = int(self.renderer.GGetPosition()) / int( self.renderer.GGetLength())
+            def INTERNAL_timingEvent_1ms(self):
+                ratio = int(self.renderer.getPosition()) / int(self.renderer.INTERNAL_getOffsetLength())
                 value = int(ratio * self.seekerMaxValue)
-                self.seeker.GSetValue(value)
-                return 0
+                self.seeker.setValue(value)
             
-            def INTERNAL_EventHandler_seekerValueChanged(self):
-                '''
-                Called via a selection-changed event, to seek into the video.
-                '''
+            def INTERNAL_seeker_selectionChangeEvent(self):
                 ratio = self.seeker.GGetValue() / self.seekerMaxValue
                 videoLengthInMS = int(self.renderer.GGetLength().toMilliseconds())
                 
                 seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoLengthInMS])
                 self.renderer.GSeekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
             
-            def INTERNAL_skipForward(self, skipTime:TimeUtils.Time):
-                self.renderer.GSkipForward(skipTime)
+            def INTERNAL_seekForwardButton_clickEvent(self, skipTime:TimeUtils.Time):
+                self.renderer.skipForward(skipTime)
 
-            def INTERNAL_skipBackward(self, skipTime:TimeUtils.Time):
-                self.renderer.GSkipBackward(skipTime)
+            def INTERNAL_seekBackwardButton_clickEvent(self, skipTime:TimeUtils.Time):
+                self.renderer.skipBackward(skipTime)
                 
-            def INTERNAL_play(self):
-                self.renderer.GPlay()
-                self.playPauseStackedLayout.GSetCurrentElement(self.pauseButton)
+            def INTERNAL_playButton_clickEvent(self):
+                self.renderer.play()
+                self.playPauseButton.setCurrentWidget(self.pauseButton)
 
-            def INTERNAL_pause(self):
-                self.renderer.GPause()
-                self.playPauseStackedLayout.GSetCurrentElement(self.playButton)
-
-            def INTERNAL_togglePlay(self):
-                if self.renderer.GIsPlaying():
-                    self.INTERNAL_pause()
-                else:
-                    self.INTERNAL_play()
+            def INTERNAL_pauseButton_clickEvent(self):
+                self.renderer.pause()
+                self.playPauseButton.setCurrentWidget(self.playButton)
             
-            def INTERNAL_stop(self):
-                self.renderer.GStop()
-                self.playPauseStackedLayout.GSetCurrentElement(self.pauseButton)
+            def INTERNAL_restartButton_clickEvent(self):
+                self.renderer.restart()
+                self.playPauseButton.setCurrentWidget(self.pauseButton)
+                
+            def INTERNAL_muteButton_clickEvent(self):
+                self.renderer.mute()
+                self.muteContainer.setCurrentWidget(self.unmuteButton)
             
-            def INTERNAL_adjustVolume(self, delta:int):
-                self.renderer.GAdjustVolume(delta)
-
-            def INTERNAL_toggleMute(self):
-                if self.renderer.GIsMute():
-                    self.renderer.GUnmute()
-                    self.muteStackedLayout.GSetCurrentElement(self.unmuteButton)
-                else:
-                    self.renderer.GMute()
-                    self.muteStackedLayout.GSetCurrentElement(self.muteButton)
-
-            def GRenderer(self):
-                '''
-                Get underlying `GVideoRenderer`.
-                '''
-                return self.renderer
+            def INTERNAL_unmuteButton_clickEvent(self):
+                self.renderer.unmute()
+                self.muteContainer.setCurrentWidget(self.muteButton)
 
 class Application:
     '''
