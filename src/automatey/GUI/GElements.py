@@ -724,8 +724,7 @@ class Widgets:
             Renders a video.
             
             Limitation(s):
-            - Video-on-repeat cannot be disabled.
-            - Last XXX-ms of video are not visible.
+            - Video-on-repeat is not optional.
             '''
         
             def __init__(self):
@@ -734,7 +733,9 @@ class Widgets:
                 Widget.__init__(self, self.qWidget)
                 
                 # ? Setting up VLC media-player.
-                self.VLCInstance = vlc.Instance('--quiet')
+                # ? ? Option (quiet) silences VLC log messages.
+                # ? ? Option (input-repeat) sets the number of video-repetitions.
+                self.VLCInstance = vlc.Instance('--quiet', '--input-repeat=999999999')
                 self.player = self.VLCInstance.media_player_new()
                 # ? ? Configure player to ignore mouse/key event(s).
                 vlc.libvlc_video_set_mouse_input(self.player, 0)
@@ -746,17 +747,6 @@ class Widgets:
                 self.isMuteFlag = False
                 self.volume = 100
                 self.player.audio_set_volume(self.volume)
-                
-                # Problem(s):
-                # - Player doesn't support video-on-repeat.
-                # - Player crash(es) near end-of-video.
-                # 
-                # Limitation(s):
-                # - (Working) Video-Length is offsetted by XXX-ms, to avoid player crash(es).
-                # - Timer fires every XXX-ms, triggering a check on if the current position exceeds the (apparent) video-length.
-                #       If `True`, it is re-loaded. 
-                self.videoLengthOffset = TimeUtils.Time.createFromMilliseconds(500)
-                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent, TimeUtils.Time.createFromMilliseconds(1))
                 
                 # ? Set event-handler(s).
                 self.qWidget.keyPressEventFcn = self.INTERNAL_keyPressEvent
@@ -773,13 +763,6 @@ class Widgets:
             def INTERNAL_enterEvent(self, event):
                 # ? Gain focus (to be able to handle key-press(es)), when mouse enters widget's area.
                 self.qWidget.setFocus()
-            
-            def INTERNAL_timingEvent(self):
-                # ? If position exceeds length (which is offset), seek '0'.
-                position = self.getPosition()
-                if (position > self.INTERNAL_getOffsetLength()):
-                    position = TimeUtils.Time(0)
-                    self.player.set_time(int(position.toMilliseconds()))
             
             def load(self, f:FileUtils.File):
                 '''
@@ -824,13 +807,7 @@ class Widgets:
                 Get video-length
                 '''
                 return TimeUtils.Time.createFromMilliseconds(self.player.get_length())
-            
-            def INTERNAL_getOffsetLength(self) -> TimeUtils.Time:
-                '''
-                Get (offset-)video-length.
-                '''
-                return self.getLength() - self.videoLengthOffset
-            
+
             def getPosition(self) -> TimeUtils.Time:
                 '''
                 (...)
@@ -841,7 +818,7 @@ class Widgets:
                 '''
                 Seek position. If out-of-bounds, `0` is seeked.
                 '''
-                if (position > self.INTERNAL_getOffsetLength()):
+                if (position > self.getLength()):
                     position = TimeUtils.Time(0)
                 self.player.set_time(int(position.toMilliseconds()))
             
@@ -1028,15 +1005,15 @@ class Widgets:
                 }))
                         
             def INTERNAL_timingEvent(self):
-                videoOffsetLength = int(self.renderer.INTERNAL_getOffsetLength())
-                if videoOffsetLength > 0:
-                    ratio = int(self.renderer.getPosition()) / videoOffsetLength
+                videoLength = int(self.renderer.getLength())
+                if videoLength > 0:
+                    ratio = int(self.renderer.getPosition()) / videoLength
                     value = int(ratio * self.seekerMaxValue)
                     self.seeker.setValue(value)
             
             def INTERNAL_seeker_selectionChangeEvent(self):
                 ratio = self.seeker.getValue() / self.seekerMaxValue
-                videoLengthInMS = int(self.renderer.INTERNAL_getOffsetLength().toMilliseconds())
+                videoLengthInMS = int(self.renderer.getLength().toMilliseconds())
                 
                 seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoLengthInMS])
                 self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
