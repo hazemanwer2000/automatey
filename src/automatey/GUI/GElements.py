@@ -816,14 +816,14 @@ class Widgets:
                     position = TimeUtils.Time(0)
                 self.player.set_time(int(position.toMilliseconds()))
             
-            def skipForward(self, skipTime:TimeUtils.Time):
+            def seekForward(self, skipTime:TimeUtils.Time):
                 '''
                 Skip forward. If out-of-bounds, `0` is seeked.
                 '''
                 newPosition = self.getPosition() + skipTime
                 self.seekPosition(newPosition)
 
-            def skipBackward(self, skipTime:TimeUtils.Time):
+            def seekBackward(self, skipTime:TimeUtils.Time):
                 '''
                 Skip backward. If out-of-bounds, `0` is seeked.
                 '''
@@ -1001,10 +1001,10 @@ class Widgets:
                 self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
             
             def seekForward(self, skipTime:TimeUtils.Time):
-                self.renderer.skipForward(skipTime)
+                self.renderer.seekForward(skipTime)
 
             def seekBackward(self, skipTime:TimeUtils.Time):
-                self.renderer.skipBackward(skipTime)
+                self.renderer.seekBackward(skipTime)
                 
             def play(self):
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
