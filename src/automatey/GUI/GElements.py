@@ -743,7 +743,7 @@ class Widgets:
                 self.player.set_hwnd(self.qWidget.winId())
                 
                 # ? Set initial volume.
-                self.isMute = False
+                self.isMuteFlag = False
                 self.volume = 100
                 self.player.audio_set_volume(self.volume)
                 
@@ -870,8 +870,14 @@ class Widgets:
                 Adjust volume (0-100). Value is clamped.
                 '''
                 self.volume = int(MathUtils.clampValue(value, 0, 100))
-                if not self.isMute:
+                if not self.isMuteFlag:
                     self.player.audio_set_volume(self.volume)
+
+            def getVolume(self) -> int:
+                '''
+                Get current volume (i.e., indepdent of is muted), range `0-100`.
+                '''
+                return self.volume
             
             def mute(self):
                 '''
@@ -880,7 +886,7 @@ class Widgets:
                 Note,
                 - Volume adjustment(s) does not affect the mute feature.
                 '''
-                self.isMute = True
+                self.isMuteFlag = True
                 self.player.audio_set_volume(0)
 
             def unmute(self):
@@ -890,7 +896,7 @@ class Widgets:
                 Note,
                 - Volume adjustment(s) does not affect the mute feature.
                 '''
-                self.isMute = False
+                self.isMuteFlag = False
                 self.player.audio_set_volume(self.volume)
 
             def isMute(self):
@@ -900,7 +906,7 @@ class Widgets:
                 Note,
                 - Volume adjustment(s) does not affect the mute feature.
                 '''
-                return self.isMute
+                return self.isMuteFlag
 
     class Complex:
 
@@ -934,7 +940,8 @@ class Widgets:
                     'L2' : TimeUtils.Time.createFromSeconds(3.0),
                     'L1' : TimeUtils.Time.createFromSeconds(1.0),
                 },
-                'Default' : Resources.resolve(FileUtils.File('video/static.mp4')),
+                'Adjust-Volume-Delta' : 10,
+                'Load-Default' : Resources.resolve(FileUtils.File('video/static.mp4')),
             }
             
             def __init__(self):
@@ -1004,28 +1011,17 @@ class Widgets:
                 # ? Set-up key shortcut(s).
                 self.renderer.setEventHandler(GUtils.EventHandlers.KeyPressEventHandler({
                     Input.Key.Space: self.togglePlay,
+                    Input.Key.Letter_M: self.toggleMute,
+                    Input.Key.Up: lambda: self.adjustVolume(Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
+                    Input.Key.Down: lambda: self.adjustVolume(-1 * Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
                 }))
-            
-            def load(self, f:FileUtils.File):
-                '''
-                Load video.
-                '''
-                self.playPauseButton.setCurrentWidget(self.pauseButton)
-                self.renderer.load(f)
-
-            def loadDefault(self):
-                '''
-                Load video.
-                '''
-                self.load(Widgets.Complex.VideoPlayer.Constants['Default'])
-            
+                        
             def INTERNAL_timingEvent_1ms(self):
-                if self.renderer.isPlaying():
-                    videoOffsetLength = int(self.renderer.INTERNAL_getOffsetLength())
-                    if videoOffsetLength > 0:
-                        ratio = int(self.renderer.getPosition()) / videoOffsetLength
-                        value = int(ratio * self.seekerMaxValue)
-                        self.seeker.setValue(value)
+                videoOffsetLength = int(self.renderer.INTERNAL_getOffsetLength())
+                if videoOffsetLength > 0:
+                    ratio = int(self.renderer.getPosition()) / videoOffsetLength
+                    value = int(ratio * self.seekerMaxValue)
+                    self.seeker.setValue(value)
             
             def INTERNAL_seeker_selectionChangeEvent(self):
                 ratio = self.seeker.getValue() / self.seekerMaxValue
@@ -1033,19 +1029,26 @@ class Widgets:
                 
                 seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoLengthInMS])
                 self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
-            
+
+            def load(self, f:FileUtils.File):
+                self.playPauseButton.setCurrentWidget(self.pauseButton)
+                self.renderer.load(f)
+
+            def loadDefault(self):
+                '''
+                Load default video.
+                '''
+                self.load(Widgets.Complex.VideoPlayer.Constants['Load-Default'])
+
             def seekForward(self, skipTime:TimeUtils.Time):
                 self.renderer.seekForward(skipTime)
 
             def seekBackward(self, skipTime:TimeUtils.Time):
                 self.renderer.seekBackward(skipTime)
-            
-            def togglePlay(self):
-                if self.renderer.isPlaying():
-                    self.pause()
-                else:
-                    self.play()
-                
+
+            def seekPosition(self, time:TimeUtils.Time):
+                self.renderer.seekPosition(time)
+
             def play(self):
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
                 self.renderer.play()
@@ -1053,6 +1056,12 @@ class Widgets:
             def pause(self):
                 self.playPauseButton.setCurrentWidget(self.playButton)
                 self.renderer.pause()
+
+            def togglePlay(self):
+                if self.renderer.isPlaying():
+                    self.pause()
+                else:
+                    self.play()
             
             def restart(self):
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
@@ -1065,6 +1074,21 @@ class Widgets:
             def unmute(self):
                 self.muteContainer.setCurrentWidget(self.muteButton)
                 self.renderer.unmute()
+
+            def toggleMute(self):
+                if self.renderer.isMute():
+                    self.unmute()
+                else:
+                    self.mute()
+
+            def setVolume(self, volume:int):
+                self.renderer.setVolume(volume)
+
+            def adjustVolume(self, delta:int):
+                self.renderer.adjustVolume(delta)
+
+            def getRenderer(self):
+                return self.renderer
 
 class Application:
     '''
