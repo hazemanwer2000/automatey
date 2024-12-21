@@ -53,6 +53,8 @@ class Key:
     Apostrophe = 303
     Slash = 304
     BackwardSlash = 305
+    SquareBrackets_Left = 306
+    SquareBrackets_Right = 307
 
 class MouseKey:
     Left = 0

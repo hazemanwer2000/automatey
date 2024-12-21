@@ -93,6 +93,8 @@ class EventHandler:
         Input.Key.Slash: QtCore.Qt.Key.Key_Slash,
         Input.Key.Dot: QtCore.Qt.Key.Key_Period,
         Input.Key.Comma: QtCore.Qt.Key.Key_Comma,
+        Input.Key.SquareBrackets_Left: QtCore.Qt.Key.Key_BracketLeft,
+        Input.Key.SquareBrackets_Right: QtCore.Qt.Key.Key_BracketRight,
         
         Input.Key.Up: QtCore.Qt.Key.Key_Up,
         Input.Key.Down: QtCore.Qt.Key.Key_Down,

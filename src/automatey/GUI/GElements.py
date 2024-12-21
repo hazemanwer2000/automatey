@@ -939,6 +939,7 @@ class Widgets:
                     'L3' : TimeUtils.Time.createFromSeconds(10.0),
                     'L2' : TimeUtils.Time.createFromSeconds(3.0),
                     'L1' : TimeUtils.Time.createFromSeconds(1.0),
+                    'L0' : TimeUtils.Time.createFromSeconds(0.1),
                 },
                 'Adjust-Volume-Delta' : 10,
                 'Load-Default' : Resources.resolve(FileUtils.File('video/static.mp4')),
@@ -1015,11 +1016,13 @@ class Widgets:
                     
                     Input.Key.Up: lambda: self.adjustVolume(Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
                     Input.Key.Down: lambda: self.adjustVolume(-1 * Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
-                    Input.Key.Left: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
-                    Input.Key.Right: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
-                    
+
+                    Input.Key.SquareBrackets_Left: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L0']),
+                    Input.Key.SquareBrackets_Right: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L0']),                    
                     Input.Key.SemiColon: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L1']),
                     Input.Key.Apostrophe: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L1']),
+                    Input.Key.Left: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
+                    Input.Key.Right: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
                     Input.Key.Comma: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
                     Input.Key.Dot: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
                 }))
