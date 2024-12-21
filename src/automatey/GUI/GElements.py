@@ -802,9 +802,9 @@ class Widgets:
                 self.play()
                 self.player.set_time(0)
             
-            def getLength(self) -> TimeUtils.Time:
+            def getDuration(self) -> TimeUtils.Time:
                 '''
-                Get video-length
+                Get video duration.
                 '''
                 return TimeUtils.Time.createFromMilliseconds(self.player.get_length())
 
@@ -818,7 +818,7 @@ class Widgets:
                 '''
                 Seek position. If out-of-bounds, `0` is seeked.
                 '''
-                if (position > self.getLength()):
+                if (position > self.getDuration()):
                     position = TimeUtils.Time(0)
                 self.player.set_time(int(position.toMilliseconds()))
             
@@ -1005,17 +1005,17 @@ class Widgets:
                 }))
                         
             def INTERNAL_timingEvent(self):
-                videoLength = int(self.renderer.getLength())
-                if videoLength > 0:
-                    ratio = int(self.renderer.getPosition()) / videoLength
+                videoDuration = int(self.renderer.getDuration())
+                if videoDuration > 0:
+                    ratio = int(self.renderer.getPosition()) / videoDuration
                     value = int(ratio * self.seekerMaxValue)
                     self.seeker.setValue(value)
             
             def INTERNAL_seeker_selectionChangeEvent(self):
                 ratio = self.seeker.getValue() / self.seekerMaxValue
-                videoLengthInMS = int(self.renderer.getLength().toMilliseconds())
+                videoDurationInMS = int(self.renderer.getDuration().toMilliseconds())
                 
-                seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoLengthInMS])
+                seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoDurationInMS])
                 self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
 
             def load(self, f:FileUtils.File):
