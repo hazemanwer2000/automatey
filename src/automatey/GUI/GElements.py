@@ -756,7 +756,7 @@ class Widgets:
                 # - Timer fires every XXX-ms, triggering a check on if the current position exceeds the (apparent) video-length.
                 #       If `True`, it is re-loaded. 
                 self.videoLengthOffset = TimeUtils.Time.createFromMilliseconds(500)
-                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent_1ms, TimeUtils.Time.createFromMilliseconds(1))
+                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent, TimeUtils.Time.createFromMilliseconds(1))
                 
                 # ? Set event-handler(s).
                 self.qWidget.keyPressEventFcn = self.INTERNAL_keyPressEvent
@@ -774,7 +774,7 @@ class Widgets:
                 # ? Gain focus (to be able to handle key-press(es)), when mouse enters widget's area.
                 self.qWidget.setFocus()
             
-            def INTERNAL_timingEvent_1ms(self):
+            def INTERNAL_timingEvent(self):
                 # ? If position exceeds length (which is offset), seek '0'.
                 position = self.getPosition()
                 if (position > self.INTERNAL_getOffsetLength()):
@@ -1007,7 +1007,7 @@ class Widgets:
                 panelWorkingIdx += 1
                 
                 # ? Every XXX-ms, a timer fires, to guarantee the seeker is sync'ed with the video (as it progresses).
-                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent_1ms, TimeUtils.Time.createFromMilliseconds(1))
+                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent, TimeUtils.Time.createFromMilliseconds(1))
                 
                 # ? Set-up key shortcut(s).
                 self.renderer.setEventHandler(GUtils.EventHandlers.KeyPressEventHandler({
@@ -1027,7 +1027,7 @@ class Widgets:
                     Input.Key.Dot: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
                 }))
                         
-            def INTERNAL_timingEvent_1ms(self):
+            def INTERNAL_timingEvent(self):
                 videoOffsetLength = int(self.renderer.INTERNAL_getOffsetLength())
                 if videoOffsetLength > 0:
                     ratio = int(self.renderer.getPosition()) / videoOffsetLength
