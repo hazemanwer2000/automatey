@@ -1012,8 +1012,16 @@ class Widgets:
                 self.renderer.setEventHandler(GUtils.EventHandlers.KeyPressEventHandler({
                     Input.Key.Space: self.togglePlay,
                     Input.Key.Letter_M: self.toggleMute,
+                    
                     Input.Key.Up: lambda: self.adjustVolume(Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
                     Input.Key.Down: lambda: self.adjustVolume(-1 * Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
+                    Input.Key.Left: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
+                    Input.Key.Right: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
+                    
+                    Input.Key.SemiColon: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L1']),
+                    Input.Key.Apostrophe: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L1']),
+                    Input.Key.Comma: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
+                    Input.Key.Dot: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
                 }))
                         
             def INTERNAL_timingEvent_1ms(self):
