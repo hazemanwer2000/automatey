@@ -77,7 +77,7 @@ class Queue:
 class Timer:
     
     '''
-    Timer, that keeps executing a runnable, as long as it returns `0`.
+    Timer, that keeps executing a runnable, until it returns `0`.
     '''
     
     def __init__(self, fcn, period:TimeUtils.Time):
@@ -90,5 +90,5 @@ class Timer:
         self.qTimer.start(int(period.toMilliseconds()))
     
     def INTERNAL_runnable(self):
-        if self.fcn() != 0:
+        if self.fcn() == 0:
             self.qTimer.stop()

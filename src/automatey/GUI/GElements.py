@@ -708,6 +708,166 @@ class Widgets:
                 if GUtils.EventHandlers.TextChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.TextChangeEventHandler].fcn()
 
+        class VideoRenderer(Widget, INTERNAL.EventManager):
+            '''
+            Renders a video.
+            '''
+        
+            def __init__(self):
+                self.qWidget = QtWidgets.QFrame()
+                INTERNAL.EventManager.__init__(self)
+                Widget.__init__(self, self.qWidget)
+                
+                # ? Setting up VLC media-player.
+                self.VLCInstance = vlc.Instance()
+                self.player = self.VLCInstance.media_player_new()
+                # (!) OS-specific (Windows-OS)
+                self.player.set_hwnd(self.winId())
+                
+                # ? Set initial volume.
+                self.isMute = False
+                self.volume = 100
+                self.player.audio_set_volume(self.volume)
+                
+                # Problem(s):
+                # - Player doesn't support video-on-repeat.
+                # - Player crash(es) near end-of-video.
+                # 
+                # Limitation(s):
+                # - (Working) Video-Length is offsetted by XXX-ms, to avoid player crash(es).
+                # - Timer fires every XXX-ms, triggering a check on if the current position exceeds the (apparent) video-length.
+                #       If `True`, it is re-loaded. 
+                self.videoLengthOffset = TimeUtils.Time.createFromMilliseconds(500)
+                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent_1ms, TimeUtils.Time.createFromMilliseconds(1))
+            
+            def INTERNAL_timingEvent_1ms(self):
+                # ? If position exceeds length (which is offset), seek '0'.
+                position = self.getPosition()
+                if (position > self.INTERNAL_getOffsetLength()):
+                    position = TimeUtils.Time(0)
+                    self.player.set_time(int(position.toMilliseconds()))
+            
+            def load(self, f:FileUtils.File):
+                '''
+                Load video.
+                
+                Note,
+                - Video auto-plays.
+                '''
+                media = self.VLCInstance.media_new(str(f))
+                self.player.set_media(media)
+                self.player.play()
+            
+            def play(self):
+                '''
+                Play video.
+                '''
+                if not self.player.is_playing():
+                    self.player.play()
+
+            def pause(self):
+                '''
+                Pause video.
+                '''
+                if self.player.is_playing():
+                    self.player.pause()
+        
+            def isPlaying(self):
+                '''
+                (...)
+                '''
+                return self.player.is_playing()
+            
+            def restart(self):
+                '''
+                Seek `0` and play.
+                '''
+                self.play()
+                self.player.set_time(0)
+            
+            def getLength(self) -> TimeUtils.Time:
+                '''
+                Get video-length
+                '''
+                return TimeUtils.Time.createFromMilliseconds(self.player.get_length())
+            
+            def INTERNAL_getOffsetLength(self) -> TimeUtils.Time:
+                '''
+                Get (offset-)video-length.
+                '''
+                return self.getLength() - self.videoLengthOffset
+            
+            def getPosition(self) -> TimeUtils.Time:
+                '''
+                (...)
+                '''
+                return TimeUtils.Time.createFromMilliseconds(self.player.get_time())
+            
+            def seekPosition(self, position:TimeUtils.Time):
+                '''
+                Seek position. If out-of-bounds, `0` is seeked.
+                '''
+                if (position > self.INTERNAL_getOffsetLength()):
+                    position = TimeUtils.Time(0)
+                self.player.set_time(int(position.toMilliseconds()))
+            
+            def skipForward(self, skipTime:TimeUtils.Time):
+                '''
+                Skip forward. If out-of-bounds, `0` is seeked.
+                '''
+                newPosition = self.getPosition() + skipTime
+                self.seekPosition(newPosition)
+
+            def skipBackward(self, skipTime:TimeUtils.Time):
+                '''
+                Skip backward. If out-of-bounds, `0` is seeked.
+                '''
+                newPosition = self.getPosition() - skipTime
+                self.seekPosition(newPosition)
+
+            def adjustVolume(self, delta:int):
+                '''
+                Adjust volume (0-100). Value is clamped.
+                '''
+                self.setVolume(self.volume + delta)
+            
+            def setVolume(self, value:int):
+                '''
+                Adjust volume (0-100). Value is clamped.
+                '''
+                self.volume = int(MathUtils.clampValue(value, 0, 100))
+                if not self.isMute:
+                    self.player.audio_set_volume(self.volume)
+            
+            def mute(self):
+                '''
+                Mute.
+                
+                Note,
+                - Volume adjustment(s) does not affect the mute feature.
+                '''
+                self.isMute = True
+                self.player.audio_set_volume(0)
+
+            def unmute(self):
+                '''
+                Un-Mute.
+                
+                Note,
+                - Volume adjustment(s) does not affect the mute feature.
+                '''
+                self.isMute = False
+                self.player.audio_set_volume(self.volume)
+
+            def isMute(self):
+                '''
+                (...)
+                
+                Note,
+                - Volume adjustment(s) does not affect the mute feature.
+                '''
+                return self.isMute
+
     class Complex:
 
         class ColorSelector(Widget):
@@ -928,161 +1088,6 @@ class Widgets:
             Get underlying `GVideoRenderer`.
             '''
             return self.renderer
-
-    class GVideoRenderer(QtWidgets.QFrame):
-        '''
-        Renders a video.
-        '''
-       
-        def __init__(self):
-            QtWidgets.QFrame.__init__(self)
-            
-            # ? Setting up VLC media-player.
-            self.VLCInstance = vlc.Instance()
-            self.player = self.VLCInstance.media_player_new()
-            # Warning: OS-specific (Windows-OS)
-            self.player.set_hwnd(self.winId())
-            
-            # ? Initial setting(s).
-            self.isMute = False
-            self.volume = 100
-            self.player.audio_set_volume(self.volume)
-            
-            # ? For robustness, offsetting video-length by a few milli-seconds.
-            self.seekEndOffset = TimeUtils.Time.createFromMilliseconds(500)
-            # ? To support video-on-repeat, timer will be triggered every 1-ms.
-            self.timer = GConcurrency.GTimer(self.INTERNAL_EventHandler_1ms,
-                                             TimeUtils.Time.createFromMilliseconds(1))
-        
-        def INTERNAL_EventHandler_1ms(self):
-            '''
-            Timing event, to handle:
-            - Robustness issue(s).
-            - Support video-on-repeat feature. 
-            '''
-            # ? If position exceeds length (which is offset), seek '0'.
-            position = self.GGetPosition()
-            if (position > self.GGetLength()):
-                position = TimeUtils.Time(0)
-                self.player.set_time(int(position.toMilliseconds()))
-            
-            return 0
-        
-        def GLoad(self, f:FileUtils.File):
-            '''
-            Load video.
-            
-            Note,
-            - Video auto-plays.
-            '''
-            media = self.VLCInstance.media_new(str(f))
-            self.player.set_media(media)
-            self.player.play()
-        
-        def GPlay(self):
-            '''
-            Play video.
-            '''
-            if not self.player.is_playing():
-                self.player.play()
-
-        def GPause(self):
-            '''
-            Pause video.
-            '''
-            if self.player.is_playing():
-                self.player.pause()
-    
-        def GIsPlaying(self):
-            '''
-            (...)
-            '''
-            return self.player.is_playing()
-        
-        def GStop(self):
-            '''
-            Seek `0` and play.
-            '''
-            self.GPlay()
-            self.player.set_time(0)
-        
-        def GGetLength(self) -> TimeUtils.Time:
-            '''
-            Get video-length (not accurate).
-            '''
-            return TimeUtils.Time.createFromMilliseconds(self.player.get_length()) - self.seekEndOffset
-        
-        def GGetPosition(self) -> TimeUtils.Time:
-            '''
-            (...)
-            '''
-            return TimeUtils.Time.createFromMilliseconds(self.player.get_time())
-        
-        def GSeekPosition(self, position:TimeUtils.Time):
-            '''
-            Seek position. If out-of-bounds, `0` is seeked.
-            '''
-            if (position > self.GGetLength()):
-                position = TimeUtils.Time(0)
-            self.player.set_time(int(position.toMilliseconds()))
-        
-        def GSkipForward(self, skipTime:TimeUtils.Time):
-            '''
-            Skip forward. If out-of-bounds, `0` is seeked.
-            '''
-            newPosition = self.GGetPosition() + skipTime
-            self.GSeekPosition(newPosition)
-
-        def GSkipBackward(self, skipTime:TimeUtils.Time):
-            '''
-            Skip backward. If out-of-bounds, `0` is seeked.
-            '''
-            newPosition = self.GGetPosition() - skipTime
-            self.GSeekPosition(newPosition)
-
-        def GAdjustVolume(self, delta:int):
-            '''
-            Adjust volume (0-100). Value is clamped.
-            '''
-            self.GSetVolume(self.volume + delta)
-        
-        def GSetVolume(self, value:int):
-            '''
-            Adjust volume (0-100). Value is clamped.
-            '''
-            self.volume = value
-            self.volume = min(100, max(0, self.volume))
-            if not self.isMute:
-                self.player.audio_set_volume(self.volume)
-        
-        def GMute(self):
-            '''
-            Mute.
-            
-            Note,
-            - Volume adjustment(s) does not affect the mute feature.
-            '''
-            self.isMute = True
-            self.player.audio_set_volume(0)
-
-        def GUnmute(self):
-            '''
-            Un-Mute.
-            
-            Note,
-            - Volume adjustment(s) does not affect the mute feature.
-            '''
-            self.isMute = False
-            self.player.audio_set_volume(self.volume)
-
-        def GIsMute(self):
-            '''
-            (...)
-            
-            Note,
-            - Volume adjustment(s) does not affect the mute feature.
-            '''
-            return self.isMute
 
 class Application:
     '''
