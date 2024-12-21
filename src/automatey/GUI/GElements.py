@@ -726,7 +726,7 @@ class Widgets:
                 self.VLCInstance = vlc.Instance()
                 self.player = self.VLCInstance.media_player_new()
                 # (!) OS-specific (Windows-OS)
-                self.player.set_hwnd(self.winId())
+                self.player.set_hwnd(self.qWidget.winId())
                 
                 # ? Set initial volume.
                 self.isMute = False
@@ -922,7 +922,7 @@ class Widgets:
                 panelWorkingIdx = 0
                 # ? ? Setting up panel's root (...)
                 self.panelLayout = Layouts.GridLayout(1, 6, Graphics.SymmetricMargin(0), 5)
-                self.rootLayout.setWidget(Widget.fromLayout(self.rootLayout), 1, 0)
+                self.rootLayout.setWidget(Widget.fromLayout(self.panelLayout), 1, 0)
                 self.rootLayout.setRowMinimumSize(1, 0)
                 # ? ? Only the seekbar's containing column shall be stretchable. 
                 for idx in range(panelWidgetCount):
@@ -956,7 +956,7 @@ class Widgets:
                 self.seekerMaxValue = 10000000
                 self.seeker = Widgets.Basics.Slider(valueRange=[0, self.seekerMaxValue], initValue=0, isHorizontal=True)
                 self.seeker.setEventHandler(GUtils.EventHandlers.SelectionChangeEventHandler(self.INTERNAL_seeker_selectionChangeEvent))
-                self.panelLayout.setWidget(self.seekForwardButton, 0, panelWorkingIdx)
+                self.panelLayout.setWidget(self.seeker, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 # ? ? Setting-up (un-)mute button.
                 self.unmuteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaVolumeMute), toolTip='(Un-)mute')
@@ -970,17 +970,27 @@ class Widgets:
                 # ? Every XXX-ms, a timer fires, to guarantee the seeker is sync'ed with the video (as it progresses).
                 self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent_1ms, TimeUtils.Time.createFromMilliseconds(1))         
             
+            def load(self, f:FileUtils.File):
+                '''
+                Load video.
+                '''
+                self.playPauseButton.setCurrentWidget(self.pauseButton)
+                self.renderer.load(f)
+            
             def INTERNAL_timingEvent_1ms(self):
-                ratio = int(self.renderer.getPosition()) / int(self.renderer.INTERNAL_getOffsetLength())
-                value = int(ratio * self.seekerMaxValue)
-                self.seeker.setValue(value)
+                if self.renderer.isPlaying():
+                    videoOffsetLength = int(self.renderer.INTERNAL_getOffsetLength())
+                    if videoOffsetLength > 0:
+                        ratio = int(self.renderer.getPosition()) / videoOffsetLength
+                        value = int(ratio * self.seekerMaxValue)
+                        self.seeker.setValue(value)
             
             def INTERNAL_seeker_selectionChangeEvent(self):
-                ratio = self.seeker.GGetValue() / self.seekerMaxValue
-                videoLengthInMS = int(self.renderer.GGetLength().toMilliseconds())
+                ratio = self.seeker.getValue() / self.seekerMaxValue
+                videoLengthInMS = int(self.renderer.INTERNAL_getOffsetLength().toMilliseconds())
                 
                 seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoLengthInMS])
-                self.renderer.GSeekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
+                self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
             
             def INTERNAL_seekForwardButton_clickEvent(self, skipTime:TimeUtils.Time):
                 self.renderer.skipForward(skipTime)
@@ -989,24 +999,24 @@ class Widgets:
                 self.renderer.skipBackward(skipTime)
                 
             def INTERNAL_playButton_clickEvent(self):
-                self.renderer.play()
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
+                self.renderer.play()
 
             def INTERNAL_pauseButton_clickEvent(self):
-                self.renderer.pause()
                 self.playPauseButton.setCurrentWidget(self.playButton)
+                self.renderer.pause()
             
             def INTERNAL_restartButton_clickEvent(self):
-                self.renderer.restart()
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
+                self.renderer.restart()
                 
             def INTERNAL_muteButton_clickEvent(self):
-                self.renderer.mute()
                 self.muteContainer.setCurrentWidget(self.unmuteButton)
+                self.renderer.mute()
             
             def INTERNAL_unmuteButton_clickEvent(self):
-                self.renderer.unmute()
                 self.muteContainer.setCurrentWidget(self.muteButton)
+                self.renderer.unmute()
 
 class Application:
     '''
