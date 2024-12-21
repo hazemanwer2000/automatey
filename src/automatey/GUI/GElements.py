@@ -724,7 +724,7 @@ class Widgets:
                 Widget.__init__(self, self.qWidget)
                 
                 # ? Setting up VLC media-player.
-                self.VLCInstance = vlc.Instance()
+                self.VLCInstance = vlc.Instance('--quiet')
                 self.player = self.VLCInstance.media_player_new()
                 # (!) OS-specific (Windows-OS)
                 self.player.set_hwnd(self.qWidget.winId())
