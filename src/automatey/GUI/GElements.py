@@ -12,6 +12,7 @@ import automatey.Base.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as Graphics
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
+import automatey.Resources as Resources
 import automatey.Utils.MathUtils as MathUtils
 import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
 import automatey.Base.ExceptionUtils as ExceptionUtils
@@ -903,7 +904,8 @@ class Widgets:
                     'L3' : TimeUtils.Time.createFromSeconds(10.0),
                     'L2' : TimeUtils.Time.createFromSeconds(3.0),
                     'L1' : TimeUtils.Time.createFromSeconds(1.0),
-                }
+                },
+                'Default' : Resources.resolve(FileUtils.File('video/static.mp4')),
             }
             
             def __init__(self):
@@ -930,25 +932,25 @@ class Widgets:
                         self.panelLayout.setColumnMinimumSize(idx, 0)
                 # ? ? Setting-up play-pause button.
                 self.playButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaPlay), toolTip='Play')
-                self.playButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_playButton_clickEvent))
+                self.playButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.play))
                 self.pauseButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaPause), toolTip='Pause')
-                self.pauseButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_pauseButton_clickEvent))
+                self.pauseButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.pause))
                 self.playPauseButton = Widgets.Containers.StackedContainer([self.playButton, self.pauseButton], self.pauseButton)
                 self.panelLayout.setWidget(self.playPauseButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 # ? ? Setting-up restart button.
                 self.restartButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaStop), toolTip='Stop')
-                self.restartButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_restartButton_clickEvent))
+                self.restartButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.restart))
                 self.panelLayout.setWidget(self.restartButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 # ? ? Setting-up seek-backward button.
                 self.seekBackwardButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaSeekBackward), toolTip='Seek Backward')
-                self.seekBackwardButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: self.INTERNAL_seekForwardButton_clickEvent(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2'])))
+                self.seekBackwardButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2'])))
                 self.panelLayout.setWidget(self.seekBackwardButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 # ? ? Setting-up seek-forward button.
                 self.seekForwardButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaSeekForward), toolTip='Seek Forward')
-                self.seekForwardButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: self.INTERNAL_seekForwardButton_clickEvent(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2'])))
+                self.seekForwardButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2'])))
                 self.panelLayout.setWidget(self.seekForwardButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 # ? ? Setting-up seeker (i.e., slider).
@@ -960,9 +962,9 @@ class Widgets:
                 panelWorkingIdx += 1
                 # ? ? Setting-up (un-)mute button.
                 self.unmuteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaVolumeMute), toolTip='(Un-)mute')
-                self.unmuteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_unmuteButton_clickEvent))
+                self.unmuteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.unmute))
                 self.muteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaVolume), toolTip='(Un-)mute')
-                self.muteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_muteButton_clickEvent))
+                self.muteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.mute))
                 self.muteContainer = Widgets.Containers.StackedContainer([self.muteButton, self.unmuteButton], self.muteButton)
                 self.panelLayout.setWidget(self.muteContainer, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
@@ -976,6 +978,12 @@ class Widgets:
                 '''
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
                 self.renderer.load(f)
+
+            def loadDefault(self):
+                '''
+                Load video.
+                '''
+                self.load(Widgets.Complex.VideoPlayer.Constants['Default'])
             
             def INTERNAL_timingEvent_1ms(self):
                 if self.renderer.isPlaying():
@@ -992,29 +1000,29 @@ class Widgets:
                 seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoLengthInMS])
                 self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
             
-            def INTERNAL_seekForwardButton_clickEvent(self, skipTime:TimeUtils.Time):
+            def seekForward(self, skipTime:TimeUtils.Time):
                 self.renderer.skipForward(skipTime)
 
-            def INTERNAL_seekBackwardButton_clickEvent(self, skipTime:TimeUtils.Time):
+            def seekBackward(self, skipTime:TimeUtils.Time):
                 self.renderer.skipBackward(skipTime)
                 
-            def INTERNAL_playButton_clickEvent(self):
+            def play(self):
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
                 self.renderer.play()
 
-            def INTERNAL_pauseButton_clickEvent(self):
+            def pause(self):
                 self.playPauseButton.setCurrentWidget(self.playButton)
                 self.renderer.pause()
             
-            def INTERNAL_restartButton_clickEvent(self):
+            def restart(self):
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
                 self.renderer.restart()
                 
-            def INTERNAL_muteButton_clickEvent(self):
+            def mute(self):
                 self.muteContainer.setCurrentWidget(self.unmuteButton)
                 self.renderer.mute()
             
-            def INTERNAL_unmuteButton_clickEvent(self):
+            def unmute(self):
                 self.muteContainer.setCurrentWidget(self.muteButton)
                 self.renderer.unmute()
 

@@ -22,7 +22,7 @@ class File:
 
     def __init__(self, *paths: str):
         joinedPath = os.path.join(*paths)
-        self.path = os.path.abspath(joinedPath)
+        self.path = os.path.normpath(joinedPath)
     
     def __str__(self):
         return self.path.replace('\\', '/')
