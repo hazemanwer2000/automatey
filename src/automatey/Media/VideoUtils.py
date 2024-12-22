@@ -727,6 +727,9 @@ class Video:
         return INTERNAL_VideoProcessing.FFMPEGWrapper.queryKeyframes(self.f_src)
 
     def getDimensions(self):
+        '''
+        Returns a '(width, height)' tuple.
+        '''
         return (self.generalInfo['width'], self.generalInfo['height'])
         
     def registerAction(self, action):

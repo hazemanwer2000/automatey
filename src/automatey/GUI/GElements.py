@@ -917,6 +917,12 @@ class Widgets:
                 '''
                 return self.isMuteFlag
 
+            def getDimensions(self):
+                '''
+                Returns a '(width, height)' tuple.
+                '''
+                return self.player.video_get_size()
+
     class Complex:
 
         class ColorSelector(Widget):
