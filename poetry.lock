@@ -206,6 +206,16 @@ typing = ["typing-extensions"]
 xmp = ["defusedxml"]
 
 [[package]]
+name = "pyperclip"
+version = "1.9.0"
+description = "A cross-platform clipboard module for Python. (Only handles plain text for now.)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pyperclip-1.9.0.tar.gz", hash = "sha256:b7de0142ddc81bfc5c7507eea19da920b92252b548b96186caf94a5e2527d310"},
+]
+
+[[package]]
 name = "pyqt6"
 version = "6.7.1"
 description = "Python bindings for the Qt cross platform application toolkit"
@@ -299,4 +309,4 @@ win32 = ["pywin32"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7515ce66a88fc8c0f4944fa3f760d2507be3c9b622fe5f266393b42618c94eaf"
+content-hash = "b1cfa0978c72b02d92b1c6c1a5bc2a3dbb7be487a8659dd530e1fa2ceb38de4d"

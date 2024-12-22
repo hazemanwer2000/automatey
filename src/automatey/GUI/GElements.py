@@ -9,14 +9,15 @@ import vlc
 import automatey.GUI.GUtils as GUtils
 import automatey.GUI.GConcurrency as GConcurrency
 import automatey.Base.ColorUtils as ColorUtils
-import automatey.Abstract.Graphics as Graphics
-import automatey.Abstract.Input as Input
+import automatey.Abstract.Graphics as AbstractGraphics
+import automatey.Abstract.Input as AbstractInput
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
 import automatey.Resources as Resources
 import automatey.Utils.MathUtils as MathUtils
 import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
 import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.OS.Clipboard as Clipboard
 
 class INTERNAL:
     
@@ -47,7 +48,7 @@ class Layouts:
         - By default, all row(s) and column(s) are stretchable.
         '''
         
-        def __init__(self, rowCount:int, colCount:int, elementMargin:Graphics.Margin, elementSpacing:int):
+        def __init__(self, rowCount:int, colCount:int, elementMargin:AbstractGraphics.Margin, elementSpacing:int):
             Layout.__init__(self, QtWidgets.QGridLayout())
             
             # ? Other setting(s).
@@ -88,7 +89,7 @@ class Layouts:
         A vertical layout.
         '''
         
-        def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
+        def __init__(self, elementMargin:AbstractGraphics.Margin, elementSpacing:int):
             self.qLayout = QtWidgets.QVBoxLayout()
             Layout.__init__(self, self.qLayout)
 
@@ -100,12 +101,12 @@ class Layouts:
             self.qLayout.setSpacing(elementSpacing)
 
         HorizontalAlignment2AlignmentFlag = {
-            Graphics.Alignment.Horizontal.Left: QtCore.Qt.AlignmentFlag.AlignLeft,
-            Graphics.Alignment.Horizontal.Right: QtCore.Qt.AlignmentFlag.AlignRight,
-            Graphics.Alignment.Horizontal.Center: QtCore.Qt.AlignmentFlag.AlignHCenter,
+            AbstractGraphics.Alignment.Horizontal.Left: QtCore.Qt.AlignmentFlag.AlignLeft,
+            AbstractGraphics.Alignment.Horizontal.Right: QtCore.Qt.AlignmentFlag.AlignRight,
+            AbstractGraphics.Alignment.Horizontal.Center: QtCore.Qt.AlignmentFlag.AlignHCenter,
         }
 
-        def insertWidget(self, widget, idx=-1, alignment=Graphics.Alignment.Horizontal.Center):
+        def insertWidget(self, widget, idx=-1, alignment=AbstractGraphics.Alignment.Horizontal.Center):
             '''
             Insert widget at index.
             '''
@@ -139,7 +140,7 @@ class Layouts:
         A horizontal layout.
         '''
         
-        def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
+        def __init__(self, elementMargin:AbstractGraphics.Margin, elementSpacing:int):
             self.qLayout = QtWidgets.QHBoxLayout()
             Layout.__init__(self, self.qLayout)
 
@@ -208,7 +209,7 @@ class Widgets:
             Adds an outline around the specified element.
             '''
             
-            def __init__(self, widget, elementMargin:Graphics.Margin):
+            def __init__(self, widget, elementMargin:AbstractGraphics.Margin):
                 Widget.__init__(self, QtWidgets.QFrame())
                 
                 # PyQt6: Stylizing 'QFrame' to mimic a border.
@@ -272,7 +273,7 @@ class Widgets:
             A container, where widgets are arranged vertically.
             '''
             
-            def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
+            def __init__(self, elementMargin:AbstractGraphics.Margin, elementSpacing:int):
                 Widget.__init__(self, QtWidgets.QWidget())
                 
                 # ? Setting up grid (root-)layout.
@@ -281,10 +282,10 @@ class Widgets:
                 self.qWidget.setLayout(self.gridLayout.qLayout)
                 
                 # ? Setting up vertical layout.
-                self.verticalLayout = Layouts.VerticalLayout(elementMargin=Graphics.SymmetricMargin(0), elementSpacing=elementSpacing)
+                self.verticalLayout = Layouts.VerticalLayout(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=elementSpacing)
                 self.gridLayout.setWidget(Widget.fromLayout(self.verticalLayout), 0, 0)
 
-            def insertWidget(self, widget, idx=-1, alignment=Graphics.Alignment.Horizontal.Center):
+            def insertWidget(self, widget, idx=-1, alignment=AbstractGraphics.Alignment.Horizontal.Center):
                 '''
                 Insert widget at index.
                 '''
@@ -313,7 +314,7 @@ class Widgets:
             A container, where widgets are arranged horizontally.
             '''
             
-            def __init__(self, elementMargin:Graphics.Margin, elementSpacing:int):
+            def __init__(self, elementMargin:AbstractGraphics.Margin, elementSpacing:int):
                 Widget.__init__(self, QtWidgets.QWidget())
                 
                 # ? Setting up grid (root-)layout.
@@ -322,7 +323,7 @@ class Widgets:
                 self.qWidget.setLayout(self.gridLayout.qLayout)
                 
                 # ? Setting up vertical layout.
-                self.horizontalLayout = Layouts.HorizontalLayout(elementMargin=Graphics.SymmetricMargin(0), elementSpacing=elementSpacing)
+                self.horizontalLayout = Layouts.HorizontalLayout(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=elementSpacing)
                 self.gridLayout.setWidget(Widget.fromLayout(self.horizontalLayout), 0, 0)
 
             def insertWidget(self, widget, idx=-1):
@@ -939,7 +940,7 @@ class Widgets:
             
             def __init__(self):
                 # ? Setting up root (...)
-                self.rootLayout = Layouts.GridLayout(2, 1, Graphics.SymmetricMargin(5), 5)
+                self.rootLayout = Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(5), 5)
                 Widget.__init__(self, Widget.fromLayout(self.rootLayout).qWidget)
                 
                 # ? Setting-up video-renderer.
@@ -952,7 +953,7 @@ class Widgets:
                 panelSeekbarIdx = (panelWidgetCount - 1) - 1
                 panelWorkingIdx = 0
                 # ? ? Setting up panel's root (...)
-                self.panelLayout = Layouts.GridLayout(1, 6, Graphics.SymmetricMargin(0), 5)
+                self.panelLayout = Layouts.GridLayout(1, 6, AbstractGraphics.SymmetricMargin(0), 5)
                 self.rootLayout.setWidget(Widget.fromLayout(self.panelLayout), 1, 0)
                 self.rootLayout.setRowMinimumSize(1, 0)
                 # ? ? Only the seekbar's containing column shall be stretchable. 
@@ -1003,20 +1004,20 @@ class Widgets:
                 
                 # ? Set-up key shortcut(s).
                 self.renderer.setEventHandler(GUtils.EventHandlers.KeyPressEventHandler({
-                    Input.Key.Space: self.togglePlay,
-                    Input.Key.Letter_M: self.toggleMute,
+                    AbstractInput.Key.Space: self.togglePlay,
+                    AbstractInput.Key.Letter_M: self.toggleMute,
                     
-                    Input.Key.Up: lambda: self.adjustVolume(Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
-                    Input.Key.Down: lambda: self.adjustVolume(-1 * Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
+                    AbstractInput.Key.Up: lambda: self.adjustVolume(Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
+                    AbstractInput.Key.Down: lambda: self.adjustVolume(-1 * Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
 
-                    Input.Key.SquareBrackets_Left: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L0']),
-                    Input.Key.SquareBrackets_Right: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L0']),                    
-                    Input.Key.SemiColon: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L1']),
-                    Input.Key.Apostrophe: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L1']),
-                    Input.Key.Left: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
-                    Input.Key.Right: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
-                    Input.Key.Comma: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
-                    Input.Key.Dot: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
+                    AbstractInput.Key.SquareBrackets_Left: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L0']),
+                    AbstractInput.Key.SquareBrackets_Right: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L0']),                    
+                    AbstractInput.Key.SemiColon: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L1']),
+                    AbstractInput.Key.Apostrophe: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L1']),
+                    AbstractInput.Key.Left: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
+                    AbstractInput.Key.Right: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L2']),
+                    AbstractInput.Key.Comma: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
+                    AbstractInput.Key.Dot: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
                 }))
                 
                 # ? Set-up context-menu of renderer.

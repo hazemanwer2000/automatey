@@ -7,7 +7,7 @@ import PyQt6.QtCore as QtCore
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.MathUtils as MathUtils
-import automatey.Abstract.Input as Input
+import automatey.Abstract.Input as AbstractInput
 
 class Image:
     '''
@@ -83,23 +83,23 @@ class EventHandler:
         self.fcn = fcn
     
     Key2QKey = {
-        Input.Key.Enter: QtCore.Qt.Key.Key_Return,
-        Input.Key.Space: QtCore.Qt.Key.Key_Space,
+        AbstractInput.Key.Enter: QtCore.Qt.Key.Key_Return,
+        AbstractInput.Key.Space: QtCore.Qt.Key.Key_Space,
         
-        Input.Key.Letter_M: QtCore.Qt.Key.Key_M,
+        AbstractInput.Key.Letter_M: QtCore.Qt.Key.Key_M,
         
-        Input.Key.Apostrophe: QtCore.Qt.Key.Key_Apostrophe,
-        Input.Key.SemiColon: QtCore.Qt.Key.Key_Semicolon,
-        Input.Key.Slash: QtCore.Qt.Key.Key_Slash,
-        Input.Key.Dot: QtCore.Qt.Key.Key_Period,
-        Input.Key.Comma: QtCore.Qt.Key.Key_Comma,
-        Input.Key.SquareBrackets_Left: QtCore.Qt.Key.Key_BracketLeft,
-        Input.Key.SquareBrackets_Right: QtCore.Qt.Key.Key_BracketRight,
+        AbstractInput.Key.Apostrophe: QtCore.Qt.Key.Key_Apostrophe,
+        AbstractInput.Key.SemiColon: QtCore.Qt.Key.Key_Semicolon,
+        AbstractInput.Key.Slash: QtCore.Qt.Key.Key_Slash,
+        AbstractInput.Key.Dot: QtCore.Qt.Key.Key_Period,
+        AbstractInput.Key.Comma: QtCore.Qt.Key.Key_Comma,
+        AbstractInput.Key.SquareBrackets_Left: QtCore.Qt.Key.Key_BracketLeft,
+        AbstractInput.Key.SquareBrackets_Right: QtCore.Qt.Key.Key_BracketRight,
         
-        Input.Key.Up: QtCore.Qt.Key.Key_Up,
-        Input.Key.Down: QtCore.Qt.Key.Key_Down,
-        Input.Key.Left: QtCore.Qt.Key.Key_Left,
-        Input.Key.Right: QtCore.Qt.Key.Key_Right,
+        AbstractInput.Key.Up: QtCore.Qt.Key.Key_Up,
+        AbstractInput.Key.Down: QtCore.Qt.Key.Key_Down,
+        AbstractInput.Key.Left: QtCore.Qt.Key.Key_Left,
+        AbstractInput.Key.Right: QtCore.Qt.Key.Key_Right,
     }
 
 class EventHandlers:

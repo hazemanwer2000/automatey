@@ -10,7 +10,7 @@ import numpy as np
 
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
-import automatey.Abstract.Graphics as Graphics
+import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.Base.ColorUtils as ColorUtils
 
 class INTERNAL_FrameProcessing:
@@ -68,7 +68,7 @@ class INTERNAL_FrameProcessing:
             return imgHandler
 
         @staticmethod
-        def addBorder(imgHandler, border:Graphics.Border):
+        def addBorder(imgHandler, border:AbstractGraphics.Border):
             '''
             Adds a border.
             '''
@@ -202,7 +202,7 @@ class INTERNAL_FrameProcessing:
             return imgHandler
 
         @staticmethod
-        def crop(imgHandler, topLeft:Graphics.Point, bottomRight:Graphics.Point):
+        def crop(imgHandler, topLeft:AbstractGraphics.Point, bottomRight:AbstractGraphics.Point):
             '''
             Crop.
             
@@ -218,7 +218,7 @@ class INTERNAL_FrameProcessing:
             return imgHandler
         
         @staticmethod
-        def overlayRectangle(imgHandler, rectangle:Graphics.Rectangle):
+        def overlayRectangle(imgHandler, rectangle:AbstractGraphics.Rectangle):
             x1 = rectangle.topLeft.x - 1
             x2 = rectangle.bottomRight.x - 1
             
@@ -245,7 +245,7 @@ class INTERNAL_FrameProcessing:
             Add a drawable (e.g., Rectangle).
             '''
             fcnDict = {
-                Graphics.Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangle,
+                AbstractGraphics.Rectangle: INTERNAL_FrameProcessing.CV2Wrapper.overlayRectangle,
             }
             return fcnDict[type(shape)](imgHandler, shape)
 
@@ -415,7 +415,7 @@ class Image:
         '''
         self.imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.pixelate(self.imgHandler, factor)
 
-    def addBorder(self, border:Graphics.Border):
+    def addBorder(self, border:AbstractGraphics.Border):
         '''
         Adds a border.
         '''
@@ -423,7 +423,7 @@ class Image:
         pillowImgHandler = INTERNAL_FrameProcessing.PillowWrapper.addBorder(pillowImgHandler, border)
         self.imgHandler = INTERNAL_FrameConversion.PillowToCV2(pillowImgHandler)
     
-    def crop(self, topLeft:Graphics.Point, bottomRight:Graphics.Point):
+    def crop(self, topLeft:AbstractGraphics.Point, bottomRight:AbstractGraphics.Point):
         '''
         Crop.
         
@@ -619,13 +619,13 @@ class GIF:
         '''
         self.INTERNAL_CV2Applier(INTERNAL_FrameProcessing.CV2Wrapper.pixelate, factor)
 
-    def addBorder(self, border:Graphics.Border):
+    def addBorder(self, border:AbstractGraphics.Border):
         '''
         Adds a border.
         '''
         self.INTERNAL_PillowApplier(INTERNAL_FrameProcessing.PillowWrapper.addBorder, border)
     
-    def crop(self, topLeft:Graphics.Point, bottomRight:Graphics.Point):
+    def crop(self, topLeft:AbstractGraphics.Point, bottomRight:AbstractGraphics.Point):
         '''
         Crop.
         

@@ -7,9 +7,7 @@ import automatey.Base.TimeUtils as TimeUtils
 import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Base.ExceptionUtils as ExceptionUtils
-import automatey.Abstract.Graphics as Graphics
-
-from pprint import pprint 
+import automatey.Abstract.Graphics as AbstractGraphics
 
 class Quality:
     
@@ -132,7 +130,7 @@ class Modifiers:
             '''
             Adds a border.
             '''
-            def __init__(self, border:Graphics.Border):
+            def __init__(self, border:AbstractGraphics.Border):
                 self.border = border
                 
         class Crop(INTERNAL_Utils.Filter):
@@ -141,7 +139,7 @@ class Modifiers:
             
             Note that (1, 1) specifies the pixel at the top-left corner.
             '''
-            def __init__(self, topLeft:Graphics.Point, bottomRight:Graphics.Point):
+            def __init__(self, topLeft:AbstractGraphics.Point, bottomRight:AbstractGraphics.Point):
                 self.topLeft = topLeft
                 self.bottomRight = bottomRight
 
