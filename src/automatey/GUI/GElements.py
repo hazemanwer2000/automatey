@@ -69,7 +69,7 @@ class Layouts:
             '''
             Set an element in a specific location within the grid.
             '''
-            self.qLayout.addWidget(widget.qWidget, rowIdx, colIdx, rowSpan, colSpan, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+            self.qLayout.addWidget(widget.qWidget, rowIdx, colIdx, rowSpan, colSpan)
         
         def setRowMinimumSize(self, rowIdx, size):
             '''
@@ -228,7 +228,8 @@ class Widgets:
             '''
             
             def __init__(self, widget, isVerticalScrollBar=False, isHorizontalScrollBar=False):
-                Widget.__init__(self, QtWidgets.QScrollArea())
+                self.qWidget = QtWidgets.QScrollArea()
+                Widget.__init__(self, self.qWidget)
                 
                 # ? Set element.
                 self.qWidget.setWidgetResizable(True)
