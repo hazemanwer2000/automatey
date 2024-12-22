@@ -44,6 +44,7 @@ class QFrame(QtWidgets.QFrame):
         QtWidgets.QFrame.__init__(self)
         self.keyPressEventFcn = None
         self.enterEventFcn = None
+        self.contextMenuEventFcn = None
          
     def enterEvent(self, event):
         if self.enterEventFcn != None:
@@ -52,6 +53,10 @@ class QFrame(QtWidgets.QFrame):
     def keyPressEvent(self, event):
         if self.keyPressEventFcn != None:
             self.keyPressEventFcn(event)
+    
+    def contextMenuEvent(self, event):
+        if self.contextMenuEventFcn != None:
+            self.contextMenuEventFcn(event)
 
 class QLineEdit(QtWidgets.QLineEdit):
     

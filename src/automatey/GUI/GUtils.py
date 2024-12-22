@@ -141,3 +141,41 @@ class EventHandlers:
 
     class KeyPressEventHandler(KeyEventHandler):
         pass
+
+class ContextMenu:
+    '''
+    A context-menu based on a contract.
+    
+    Contract shall consist of a list of dictionaries, with optional `None` value(s) in-between, intepretted as separators.
+    
+    Each dictionary, representing a button, shall specify,
+    - `text`.
+    - `handler`.
+    - `is-checkable`, specifying whether button is checkable.
+        - Note, if `is-checkable`, `handler` receives a single `bool` argument.
+    
+    Note that,
+    - A context-menu can only be used by a single widget.
+    '''
+    
+    def __init__(self, contract):
+        self.contract = contract
+    
+    def INTERNAL_create(self, parentWidget):
+        
+        self.qMenu = QtWidgets.QMenu(parentWidget.qWidget)
+        
+        for term in self.contract:
+            if term == None:
+                self.qMenu.addSeparator()
+            else:
+                action = QtGui.QAction(
+                    term['text'],
+                    parentWidget.qWidget
+                )
+                action.triggered.connect(term['handler'])
+                action.setCheckable(term['is-checkable'])
+                self.qMenu.addAction(action)
+    
+    def INTERNAL_show(self, position):
+        self.qMenu.exec(position)

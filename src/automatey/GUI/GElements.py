@@ -751,6 +751,21 @@ class Widgets:
                 # ? Set event-handler(s).
                 self.qWidget.keyPressEventFcn = self.INTERNAL_keyPressEvent
                 self.qWidget.enterEventFcn = self.INTERNAL_enterEvent
+                self.qWidget.contextMenuEventFcn = self.INTERNAL_contextMenuEvent
+                self.contextMenu:GUtils.ContextMenu = None
+            
+            def setContextMenu(self, contextMenu:GUtils.ContextMenu):
+                '''
+                Set context menu.
+                
+                Note that, it is shown only if triggered within video's frame.
+                '''
+                contextMenu.INTERNAL_create(self)
+                self.contextMenu = contextMenu
+            
+            def INTERNAL_contextMenuEvent(self, event:QtGui.QContextMenuEvent):
+                if self.contextMenu != None:
+                    self.contextMenu.INTERNAL_show(event.globalPos())
             
             def INTERNAL_keyPressEvent(self, event):
                 qKey = event.key()
@@ -1003,7 +1018,22 @@ class Widgets:
                     Input.Key.Comma: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
                     Input.Key.Dot: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
                 }))
-                        
+                
+                # ? Set-up context-menu of renderer.
+                self.renderer.setContextMenu(GUtils.ContextMenu([
+                    {
+                        'text' : 'Copy (X, Y)',
+                        'handler' : self.INTERNAL_contextMenu_copyMousePosition,
+                        'is-checkable' : False,
+                    },
+                    None,
+                    {
+                        'text' : 'Copy HH:MM:SS.xxx',
+                        'handler' : self.INTERNAL_contextMenu_copyVideoPosition,
+                        'is-checkable' : True,
+                    },
+                ]))
+            
             def INTERNAL_timingEvent(self):
                 videoDuration = int(self.renderer.getDuration())
                 if videoDuration > 0:
@@ -1017,6 +1047,12 @@ class Widgets:
                 
                 seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoDurationInMS])
                 self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
+
+            def INTERNAL_contextMenu_copyMousePosition(self):
+                print('(X, Y)')
+
+            def INTERNAL_contextMenu_copyVideoPosition(self):
+                print('HH:MM:SS.xxx')
 
             def load(self, f:FileUtils.File):
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
