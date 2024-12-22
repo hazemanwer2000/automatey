@@ -49,7 +49,8 @@ class Layouts:
         '''
         
         def __init__(self, rowCount:int, colCount:int, elementMargin:AbstractGraphics.Margin, elementSpacing:int):
-            Layout.__init__(self, QtWidgets.QGridLayout())
+            self.qLayout = QtWidgets.QGridLayout()
+            Layout.__init__(self, self.qLayout)
             
             # ? Other setting(s).
             self.qLayout.setContentsMargins(elementMargin.left,
@@ -68,7 +69,7 @@ class Layouts:
             '''
             Set an element in a specific location within the grid.
             '''
-            self.qLayout.addWidget(widget.qWidget, rowIdx, colIdx, rowSpan, colSpan)
+            self.qLayout.addWidget(widget.qWidget, rowIdx, colIdx, rowSpan, colSpan, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         
         def setRowMinimumSize(self, rowIdx, size):
             '''
@@ -421,7 +422,7 @@ class Widgets:
 
         class Label:
             '''
-            Can handle an image, as well as text.
+            Can handle an image, GIF, and text.
             '''
 
             def __init__(self, text:str=None, img:GUtils.Image=None, gif:GUtils.GIF=None):
@@ -435,7 +436,6 @@ class Widgets:
                     self.qWidget.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
 
                 if gif != None:
-                    pass
                     self.qWidget.setMovie(gif.qMovie)
                     gif.qMovie.start()
 
@@ -927,6 +927,26 @@ class Widgets:
                 Returns a '(width, height)' tuple.
                 '''
                 return self.player.video_get_size()
+
+        class GIFRenderer(Widget, INTERNAL.EventManager):
+            '''
+            GIF renderer.
+            '''
+
+            def __init__(self, ):
+                self.qWidget = PyQt6Wrapper.QLabel()
+                Widget.__init__(self, self.qWidget)
+
+                # PyQt6: Force widget not to be focusable.
+                self.qWidget.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)  
+            
+            def load(self, f:FileUtils.File):
+                '''
+                Load GIF file.
+                '''
+                self.qMovie = QtGui.QMovie(str(f))
+                self.qWidget.setMovie(self.qMovie)
+                self.qMovie.start()
 
     class Complex:
 
