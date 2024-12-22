@@ -769,7 +769,7 @@ class Widgets:
                     qWidgetSize = self.qWidget.size()
                     qWidgetPosition = event.pos()
                     videoSize = self.player.video_get_size()
-                    videoMousePosition = MathUtils.isWithinFrame(
+                    videoMousePosition = MathUtils.MediaSpecific.BoundingBox.isWithinFrame(
                         videoSize,
                         [qWidgetSize.width(), qWidgetSize.height()],
                         [qWidgetPosition.x(), qWidgetPosition.y()],
