@@ -1375,7 +1375,7 @@ class Window:
     Multiple window(s) may be created.
     '''
     
-    def __init__(self, title:str, rootLayout:Layout, minimumSize, isSizeFixed=False):
+    def __init__(self, title:str, rootLayout:Layout, minimumSize, isSizeFixed=False, isEnableStatusBar=False):
         super().__init__()
         
         self.qWindow = QtWidgets.QMainWindow()
@@ -1390,7 +1390,18 @@ class Window:
             self.qWindow.setMinimumSize(minimumSize[0], minimumSize[1])
         self.qWindow.setWindowTitle(title)
         self.qWindow.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
-    
+        
+        # ? Enable status-bar (optional).
+        if isEnableStatusBar:
+            self.statusBar = QtWidgets.QStatusBar()
+            self.qWindow.setStatusBar(self.statusBar)
+
+    def setStatus(self, text:str):
+        '''
+        Update status-bar.
+        '''
+        self.statusBar.showMessage(text)
+
     def setTitle(self, title):
         '''
         Set title of window.
