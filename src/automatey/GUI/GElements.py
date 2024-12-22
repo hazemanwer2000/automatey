@@ -770,6 +770,8 @@ class Widgets:
                 self.qWidget.enterEventFcn = self.INTERNAL_enterEvent
                 self.qWidget.contextMenuEventFcn = self.INTERNAL_contextMenuEvent
                 self.qContextMenu:QtWidgets.QMenu = None
+                self.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseMoveEvent
+                self.qWidget.setMouseTracking(True)
                 self.lastMousePosition = None
             
             def setContextMenu(self, menu:GUtils.Menu):
@@ -783,23 +785,22 @@ class Widgets:
             
             def INTERNAL_contextMenuEvent(self, event:QtGui.QContextMenuEvent):
                 if self.qContextMenu != None:
-                    qWidgetSize = self.qWidget.size()
-                    qWidgetPosition = event.pos()
-                    videoSize = self.player.video_get_size()
                     videoMousePosition = MathUtils.MediaSpecific.BoundingBox.isWithinFrame(
-                        videoSize,
-                        [qWidgetSize.width(), qWidgetSize.height()],
-                        [qWidgetPosition.x(), qWidgetPosition.y()],
+                        self.player.video_get_size(),
+                        [self.qWidget.size().width(), self.qWidget.size().height()],
+                        [event.pos().x(), event.pos().y()],
                     )
                     if (videoMousePosition != None):
-                        self.lastMousePosition = tuple(videoMousePosition)
                         self.qContextMenu.exec(event.globalPos())
             
-            def getMousePosition(self):
-                '''
-                Get mouse position within video, updated only when triggered to show context-menu.
-                '''
-                return self.lastMousePosition
+            def INTERNAL_mouseMoveEvent(self, event):
+                videoMousePosition = MathUtils.MediaSpecific.BoundingBox.isWithinFrame(
+                    self.player.video_get_size(),
+                    [self.qWidget.size().width(), self.qWidget.size().height()],
+                    [event.pos().x(), event.pos().y()],
+                )
+                if (videoMousePosition != None):
+                    self.lastMousePosition = tuple(videoMousePosition)
             
             def INTERNAL_keyPressEvent(self, event):
                 qKey = event.key()
@@ -939,6 +940,12 @@ class Widgets:
                 Returns a '(width, height)' tuple.
                 '''
                 return self.player.video_get_size()
+
+            def getMousePosition(self):
+                '''
+                Get mouse position within video, updated only when triggered to show context-menu.
+                '''
+                return self.lastMousePosition
 
         class GIFRenderer(Widget, INTERNAL.EventManager):
             '''
