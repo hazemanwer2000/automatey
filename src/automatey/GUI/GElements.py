@@ -793,7 +793,7 @@ class Widgets:
                 if (currentRowIdx > 0):
                     # Swap with previous row.
                     previousRowIdx = currentRowIdx - 1
-                    self.swapEntries(currentRowIdx, previousRowIdx)
+                    self.INTERNAL_swapEntries(currentRowIdx, previousRowIdx)
                     # ? Select (appropriate) row.
                     self.qTableWidget.setCurrentCell(previousRowIdx, self.qTableWidget.currentColumn())
 
@@ -803,10 +803,27 @@ class Widgets:
                 nextRowIdx = currentRowIdx + 1
                 if (nextRowIdx < rowCount):
                     # Swap with next row.
-                    self.swapEntries(currentRowIdx, nextRowIdx)
+                    self.INTERNAL_swapEntries(currentRowIdx, nextRowIdx)
                     # ? Select (appropriate) row.
                     self.qTableWidget.setCurrentCell(nextRowIdx, self.qTableWidget.currentColumn())
+
+            def INTERNAL_setEntry(self, idx, data):
+                '''
+                Set entry, from a list of string(s).
+                '''
+                columnCount = self.qTableWidget.columnCount()
+                for columnIdx in range(columnCount):
+                    self.qTableWidget.setItem(idx, columnIdx, QtWidgets.QTableWidgetItem(data[columnIdx]))
             
+            def INTERNAL_swapEntries(self, idx1, idx2):
+                '''
+                Swap entries.
+                '''
+                data1 = self.getEntry(idx1)
+                data2 = self.getEntry(idx2)
+                self.INTERNAL_setEntry(idx2, data1)
+                self.INTERNAL_setEntry(idx1, data2)
+
             def getEntry(self, idx):
                 '''
                 Get entry, as a list of string(s).
@@ -817,23 +834,6 @@ class Widgets:
                     qItem = self.qTableWidget.item(idx, columnIdx)
                     data.append(qItem.text() if (qItem != None) else '')
                 return data
-            
-            def setEntry(self, idx, data):
-                '''
-                Set entry, from a list of string(s).
-                '''
-                columnCount = self.qTableWidget.columnCount()
-                for columnIdx in range(columnCount):
-                    self.qTableWidget.setItem(idx, columnIdx, QtWidgets.QTableWidgetItem(data[columnIdx]))
-            
-            def swapEntries(self, idx1, idx2):
-                '''
-                Swap entries.
-                '''
-                data1 = self.getEntry(idx1)
-                data2 = self.getEntry(idx2)
-                self.setEntry(idx2, data1)
-                self.setEntry(idx1, data2)
 
             def getEntries(self):
                 '''
@@ -844,6 +844,12 @@ class Widgets:
                 for idx in range(rowCount):
                     entries.append(self.getEntry(idx))
                 return entries
+
+            def getEntryCount(self):
+                '''
+                Get number of entries.
+                '''
+                return self.qTableWidget.rowCount()
 
         class VideoRenderer(Widget, INTERNAL.EventManager):
             '''
