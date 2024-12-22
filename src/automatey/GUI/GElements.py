@@ -1096,7 +1096,8 @@ class Widgets:
                 panelWorkingIdx += 1
                 
                 # ? Every XXX-ms, a timer fires, to guarantee the seeker is sync'ed with the video (as it progresses).
-                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent, TimeUtils.Time.createFromMilliseconds(1))
+                self.timer = GConcurrency.Timer(self.INTERNAL_timingEvent, TimeUtils.Time.createFromMilliseconds(50))
+                self.timer.start()
                 
                 # ? Set-up key shortcut(s).
                 self.renderer.setEventHandler(GUtils.EventHandlers.KeyPressEventHandler({

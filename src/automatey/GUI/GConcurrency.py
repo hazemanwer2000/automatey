@@ -80,15 +80,21 @@ class Timer:
     Timer, that keeps executing a runnable, until it returns `0`.
     '''
     
-    def __init__(self, fcn, period:TimeUtils.Time):
+    def __init__(self, fcn, period:TimeUtils.Time=None):
+        self.fcn = fcn
+        self.period = period
         
         self.qTimer = QtCore.QTimer()
-        
         self.qTimer.timeout.connect(self.INTERNAL_runnable)
         
-        self.fcn = fcn
-        self.qTimer.start(int(period.toMilliseconds()))
+    def start(self, period:TimeUtils.Time=None):
+        if period != None:
+            self.period = period
+        self.qTimer.start(int(self.period.toMilliseconds()))
     
+    def stop(self):
+        self.qTimer.stop()
+
     def INTERNAL_runnable(self):
         if self.fcn() == 0:
             self.qTimer.stop()
