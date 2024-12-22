@@ -946,17 +946,18 @@ class Widgets:
 
             def __init__(self, ):
                 self.label = Widget(PyQt6Wrapper.QLabel())
-                self.decorator = Widgets.Decorators.ScrollArea(
-                    Widgets.Decorators.Central(self.label),
-                    isVerticalScrollBar=True,
-                    isHorizontalScrollBar=True
-                )
+                self.decorator = Widgets.Decorators.Central(self.label)
                 Widget.__init__(self, self.decorator.qWidget)
+                
+                # (...) 
+                self.qMovie = None
             
             def load(self, f:FileUtils.File):
                 '''
                 Load GIF file.
                 '''
+                if self.qMovie != None:
+                    self.qMovie.stop()
                 self.qMovie = QtGui.QMovie(str(f))
                 self.label.qWidget.setMovie(self.qMovie)
                 self.qMovie.start()
