@@ -243,6 +243,16 @@ class Widgets:
                 self.qWidget.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
                 self.qWidget.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
 
+        class Central(Widget):
+            '''
+            For fixed-size widget(s), center widget within a stretching box.
+            '''
+            def __init__(self, widget):
+                self.layout = Layouts.GridLayout(3, 3, AbstractGraphics.SymmetricMargin(0), 0)
+                self.layout.setWidget(widget, 1, 1)
+                layoutsWidget = Widget.fromLayout(self.layout)
+                Widget.__init__(self, layoutsWidget.qWidget)
+
     class Containers:
         
         class StackedContainer(Widget):
@@ -935,18 +945,20 @@ class Widgets:
             '''
 
             def __init__(self, ):
-                self.qWidget = PyQt6Wrapper.QLabel()
-                Widget.__init__(self, self.qWidget)
-
-                # PyQt6: Force widget not to be focusable.
-                self.qWidget.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)  
+                self.label = Widget(PyQt6Wrapper.QLabel())
+                self.decorator = Widgets.Decorators.ScrollArea(
+                    Widgets.Decorators.Central(self.label),
+                    isVerticalScrollBar=True,
+                    isHorizontalScrollBar=True
+                )
+                Widget.__init__(self, self.decorator.qWidget)
             
             def load(self, f:FileUtils.File):
                 '''
                 Load GIF file.
                 '''
                 self.qMovie = QtGui.QMovie(str(f))
-                self.qWidget.setMovie(self.qMovie)
+                self.label.qWidget.setMovie(self.qMovie)
                 self.qMovie.start()
 
     class Complex:
