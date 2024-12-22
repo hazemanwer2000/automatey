@@ -151,9 +151,10 @@ class Menu:
     
     class EndPoint:
         
-        def __init__(self, text, fcn, isCheckable=False):
+        def __init__(self, text, fcn, icon:Icon=None, isCheckable=False):
             self.text = text
             self.fcn = fcn
+            self.icon = icon
             self.isCheckable = isCheckable
         
         def INTERNAL_instantiate(self, qMenu, qParent):
@@ -161,6 +162,8 @@ class Menu:
                 self.text,
                 qParent
             )
+            if self.icon != None:
+                action.setIcon(self.icon.qIcon)
             action.triggered.connect(self.fcn)
             action.setCheckable(self.isCheckable)
             qMenu.addAction(action)

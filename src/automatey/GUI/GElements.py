@@ -1275,37 +1275,14 @@ class Window:
         '''
         self.qWindow.setWindowTitle(title)
 
-    def createToolbar(self, contract):
+    def createToolbar(self, menu:GUtils.Menu):
         '''
-        Creates a Tool-bar based on a contract.
-        
-        Contract shall consist of a list of dictionaries, with optional `None` value(s) in-between, intepretted as separators.
-        
-        Each dictionary, representing a button, shall specify,
-        - `icon`.
-        - `tool-tip`.
-        - `handler`.
-        - `is-checkable`, specifying whether button is checkable.
-            - Note, if `is-checkable`, `handler` receives a single `bool` argument.
+        Creates a Tool-bar.
         '''
-        
         toolbar = QtWidgets.QToolBar()
         toolbar.setMovable(False)
         toolbar.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.PreventContextMenu)
-        
-        for term in contract:
-            if term == None:
-                toolbar.addSeparator()
-            else:
-                action = QtGui.QAction(
-                    term['icon'].qIcon,
-                    term['tool-tip'],
-                    self.qWindow
-                )
-                action.triggered.connect(term['handler'])
-                action.setCheckable(term['is-checkable'])
-                toolbar.addAction(action)
-        
+        menu.INTERNAL_instantiate(toolbar, self.qWindow)
         self.qWindow.addToolBar(toolbar)
 
     def addMenu(self, menuName:str, menu:GUtils.Menu):
