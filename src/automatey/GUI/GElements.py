@@ -743,12 +743,12 @@ class Widgets:
                 Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
                 
                 # ? Create table.
-                self.tableWidget = Widget(QtWidgets.QTableWidget(5, len(header)))
-                self.layout.setWidget(self.tableWidget, 0, 1)
+                self.qTableWidget = QtWidgets.QTableWidget(1, len(header))
+                self.layout.setWidget(Widget(self.qTableWidget), 0, 1)
                 # ? ? Assign header.
-                self.tableWidget.qWidget.setHorizontalHeaderLabels(header)
+                self.qTableWidget.setHorizontalHeaderLabels(header)
                 # ? ? Fix header-column, and row size.
-                qVerticalHeader = self.tableWidget.qWidget.verticalHeader()
+                qVerticalHeader = self.qTableWidget.verticalHeader()
                 qVerticalHeader.setFixedWidth(50)
                 qVerticalHeader.setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Fixed)
 
@@ -756,20 +756,75 @@ class Widgets:
                 self.verticalContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
                 self.layout.setWidget(self.verticalContainer, 0, 0)
                 self.layout.setColumnMinimumSize(0, 0)
-                # ? ? Create delete button.
-                self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(), toolTip='Insert Entry')
+                # ? ? Create insert button.
+                self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/plus.svg'))), toolTip='Insert Entry')
                 self.insertButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_insertButton_clickEvent))
                 self.verticalContainer.insertWidget(self.insertButton)
+                # ? ? Create move-up button.
+                self.moveUpButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-up.svg'))), toolTip='Move Entry Up')
+                self.moveUpButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveUpButton_clickEvent))
+                self.verticalContainer.insertWidget(self.moveUpButton)
+                # ? ? Create move-down button.
+                self.moveDownButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-down.svg'))), toolTip='Move Entry Down')
+                self.moveDownButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveDownButton_clickEvent))
+                self.verticalContainer.insertWidget(self.moveDownButton)
                 # ? ? Create delete button.
-                self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.Discard), toolTip='Delete Entry')
+                self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/x.svg'))), toolTip='Delete Entry')
                 self.deleteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_deleteButton_clickEvent))
                 self.verticalContainer.insertWidget(self.deleteButton)
             
             def INTERNAL_insertButton_clickEvent(self):
-                print('Insert!')
+                currentRowIdx = self.qTableWidget.currentRow()
+                self.qTableWidget.insertRow(currentRowIdx + 1)
 
             def INTERNAL_deleteButton_clickEvent(self):
-                print('Delete!')
+                rowCount = self.qTableWidget.rowCount()
+                if rowCount > 1:
+                    currentRowIdx = self.qTableWidget.currentRow()
+                    self.qTableWidget.removeRow(currentRowIdx)
+
+            def INTERNAL_moveUpButton_clickEvent(self):
+                currentRowIdx = self.qTableWidget.currentRow()
+                if (currentRowIdx > 0):
+                    previousRowIdx = currentRowIdx - 1
+                    self.swapEntries(currentRowIdx, previousRowIdx)
+                    self.qTableWidget.setCurrentCell(previousRowIdx, self.qTableWidget.currentColumn())
+
+            def INTERNAL_moveDownButton_clickEvent(self):
+                currentRowIdx = self.qTableWidget.currentRow()
+                rowCount = self.qTableWidget.rowCount()
+                nextRowIdx = currentRowIdx + 1
+                if (nextRowIdx < rowCount):
+                    self.swapEntries(currentRowIdx, nextRowIdx)
+                    self.qTableWidget.setCurrentCell(nextRowIdx, self.qTableWidget.currentColumn())
+            
+            def getEntry(self, idx):
+                '''
+                Get entry, as a list of string(s).
+                '''
+                columnCount = self.qTableWidget.columnCount()
+                data = []
+                for columnIdx in range(columnCount):
+                    qItem = self.qTableWidget.item(idx, columnIdx)
+                    data.append(qItem.text() if (qItem != None) else '')
+                return data
+            
+            def setEntry(self, idx, data):
+                '''
+                Set entry, from a list of string(s).
+                '''
+                columnCount = self.qTableWidget.columnCount()
+                for columnIdx in range(columnCount):
+                    self.qTableWidget.setItem(idx, columnIdx, QtWidgets.QTableWidgetItem(data[columnIdx]))
+            
+            def swapEntries(self, idx1, idx2):
+                '''
+                Swap entries.
+                '''
+                data1 = self.getEntry(idx1)
+                data2 = self.getEntry(idx2)
+                self.setEntry(idx2, data1)
+                self.setEntry(idx1, data2)
 
         class VideoRenderer(Widget, INTERNAL.EventManager):
             '''
