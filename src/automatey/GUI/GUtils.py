@@ -9,6 +9,15 @@ import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.MathUtils as MathUtils
 import automatey.Abstract.Input as AbstractInput
 
+class GIF:
+    
+    '''
+    Image, may be used with all element(s) of the GUI.
+    '''
+    
+    def __init__(self, f:FileUtils.File):
+        self.qMovie = QtGui.QMovie(str(f))
+
 class Image:
     '''
     Image, may be used with all element(s) of the GUI.

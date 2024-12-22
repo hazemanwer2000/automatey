@@ -55,6 +55,16 @@ class QFrame(QtWidgets.QFrame):
         if self.contextMenuEventFcn != None:
             self.contextMenuEventFcn(event)
 
+class QLabel(QtWidgets.QLabel):
+    
+    def __init__(self):
+        QtWidgets.QLabel.__init__(self)
+        self.contextMenuEventFcn = None
+
+    def contextMenuEvent(self, event):
+        if self.contextMenuEventFcn != None:
+            self.contextMenuEventFcn(event)
+
 class QLineEdit(QtWidgets.QLineEdit):
     
     def __init__(self):

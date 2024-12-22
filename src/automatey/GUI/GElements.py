@@ -424,8 +424,8 @@ class Widgets:
             Can handle an image, as well as text.
             '''
 
-            def __init__(self, text:str=None, img:GUtils.Image=None):
-                self.qWidget = QtWidgets.QLabel()
+            def __init__(self, text:str=None, img:GUtils.Image=None, gif:GUtils.GIF=None):
+                self.qWidget = PyQt6Wrapper.QLabel()
                 Widget.__init__(self, self.qWidget)
                 
                 if text != None:
@@ -433,6 +433,11 @@ class Widgets:
                 
                 if img != None:
                     self.qWidget.setPixmap(QtGui.QPixmap.fromImage(img.qImage))
+
+                if gif != None:
+                    pass
+                    self.qWidget.setMovie(gif.qMovie)
+                    gif.qMovie.start()
 
                 # PyQt6: Force widget not to be focusable.
                 self.qWidget.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
