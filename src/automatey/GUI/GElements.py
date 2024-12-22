@@ -752,20 +752,20 @@ class Widgets:
                 self.qWidget.keyPressEventFcn = self.INTERNAL_keyPressEvent
                 self.qWidget.enterEventFcn = self.INTERNAL_enterEvent
                 self.qWidget.contextMenuEventFcn = self.INTERNAL_contextMenuEvent
-                self.contextMenu:GUtils.ContextMenu = None
+                self.qContextMenu:QtWidgets.QMenu = None
             
-            def setContextMenu(self, contextMenu:GUtils.ContextMenu):
+            def setContextMenu(self, menu:GUtils.Menu):
                 '''
                 Set context menu.
                 
                 Note that, it is shown only if triggered within video's frame.
                 '''
-                contextMenu.INTERNAL_create(self)
-                self.contextMenu = contextMenu
+                self.qContextMenu = QtWidgets.QMenu()
+                menu.INTERNAL_instantiate(self.qContextMenu, self.qWidget)
             
             def INTERNAL_contextMenuEvent(self, event:QtGui.QContextMenuEvent):
-                if self.contextMenu != None:
-                    self.contextMenu.INTERNAL_show(event.globalPos())
+                if self.qContextMenu != None:
+                    self.qContextMenu.exec(event.globalPos())
             
             def INTERNAL_keyPressEvent(self, event):
                 qKey = event.key()
@@ -1020,18 +1020,11 @@ class Widgets:
                 }))
                 
                 # ? Set-up context-menu of renderer.
-                self.renderer.setContextMenu(GUtils.ContextMenu([
-                    {
-                        'text' : 'Copy (X, Y)',
-                        'handler' : self.INTERNAL_contextMenu_copyMousePosition,
-                        'is-checkable' : False,
-                    },
-                    None,
-                    {
-                        'text' : 'Copy HH:MM:SS.xxx',
-                        'handler' : self.INTERNAL_contextMenu_copyVideoPosition,
-                        'is-checkable' : True,
-                    },
+                self.renderer.setContextMenu(GUtils.Menu([
+                    GUtils.Menu.SubMenu('Copy', [
+                        GUtils.Menu.EndPoint('(X, Y)', self.INTERNAL_contextMenu_copyMousePosition),
+                        GUtils.Menu.EndPoint('HH:MM:SS.xxx', self.INTERNAL_contextMenu_copyVideoPosition),
+                    ]),
                 ]))
             
             def INTERNAL_timingEvent(self):
@@ -1314,34 +1307,14 @@ class Window:
                 toolbar.addAction(action)
         
         self.qWindow.addToolBar(toolbar)
-  
-    def createMenu(self, menuName:str, contract):
+
+    def addMenu(self, menuName:str, menu:GUtils.Menu):
         '''
-        Creates a (sub-)menu based on a contract.
-        
-        Contract shall consist of a list of dictionaries, with optional `None` value(s) in-between, intepretted as separators.
-        
-        Each dictionary, representing a button, shall specify,
-        - `text`.
-        - `handler`.
-        - `is-checkable`, specifying whether button is checkable.
-            - Note, if `is-checkable`, `handler` receives a single `bool` argument.
+        Adds a menu(-entry), to the (menu-)bar.
         '''
-        
-        menu = self.qWindow.menuBar()
-        subMenu = menu.addMenu('&' + menuName)
-        
-        for term in contract:
-            if term == None:
-                subMenu.addSeparator()
-            else:
-                action = QtGui.QAction(
-                    term['text'],
-                    self.qWindow
-                )
-                action.triggered.connect(term['handler'])
-                action.setCheckable(term['is-checkable'])
-                subMenu.addAction(action)
+        qMenuBar = self.qWindow.menuBar()
+        qMenu = qMenuBar.addMenu('&' + menuName)
+        menu.INTERNAL_instantiate(qMenu, self.qWindow)
 
     def show(self):
         '''

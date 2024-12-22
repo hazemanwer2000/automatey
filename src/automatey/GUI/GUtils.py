@@ -142,40 +142,48 @@ class EventHandlers:
     class KeyPressEventHandler(KeyEventHandler):
         pass
 
-class ContextMenu:
+class Menu:
     '''
-    A context-menu based on a contract.
+    A menu based on a contract.
     
-    Contract shall consist of a list of dictionaries, with optional `None` value(s) in-between, intepretted as separators.
-    
-    Each dictionary, representing a button, shall specify,
-    - `text`.
-    - `handler`.
-    - `is-checkable`, specifying whether button is checkable.
-        - Note, if `is-checkable`, `handler` receives a single `bool` argument.
-    
-    Note that,
-    - A context-menu can only be used by a single widget.
+    Contract shall consist of a list of entries, of type `EndPoint`, `SubMenu`, or `Separator`.
     '''
     
-    def __init__(self, contract):
-        self.contract = contract
-    
-    def INTERNAL_create(self, parentWidget):
+    class EndPoint:
         
-        self.qMenu = QtWidgets.QMenu(parentWidget.qWidget)
+        def __init__(self, text, fcn, isCheckable=False):
+            self.text = text
+            self.fcn = fcn
+            self.isCheckable = isCheckable
         
-        for term in self.contract:
-            if term == None:
-                self.qMenu.addSeparator()
-            else:
-                action = QtGui.QAction(
-                    term['text'],
-                    parentWidget.qWidget
-                )
-                action.triggered.connect(term['handler'])
-                action.setCheckable(term['is-checkable'])
-                self.qMenu.addAction(action)
+        def INTERNAL_instantiate(self, qMenu, qParent):
+            action = QtGui.QAction(
+                self.text,
+                qParent
+            )
+            action.triggered.connect(self.fcn)
+            action.setCheckable(self.isCheckable)
+            qMenu.addAction(action)
+        
+    class SubMenu:
+        
+        def __init__(self, text, entries):
+            self.text = text
+            self.entries = entries
+        
+        def INTERNAL_instantiate(self, qMenu, qParent):
+            qSubMenu = qMenu.addMenu('&' + self.text)
+            for entry in self.entries:
+                entry.INTERNAL_instantiate(qSubMenu, qParent)
+
+    class Separator:
+
+        def INTERNAL_instantiate(self, qMenu, qParent):
+            qMenu.addSeparator()
     
-    def INTERNAL_show(self, position):
-        self.qMenu.exec(position)
+    def __init__(self, entries):
+        self.entries = entries
+    
+    def INTERNAL_instantiate(self, qMenu, qParent):
+        for entry in self.entries:
+            entry.INTERNAL_instantiate(qMenu, qParent)
