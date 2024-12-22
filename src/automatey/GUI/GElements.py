@@ -780,14 +780,21 @@ class Widgets:
             def INTERNAL_deleteButton_clickEvent(self):
                 rowCount = self.qTableWidget.rowCount()
                 if rowCount > 1:
+                    # ? Remove current row.
                     currentRowIdx = self.qTableWidget.currentRow()
                     self.qTableWidget.removeRow(currentRowIdx)
+                    # ? Select (appropriate) row.
+                    newLastRowIdx = (rowCount - 1) - 1
+                    selectIdx = currentRowIdx if (currentRowIdx <= newLastRowIdx) else newLastRowIdx
+                    self.qTableWidget.setCurrentCell(selectIdx, self.qTableWidget.currentColumn())
 
             def INTERNAL_moveUpButton_clickEvent(self):
                 currentRowIdx = self.qTableWidget.currentRow()
                 if (currentRowIdx > 0):
+                    # Swap with previous row.
                     previousRowIdx = currentRowIdx - 1
                     self.swapEntries(currentRowIdx, previousRowIdx)
+                    # ? Select (appropriate) row.
                     self.qTableWidget.setCurrentCell(previousRowIdx, self.qTableWidget.currentColumn())
 
             def INTERNAL_moveDownButton_clickEvent(self):
@@ -795,7 +802,9 @@ class Widgets:
                 rowCount = self.qTableWidget.rowCount()
                 nextRowIdx = currentRowIdx + 1
                 if (nextRowIdx < rowCount):
+                    # Swap with next row.
                     self.swapEntries(currentRowIdx, nextRowIdx)
+                    # ? Select (appropriate) row.
                     self.qTableWidget.setCurrentCell(nextRowIdx, self.qTableWidget.currentColumn())
             
             def getEntry(self, idx):
@@ -825,6 +834,16 @@ class Widgets:
                 data2 = self.getEntry(idx2)
                 self.setEntry(idx2, data1)
                 self.setEntry(idx1, data2)
+
+            def getEntries(self):
+                '''
+                Get a list of all entries, each a list of string(s).
+                '''
+                rowCount = self.qTableWidget.rowCount()
+                entries = []
+                for idx in range(rowCount):
+                    entries.append(self.getEntry(idx))
+                return entries
 
         class VideoRenderer(Widget, INTERNAL.EventManager):
             '''
