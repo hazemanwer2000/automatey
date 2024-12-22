@@ -736,6 +736,41 @@ class Widgets:
                 if GUtils.EventHandlers.TextChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.TextChangeEventHandler].fcn()
 
+        class EntryTable(Widget):
+            
+            def __init__(self, header:list):
+                self.layout = Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=0)
+                Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
+                
+                # ? Create table.
+                self.tableWidget = Widget(QtWidgets.QTableWidget(5, len(header)))
+                self.layout.setWidget(self.tableWidget, 0, 1)
+                # ? ? Assign header.
+                self.tableWidget.qWidget.setHorizontalHeaderLabels(header)
+                # ? ? Fix header-column, and row size.
+                qVerticalHeader = self.tableWidget.qWidget.verticalHeader()
+                qVerticalHeader.setFixedWidth(50)
+                qVerticalHeader.setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Fixed)
+
+                # ? Create (control-)panel.
+                self.verticalContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+                self.layout.setWidget(self.verticalContainer, 0, 0)
+                self.layout.setColumnMinimumSize(0, 0)
+                # ? ? Create delete button.
+                self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(), toolTip='Insert Entry')
+                self.insertButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_insertButton_clickEvent))
+                self.verticalContainer.insertWidget(self.insertButton)
+                # ? ? Create delete button.
+                self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.Discard), toolTip='Delete Entry')
+                self.deleteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_deleteButton_clickEvent))
+                self.verticalContainer.insertWidget(self.deleteButton)
+            
+            def INTERNAL_insertButton_clickEvent(self):
+                print('Insert!')
+
+            def INTERNAL_deleteButton_clickEvent(self):
+                print('Delete!')
+
         class VideoRenderer(Widget, INTERNAL.EventManager):
             '''
             Renders a video.
