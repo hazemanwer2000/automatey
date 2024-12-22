@@ -766,7 +766,23 @@ class Widgets:
             
             def INTERNAL_contextMenuEvent(self, event:QtGui.QContextMenuEvent):
                 if self.qContextMenu != None:
-                    self.qContextMenu.exec(event.globalPos())
+                    qWidgetSize = self.qWidget.size()
+                    qWidgetPosition = event.pos()
+                    videoSize = self.player.video_get_size()
+                    videoMousePosition = MathUtils.isWithinFrame(
+                        videoSize,
+                        [qWidgetSize.width(), qWidgetSize.height()],
+                        [qWidgetPosition.x(), qWidgetPosition.y()],
+                    )
+                    if (videoMousePosition != None):
+                        self.lastMousePosition = videoMousePosition
+                        self.qContextMenu.exec(event.globalPos())
+            
+            def getMousePosition(self):
+                '''
+                Get mouse position within video, updated only when triggered to show context-menu.
+                '''
+                return self.lastMousePosition
             
             def INTERNAL_keyPressEvent(self, event):
                 qKey = event.key()
@@ -1043,10 +1059,12 @@ class Widgets:
                 self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
 
             def INTERNAL_contextMenu_copyMousePosition(self):
-                print('(X, Y)')
+                mousePosition = self.renderer.getMousePosition()
+                mousePositionInText = '(' + str(mousePosition[0]) + ', ' + str(mousePosition[1]) + ')'
+                Clipboard.copy(mousePositionInText)
 
             def INTERNAL_contextMenu_copyVideoPosition(self):
-                print('HH:MM:SS.xxx')
+                Clipboard.copy(str(self.renderer.getPosition()))
 
             def load(self, f:FileUtils.File):
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
