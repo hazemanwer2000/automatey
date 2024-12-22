@@ -770,6 +770,7 @@ class Widgets:
                 self.qWidget.enterEventFcn = self.INTERNAL_enterEvent
                 self.qWidget.contextMenuEventFcn = self.INTERNAL_contextMenuEvent
                 self.qContextMenu:QtWidgets.QMenu = None
+                self.lastMousePosition = None
             
             def setContextMenu(self, menu:GUtils.Menu):
                 '''
@@ -791,7 +792,7 @@ class Widgets:
                         [qWidgetPosition.x(), qWidgetPosition.y()],
                     )
                     if (videoMousePosition != None):
-                        self.lastMousePosition = videoMousePosition
+                        self.lastMousePosition = tuple(videoMousePosition)
                         self.qContextMenu.exec(event.globalPos())
             
             def getMousePosition(self):
@@ -951,6 +952,33 @@ class Widgets:
                 
                 # (...) 
                 self.qMovie = None
+                
+                # ? Initialize event-handler(s).
+                self.label.qWidget.contextMenuEventFcn = self.INTERNAL_contextMenuEvent
+                self.qContextMenu:QtWidgets.QMenu = None
+                self.lastMousePosition = None
+            
+            def INTERNAL_contextMenuEvent(self, event:QtGui.QContextMenuEvent):
+                if self.qContextMenu != None:
+                    qWidgetPosition = event.pos()
+                    self.lastMousePosition = (
+                        qWidgetPosition.x(),
+                        qWidgetPosition.y(),
+                    )
+                    self.qContextMenu.exec(event.globalPos())
+            
+            def setContextMenu(self, menu:GUtils.Menu):
+                '''
+                Set context menu.
+                '''
+                self.qContextMenu = QtWidgets.QMenu()
+                menu.INTERNAL_instantiate(self.qContextMenu, self.label.qWidget)
+
+            def getMousePosition(self):
+                '''
+                Get mouse position within GIF, updated only when triggered to show context-menu.
+                '''
+                return self.lastMousePosition
             
             def load(self, f:FileUtils.File):
                 '''
@@ -1104,9 +1132,7 @@ class Widgets:
                 self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
 
             def INTERNAL_contextMenu_copyMousePosition(self):
-                mousePosition = self.renderer.getMousePosition()
-                mousePositionInText = '(' + str(mousePosition[0]) + ', ' + str(mousePosition[1]) + ')'
-                Clipboard.copy(mousePositionInText)
+                Clipboard.copy(str(self.renderer.getMousePosition()))
 
             def INTERNAL_contextMenu_copyVideoPosition(self):
                 Clipboard.copy(str(self.renderer.getPosition()))
@@ -1169,6 +1195,31 @@ class Widgets:
                 self.renderer.adjustVolume(delta)
 
             def getRenderer(self):
+                return self.renderer
+
+        class GIFPlayer(Widget):
+            '''
+            A GIF player.
+            '''
+            
+            def __init__(self):
+                self.renderer = Widgets.Basics.GIFRenderer()
+                Widget.__init__(self, self.renderer.qWidget)
+
+                # ? Set-up context-menu of renderer.
+                self.renderer.setContextMenu(GUtils.Menu([
+                    GUtils.Menu.SubMenu('Copy', [
+                        GUtils.Menu.EndPoint('(X, Y)', self.INTERNAL_contextMenu_copyMousePosition),
+                    ]),
+                ]))
+            
+            def INTERNAL_contextMenu_copyMousePosition(self):
+                Clipboard.copy(str(self.renderer.getMousePosition()))
+
+            def getRenderer(self):
+                '''
+                Get underlying renderer.
+                '''
                 return self.renderer
 
 class Application:
