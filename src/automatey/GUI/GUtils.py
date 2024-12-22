@@ -184,7 +184,7 @@ class Menu:
             self.entries = entries
         
         def INTERNAL_instantiate(self, qMenu, qParent):
-            qSubMenu = qMenu.addMenu('&' + self.text)
+            qSubMenu = qMenu.addMenu(self.text)
             for entry in self.entries:
                 entry.INTERNAL_instantiate(qSubMenu, qParent)
 

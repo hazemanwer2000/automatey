@@ -964,14 +964,14 @@ class Widgets:
                 self.label.qWidget.contextMenuEventFcn = self.INTERNAL_contextMenuEvent
                 self.qContextMenu:QtWidgets.QMenu = None
                 self.lastMousePosition = None
+                self.label.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseMoveEvent
+                self.label.qWidget.setMouseTracking(True)
+            
+            def INTERNAL_mouseMoveEvent(self, event):
+                self.lastMousePosition = (event.pos().x(), event.pos().y())
             
             def INTERNAL_contextMenuEvent(self, event:QtGui.QContextMenuEvent):
                 if self.qContextMenu != None:
-                    qWidgetPosition = event.pos()
-                    self.lastMousePosition = (
-                        qWidgetPosition.x(),
-                        qWidgetPosition.y(),
-                    )
                     self.qContextMenu.exec(event.globalPos())
             
             def setContextMenu(self, menu:GUtils.Menu):

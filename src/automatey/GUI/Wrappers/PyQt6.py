@@ -65,10 +65,15 @@ class QLabel(QtWidgets.QLabel):
     def __init__(self):
         QtWidgets.QLabel.__init__(self)
         self.contextMenuEventFcn = None
+        self.mouseMoveEventFcn = None
 
     def contextMenuEvent(self, event):
         if self.contextMenuEventFcn != None:
             self.contextMenuEventFcn(event)
+
+    def mouseMoveEvent(self, event):
+        if self.mouseMoveEventFcn != None:
+            self.mouseMoveEventFcn(event)
 
 class QLineEdit(QtWidgets.QLineEdit):
     
