@@ -772,7 +772,7 @@ class Widgets:
                 self.qContextMenu:QtWidgets.QMenu = None
                 self.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseMoveEvent
                 self.qWidget.setMouseTracking(True)
-                self.lastMousePosition = None
+                self.lastMousePosition = (0, 0)
             
             def setContextMenu(self, menu:GUtils.Menu):
                 '''
@@ -963,7 +963,7 @@ class Widgets:
                 # ? Initialize event-handler(s).
                 self.label.qWidget.contextMenuEventFcn = self.INTERNAL_contextMenuEvent
                 self.qContextMenu:QtWidgets.QMenu = None
-                self.lastMousePosition = None
+                self.lastMousePosition = (0, 0)
                 self.label.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseMoveEvent
                 self.label.qWidget.setMouseTracking(True)
             
