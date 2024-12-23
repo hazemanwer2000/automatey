@@ -17,6 +17,8 @@ class XML:
     - XPath queries must always return an element.
     '''
     
+    # Loading operation(s).
+    
     def __init__(self, root):
         self.root = root
     
@@ -28,6 +30,13 @@ class XML:
         tree = lxml.etree.parse(str(f))
         return XML(tree.getroot())
     
+    @staticmethod
+    def fromScratch(tag)-> "XML":
+        '''
+        Create XML(-element) fom scratch.
+        '''
+        return XML(lxml.etree.Element(tag))
+    
     def saveAs(self, f:FileUtils.File):
         '''
         Save as XML file.
@@ -35,6 +44,8 @@ class XML:
         with f.openFile('wt') as handler:
             handler.writeAny(str(self))
     
+    # General operation(s).
+
     def XPath(self, query) -> typing.List["XML"]:
         '''
         Returns a list, the result of the given XPath query.
@@ -84,14 +95,30 @@ class XML:
     
     # Formatting-specific operation(s)
     
-    def removeChildElement(self, xml:"XML"):
+    def removeElement(self, xml:"XML"):
+        '''
+        Remove child element.
+        '''
         self.root.remove(xml.root)
-    
-    def copyElement(self) -> "XML":
-        return copy.deepcopy(self)
-    
+
+    def removeElementByIndex(self, idx:int):
+        '''
+        Remove child element by index.
+        '''
+        self.root.remove(self.root[idx])
+
     def insertElement(self, xml:"XML", idx:int=-1):
+        '''
+        Insert element as child. If index is unspecified, element is appeneded.
+        '''
         if idx == -1:
             self.root.append(xml.root)
         else:
             self.root.insert(idx, xml.root)
+    
+    def copy(self) -> "XML":
+        '''
+        (Deep-)Copy element.
+        '''
+        return copy.deepcopy(self)
+
