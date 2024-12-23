@@ -928,6 +928,7 @@ class Widgets:
                 self.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseMoveEvent
                 self.qWidget.setMouseTracking(True)
                 self.lastMousePosition = (0, 0)
+                self.qWidget.wheelEventFcn = self.INTERNAL_wheelEvent
             
             def setContextMenu(self, menu:GUtils.Menu):
                 '''
@@ -968,6 +969,18 @@ class Widgets:
             def INTERNAL_enterEvent(self, event):
                 # ? Gain focus (to be able to handle key-press(es)), when mouse enters widget's area.
                 self.qWidget.setFocus()
+            
+            def INTERNAL_wheelEvent(self, event:QtGui.QWheelEvent):
+                if GUtils.EventHandlers.ScrollEventHandler in self.eventHandlers:
+                    scrollEventHandler:GUtils.EventHandlers.ScrollEventHandler = self.eventHandlers[GUtils.EventHandlers.ScrollEventHandler]
+                    # ? Case: Scroll-up.
+                    if event.angleDelta().y() > 0:
+                        if scrollEventHandler.scrollUpFcn != None:
+                            scrollEventHandler.scrollUpFcn()
+                    # ? Case: Scroll-down.
+                    else:
+                        if scrollEventHandler.scrollDownFcn != None:
+                            scrollEventHandler.scrollDownFcn()
             
             def load(self, f:FileUtils.File):
                 '''
@@ -1317,6 +1330,10 @@ class Widgets:
                     AbstractInput.Key.Comma: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
                     AbstractInput.Key.Dot: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L3']),
                 }))
+                self.renderer.setEventHandler(GUtils.EventHandlers.ScrollEventHandler(
+                    scrollUpFcn = lambda: self.adjustVolume(Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
+                    scrollDownFcn = lambda: self.adjustVolume(-1 * Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
+                ))
                 
                 # ? Set-up context-menu of renderer.
                 self.renderer.setContextMenu(GUtils.Menu([

@@ -43,6 +43,7 @@ class QFrame(QtWidgets.QFrame):
         self.enterEventFcn = None
         self.contextMenuEventFcn = None
         self.mouseMoveEventFcn = None
+        self.wheelEventFcn = None
          
     def enterEvent(self, event):
         if self.enterEventFcn != None:
@@ -59,6 +60,10 @@ class QFrame(QtWidgets.QFrame):
     def mouseMoveEvent(self, event):
         if self.mouseMoveEventFcn != None:
             self.mouseMoveEventFcn(event)
+    
+    def wheelEvent(self, event):
+        if self.wheelEventFcn != None:
+            self.wheelEventFcn(event)
 
 class QLabel(QtWidgets.QLabel):
     

@@ -55,7 +55,3 @@ class Key:
     BackwardSlash = 305
     SquareBrackets_Left = 306
     SquareBrackets_Right = 307
-
-class MouseKey:
-    Left = 0
-    Right = 1

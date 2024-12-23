@@ -146,6 +146,11 @@ class EventHandlers:
 
     class KeyPressEventHandler(KeyEventHandler):
         pass
+    
+    class ScrollEventHandler(KeyEventHandler):
+        def __init__(self, scrollUpFcn=None, scrollDownFcn=None):
+            self.scrollUpFcn = scrollUpFcn
+            self.scrollDownFcn = scrollDownFcn
 
 class Menu:
     '''
