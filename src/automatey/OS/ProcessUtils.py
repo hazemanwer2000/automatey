@@ -1,6 +1,7 @@
 
 # Internal libraries
 import automatey.Utils.StringUtils as StringUtils
+import automatey.OS.FileUtils as FileUtils
 
 # Standard libraries
 import subprocess
@@ -21,8 +22,17 @@ class FileTemplate:
     
     def __init__(self, template):
         self.template = template
+        
+    @staticmethod
+    def fromFile(f:FileUtils.File) -> "FileTemplate":
+        '''
+        Create template from file.
+        '''
+        with f.openFile('rt') as f_opened:
+            template = f_opened.readAny()
+        return FileTemplate(template)
     
-    def createFormatter(self):
+    def createFormatter(self) -> "FileTemplate.Formatter":
         '''
         Creates a formatter object, to be used to format the template into a file.
         
@@ -59,6 +69,13 @@ class FileTemplate:
         
         def __repr__(self):
             return str(self)
+        
+        def saveAs(self, f:FileUtils.File):
+            '''
+            Save to file.
+            '''
+            with f.openFile('wt') as f_opened:
+                f_opened.writeAny(str(self))
     
         class INTERNAL_Utils:
             
