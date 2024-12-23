@@ -1428,6 +1428,31 @@ class Widgets:
                 '''
                 return self.renderer
 
+        class ImageViewer(Widget):
+            '''
+            Am image viewer.
+            '''
+            
+            def __init__(self):
+                self.renderer = Widgets.Basics.ImageRenderer()
+                Widget.__init__(self, self.renderer.qWidget)
+
+                # ? Set-up context-menu of renderer.
+                self.renderer.setContextMenu(GUtils.Menu([
+                    GUtils.Menu.SubMenu('Copy', [
+                        GUtils.Menu.EndPoint('(X, Y)', self.INTERNAL_contextMenu_copyMousePosition),
+                    ]),
+                ]))
+            
+            def INTERNAL_contextMenu_copyMousePosition(self):
+                Clipboard.copy(str(self.renderer.getMousePosition()))
+
+            def getRenderer(self):
+                '''
+                Get underlying renderer.
+                '''
+                return self.renderer
+
 class Application:
     '''
     Only one instance of 'Application' is required.
