@@ -12,28 +12,16 @@ class Format:
         - Header (i.e., list of column name(s)).
         - Entries (i.e., list of entries, each a list of string(s)).
         '''
-        @staticmethod
-        def INTERNAL_fromFile(f_src:FileUtils.File, delimiter=','):
-            data = Format.ListOfDictionaries.INTERNAL_fromFile(f_src, delimiter=delimiter)
-            return Format.HeaderAndData.fromDictionaries(data)
-        
-        @staticmethod
-        def INTERNAL_saveAs(data, f_dst:FileUtils.File, delimiter=','):
-            Format.ListOfDictionaries.INTERNAL_saveAs(
-                Format.HeaderAndData.toDictionaries(*data),
-                f_dst,
-                delimiter=delimiter
-            )
-        
+
         @staticmethod
         def fromDictionaries(data):
-            header = data[0].keys()
+            header = list(data[0].keys())
             entries = [list(x.values()) for x in data]
             return (header, entries)
 
         @staticmethod
         def toDictionaries(header, entries):
-            return dict(zip(header, entries))
+            return [dict(zip(header, entry)) for entry in entries]
 
     class ListOfDictionaries:
         '''
@@ -57,11 +45,17 @@ class Format:
 def fromFile(f_src:FileUtils.File, format=Format.ListOfDictionaries, delimiter=','):
     '''
     Read data from CSV file.
+
+    Note that,
+    - Format used by default is `ListOfDictionaries`.
     '''
-    return format.INTERNAL_fromFile(f_src, delimiter=delimiter)
+    return Format.ListOfDictionaries.INTERNAL_fromFile(f_src, delimiter=delimiter)
 
 def saveAs(data, f_dst:FileUtils.File, format=Format.ListOfDictionaries, delimiter=','):
     '''
     Write data as CSV, to file.
+    
+    Note that,
+    - Format used by default is `ListOfDictionaries`.
     '''
-    return format.INTERNAL_saveAs(data, f_dst, delimiter=delimiter)
+    return Format.ListOfDictionaries.INTERNAL_saveAs(data, f_dst, delimiter=delimiter)
