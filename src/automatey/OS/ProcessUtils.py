@@ -28,7 +28,7 @@ class FileTemplate:
         
         As many formatter object(s) may be created.
         '''
-        return CommandTemplate.Formatter(self.template)
+        return FileTemplate.Formatter(self.template)
 
     class Formatter:
         
@@ -40,19 +40,19 @@ class FileTemplate:
             Assert a section, asserting contained parameter value(s).
             '''
             params = {} if (params == None) else params
-            self.template = CommandTemplate.Formatter.INTERNAL_Utils.assertSection(sectionName, params, self.template)
+            self.template = FileTemplate.Formatter.INTERNAL_Utils.assertSection(sectionName, params, self.template)
         
         def assertParameter(self, paramName:str, paramValue:str):
             '''
             Assert parameter value.
             '''
-            self.template = CommandTemplate.Formatter.INTERNAL_Utils.assertParameter(paramName, paramValue, self.template)
+            self.template = FileTemplate.Formatter.INTERNAL_Utils.assertParameter(paramName, paramValue, self.template)
         
         def excludeSection(self, sectionName:str):
             '''
             Remove a section.
             '''
-            self.template = CommandTemplate.Formatter.INTERNAL_Utils.excludeSection(sectionName, self.template)
+            self.template = FileTemplate.Formatter.INTERNAL_Utils.excludeSection(sectionName, self.template)
         
         def __str__(self):
             return self.template
@@ -83,7 +83,7 @@ class FileTemplate:
                 '''
                 Assert parameter value.
                 '''
-                paramExpr = CommandTemplate.Formatter.INTERNAL_Utils.Regex.formatParameterExpression(paramName)
+                paramExpr = FileTemplate.Formatter.INTERNAL_Utils.Regex.formatParameterExpression(paramName)
                 txt = StringUtils.Regex.replaceAll(paramExpr, paramValue, txt)
                 return txt
 
@@ -92,10 +92,10 @@ class FileTemplate:
                 '''
                 Assert a section, asserting contained parameter value(s).
                 '''
-                sectionExpr = CommandTemplate.Formatter.INTERNAL_Utils.Regex.formatSectionExpression(sectionName)
+                sectionExpr = FileTemplate.Formatter.INTERNAL_Utils.Regex.formatSectionExpression(sectionName)
                 sectionContent = StringUtils.Regex.findAll(sectionExpr, txt)[0]
                 for paramName in params:
-                    sectionContent = CommandTemplate.Formatter.INTERNAL_Utils.assertParameter(paramName, params[paramName], sectionContent)
+                    sectionContent = FileTemplate.Formatter.INTERNAL_Utils.assertParameter(paramName, params[paramName], sectionContent)
                 txt = StringUtils.Regex.replaceAll(sectionExpr, sectionContent, txt)
                 return txt
             
@@ -104,7 +104,7 @@ class FileTemplate:
                 '''
                 Remove a section.
                 '''
-                sectionExpr = CommandTemplate.Formatter.INTERNAL_Utils.Regex.formatSectionExpression(sectionName)
+                sectionExpr = FileTemplate.Formatter.INTERNAL_Utils.Regex.formatSectionExpression(sectionName)
                 txt = StringUtils.Regex.replaceAll(sectionExpr, '', txt)
                 return txt
 

@@ -1,5 +1,4 @@
 __pycache__/
-ignore*.py
-ignore*.bat
+ignore*
 *.code-workspace
 /dist/
