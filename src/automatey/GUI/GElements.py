@@ -1149,6 +1149,52 @@ class Widgets:
                 self.label.qWidget.setMovie(self.qMovie)
                 self.qMovie.start()
 
+        class ImageRenderer(Widget, INTERNAL.EventManager):
+            '''
+            Image renderer.
+            '''
+
+            def __init__(self):
+                self.label = Widget(PyQt6Wrapper.QLabel())
+                self.decorator = Widgets.Decorators.Central(self.label)
+                Widget.__init__(self, self.decorator.qWidget)
+                
+                # (...) 
+                self.qMovie = None
+                
+                # ? Initialize event-handler(s).
+                self.label.qWidget.contextMenuEventFcn = self.INTERNAL_contextMenuEvent
+                self.qContextMenu:QtWidgets.QMenu = None
+                self.lastMousePosition = (0, 0)
+                self.label.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseMoveEvent
+                self.label.qWidget.setMouseTracking(True)
+            
+            def INTERNAL_mouseMoveEvent(self, event):
+                self.lastMousePosition = (event.pos().x(), event.pos().y())
+            
+            def INTERNAL_contextMenuEvent(self, event:QtGui.QContextMenuEvent):
+                if self.qContextMenu != None:
+                    self.qContextMenu.exec(event.globalPos())
+            
+            def setContextMenu(self, menu:GUtils.Menu):
+                '''
+                Set context menu.
+                '''
+                self.qContextMenu = QtWidgets.QMenu()
+                menu.INTERNAL_instantiate(self.qContextMenu, self.label.qWidget)
+
+            def getMousePosition(self):
+                '''
+                Get mouse position within GIF, updated only when triggered to show context-menu.
+                '''
+                return self.lastMousePosition
+            
+            def load(self, f:FileUtils.File):
+                '''
+                Load image file.
+                '''
+                self.label.qWidget.setPixmap(QtGui.QPixmap.fromImage(GUtils.Image(f).qImage))
+
     class Complex:
 
         class ColorSelector(Widget):
