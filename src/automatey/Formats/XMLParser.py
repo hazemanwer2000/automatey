@@ -1,13 +1,14 @@
 
 # Internal Libraries
-import lxml.etree
 import automatey.OS.FileUtils as FileUtils
+import automatey.Utils.StringUtils as StringUtils
 
 # External Libraries
-import lxml
 import typing
 import copy
-    
+import lxml.etree
+import xml.dom.minidom
+
 class XML:
     
     '''
@@ -88,7 +89,9 @@ class XML:
         self.root.text = text
     
     def __str__(self):
-        return lxml.etree.tostring(self.root, pretty_print=True, encoding='unicode')
+        text = lxml.etree.tostring(self.root, pretty_print=True, encoding='unicode')
+        dom = xml.dom.minidom.parseString(text)
+        return StringUtils.Normalize.asParagraph(dom.toprettyxml())
 
     def __repr__(self):
         return str(self)
@@ -122,3 +125,15 @@ class XML:
         '''
         return copy.deepcopy(self)
 
+    # String-Formatting-specific operation(s).
+    
+    def normalizeAllTextAsSentence(self):
+        '''
+        Normalize text of element, and all descendant(s), as sentence.
+        '''
+        result = self.XPath('./descendant-or-self::*')
+        for element in result:
+            print(element.getTag())
+            textAsSentence = StringUtils.Normalize.asSentence(element.getText())
+            element.setText(textAsSentence)
+            

@@ -22,3 +22,23 @@ class Regex:
         if res == None:
             res = []
         return res
+
+class Normalize:
+    
+    @staticmethod
+    def asSentence(text:str):
+        '''
+        Strip, and replace multiple, consecutive occurences of white-space character(s), with a single space.
+        '''
+        strippedText = text.strip()
+        normalizedText = Regex.replaceAll(r'\s+', ' ', strippedText)
+        return normalizedText
+
+    @staticmethod
+    def asParagraph(text:str):
+        '''
+        Strip, and remove all lines that are empty, or with white-space character(s) only.
+        '''
+        strippedText = text.strip()
+        normalizedText = Regex.replaceAll(r'\n\s*\n', '\n', strippedText)
+        return normalizedText
