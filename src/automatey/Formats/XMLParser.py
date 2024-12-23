@@ -12,9 +12,6 @@ class XML:
     
     '''
     XML representation.
-    
-    Note that,
-    - XPath queries must always return an element.
     '''
     
     # Loading operation(s).
@@ -49,6 +46,9 @@ class XML:
     def XPath(self, query) -> typing.List["XML"]:
         '''
         Returns a list, the result of the given XPath query.
+        
+        Note that,
+        - XPath queries must always return an element.
         '''
         result = self.root.xpath(query)
         return [XML(element) for element in result]
