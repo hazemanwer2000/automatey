@@ -367,7 +367,7 @@ class Widgets:
             Tabs, to switch between different widget(s).
             '''
             
-            def __init__(self, tabNames, widgets):
+            def __init__(self, tabNames, widgets, initTabIndex=0):
                 self.qTabWidget = QtWidgets.QTabWidget()
                 Widget.__init__(self, self.qTabWidget)
                 INTERNAL.EventManager.__init__(self)
@@ -378,6 +378,9 @@ class Widgets:
                     
                 # ? Register event-handler(s).
                 self.qTabWidget.currentChanged.connect(self.INTERNAL_currentTabChanged)
+                
+                # ? Select initial tab.
+                self.qTabWidget.setCurrentIndex(initTabIndex)
             
             def INTERNAL_currentTabChanged(self, index):
                 if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
