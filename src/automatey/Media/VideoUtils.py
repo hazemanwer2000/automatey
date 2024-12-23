@@ -268,7 +268,16 @@ class INTERNAL_VideoProcessing:
                 r'-of csv=print_section=0',
                 r'-skip_frame nokey',
                 r'{{{INPUT-FILE}}}',
-            )
+            ),
+            'ThumbnailGenerate' : ProcessUtils.CommandTemplate(
+                r'ffmpeg',
+                r'-hide_banner',
+                r'-loglevel error',
+                r'-i {{{INPUT-FILE}}}',
+                r'-ss {{{TIME}}}',
+                r'-vframes 1',
+                r'{{{OUTPUT-FILE}}}',
+            ),
         }
 
         QualityToCRF = {
@@ -349,6 +358,24 @@ class INTERNAL_VideoProcessing:
             keyframes = [TimeUtils.Time.createFromSeconds(float(x.split(',')[0])) for x in resultList]
             
             return keyframes
+
+        @staticmethod
+        def generateThumbnail(f_src:FileUtils.File, f_dst:FileUtils.File, time:TimeUtils.Time):
+            '''
+            Generate thumbnail at a specific timestamp.
+            '''
+            
+            # Format command.
+            command_GenerateThumbnail = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['ThumbnailGenerate'].createFormatter()
+            command_GenerateThumbnail.assertParameter('input-file', str(f_src))
+            command_GenerateThumbnail.assertParameter('output-file', str(f_dst))
+            command_GenerateThumbnail.assertParameter('time', str(time))
+            
+            # Execute.
+            print(str(command_GenerateThumbnail))
+            
+            proc = ProcessUtils.Process(str(command_GenerateThumbnail))
+            proc.run()
 
         class VideoFilterConstructors:
             
@@ -752,7 +779,37 @@ class Video:
         Clears all registered action(s)
         '''
         self.actions.clear()
+    
+    def generateThumbnails(self, f_dstDir:FileUtils.File, N:int):
+        '''
+        Generate thumb-nails at equi-distant interval(s).
+        '''
         
+        # ? Create directory.
+        if f_dstDir.isExists():
+            raise ExceptionUtils.ValidationError('Destination directory must not exist.')
+        f_dstDir.makeDirectory()
+        
+        # ? Generate thumbnail(s).
+        incrementTime = self.getDuration() / (N + 1)
+        totalTime = TimeUtils.Time(0)
+        for i in range(1, N + 1):
+            totalTime += incrementTime
+            f_dst = f_dstDir.traverseDirectory(f"thumbs-{i:04d}.png")
+            INTERNAL_VideoProcessing.FFMPEGWrapper.generateThumbnail(self.f_src, f_dst, totalTime)
+
+    def generateThumbnail(self, f_dst:FileUtils.File, time:TimeUtils.Time):
+        '''
+        Generate thumb-nail at a specific time-stamp.
+        '''
+        
+        # ? Create directory.
+        if f_dst.isExists():
+            raise ExceptionUtils.ValidationError('Destination file must not exist.')
+
+        # ? Generate thumbnail.
+        INTERNAL_VideoProcessing.FFMPEGWrapper.generateThumbnail(self.f_src, f_dst, time)
+    
     class Utils:
         
         @staticmethod

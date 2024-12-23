@@ -74,6 +74,9 @@ class Time:
         diff = self.microseconds - obj.microseconds
         return Time(max(diff, 0))
     
+    def __truediv__(self, n:int):
+        return Time(int(self.microseconds / n))
+    
     def __eq__(self, obj):
         return self.microseconds == obj.microseconds
 
