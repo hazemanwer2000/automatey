@@ -6,7 +6,7 @@ import automatey.OS.FileUtils as FileUtils
 # External Libraries
 import lxml
 import typing
-import xml
+import copy
     
 class XML:
     
@@ -42,27 +42,56 @@ class XML:
         result = self.root.xpath(query)
         return [XML(element) for element in result]
 
-    def tag(self) -> str:
+    def getTag(self) -> str:
         '''
         Get tag.
         '''
         return self.root.tag
     
+    def setTag(self, tag:str):
+        '''
+        Set tag.
+        '''
+        self.root.tag = tag
+    
     def attributes(self) -> dict:
         '''
         Get attributes, as `dict`.
+        
+        Note,
+        - It can be used for reading, and setting attributes.
         '''
         return self.root.attrib
     
-    def text(self) -> str:
+    def getText(self) -> str:
         '''
         Get text. Returns `''` if no text is found.
         '''
         text = self.root.text if (self.root.text != None) else ''
         return text.strip()
     
+    def setText(self, text:str):
+        '''
+        Set text.
+        '''
+        self.root.text = text
+    
     def __str__(self):
         return lxml.etree.tostring(self.root, pretty_print=True, encoding='unicode')
 
     def __repr__(self):
         return str(self)
+    
+    # Formatting-specific operation(s)
+    
+    def removeChildElement(self, xml:"XML"):
+        self.root.remove(xml.root)
+    
+    def copyElement(self) -> "XML":
+        return copy.deepcopy(self)
+    
+    def insertElement(self, xml:"XML", idx:int=-1):
+        if idx == -1:
+            self.root.append(xml.root)
+        else:
+            self.root.insert(idx, xml.root)
