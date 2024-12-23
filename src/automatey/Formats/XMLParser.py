@@ -35,12 +35,23 @@ class XML:
         '''
         return XML(lxml.etree.Element(tag))
     
-    def saveAs(self, f:FileUtils.File):
+    def saveAs(self, f:FileUtils.File, indent:str='\t'):
         '''
         Save as XML file.
         '''
         with f.openFile('wt') as handler:
-            handler.writeAny(str(self))
+            handler.writeAny(self.toString(indent=indent))
+    
+    def toString(self, indent:str='\t'):
+        text = lxml.etree.tostring(self.root, pretty_print=True, encoding='unicode')
+        dom = xml.dom.minidom.parseString(text)
+        return StringUtils.Normalize.asParagraph(dom.toprettyxml(indent=indent))
+    
+    def __str__(self):
+        return self.toString()
+
+    def __repr__(self):
+        return str(self)
     
     # General operation(s).
 
@@ -87,15 +98,7 @@ class XML:
         Set text.
         '''
         self.root.text = text
-    
-    def __str__(self):
-        text = lxml.etree.tostring(self.root, pretty_print=True, encoding='unicode')
-        dom = xml.dom.minidom.parseString(text)
-        return StringUtils.Normalize.asParagraph(dom.toprettyxml())
 
-    def __repr__(self):
-        return str(self)
-    
     # Formatting-specific operation(s)
     
     def removeElement(self, xml:"XML"):
@@ -133,7 +136,5 @@ class XML:
         '''
         result = self.XPath('./descendant-or-self::*')
         for element in result:
-            print(element.getTag())
             textAsSentence = StringUtils.Normalize.asSentence(element.getText())
             element.setText(textAsSentence)
-            

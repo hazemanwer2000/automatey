@@ -13,7 +13,7 @@ def fromFile(f_src:FileUtils.File):
         data = json.load(json_file)
     return data
 
-def saveAs(data, f_dst:FileUtils.File, isMinified=False, indent=4):
+def saveAs(data, f_dst:FileUtils.File, isMinified=False, indent:int=4):
     '''
     Write JSON data to file, from either `dict` or `list`.
     '''
