@@ -129,10 +129,6 @@ class EventHandlers:
         pass
     
     class KeyEventHandler(EventHandler):
-        '''
-        Note that,
-        - Registered handler shall expect the pressed `Key` is argument.
-        '''
         
         def __init__(self, key2FcnDict:dict):
             self.key2FcnDict = key2FcnDict

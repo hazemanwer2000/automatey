@@ -255,7 +255,7 @@ class Widgets:
 
     class Containers:
         
-        class StackedContainer(Widget):
+        class StackContainer(Widget):
             '''
             A container, where widgets are stacked on-top of one-another.
             '''
@@ -361,6 +361,39 @@ class Widgets:
                 Get number of widget(s).
                 '''
                 return self.verticalLayout.getCount()
+
+        class TabContainer(Widget, INTERNAL.EventManager):
+            '''
+            Tabs, to switch between different widget(s).
+            '''
+            
+            def __init__(self, tabNames, widgets):
+                self.qTabWidget = QtWidgets.QTabWidget()
+                Widget.__init__(self, self.qTabWidget)
+                INTERNAL.EventManager.__init__(self)
+                                
+                # ? Adding tab(s) in-order.
+                for tabName, widget in zip(tabNames, widgets):
+                    self.qTabWidget.addTab(widget.qWidget, tabName)
+                    
+                # ? Register event-handler(s).
+                self.qTabWidget.currentChanged.connect(self.INTERNAL_currentTabChanged)
+            
+            def INTERNAL_currentTabChanged(self, index):
+                if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
+            
+            def getCurrentTabByIndex(self) -> int:
+                '''
+                Get index of currently selected tab.
+                '''
+                return self.qTabWidget.currentIndex()
+
+            def getCurrentTabByName(self) -> str:
+                '''
+                Get name of currently selected tab.
+                '''
+                return self.qTabWidget.tabText(self.getCurrentTabByIndex())
 
     class Basics:
 
@@ -1180,7 +1213,7 @@ class Widgets:
                 self.playButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.play))
                 self.pauseButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaPause), toolTip='Pause')
                 self.pauseButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.pause))
-                self.playPauseButton = Widgets.Containers.StackedContainer([self.playButton, self.pauseButton], self.pauseButton)
+                self.playPauseButton = Widgets.Containers.StackContainer([self.playButton, self.pauseButton], self.pauseButton)
                 self.panelLayout.setWidget(self.playPauseButton, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 # ? ? Setting-up restart button.
@@ -1210,7 +1243,7 @@ class Widgets:
                 self.unmuteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.unmute))
                 self.muteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.MediaVolume), toolTip='(Un-)mute')
                 self.muteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.mute))
-                self.muteContainer = Widgets.Containers.StackedContainer([self.muteButton, self.unmuteButton], self.muteButton)
+                self.muteContainer = Widgets.Containers.StackContainer([self.muteButton, self.unmuteButton], self.muteButton)
                 self.panelLayout.setWidget(self.muteContainer, 0, panelWorkingIdx)
                 panelWorkingIdx += 1
                 
