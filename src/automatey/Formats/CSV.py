@@ -10,15 +10,15 @@ class Format:
     class HeaderAndData:
         '''
         - Header (i.e., list of column name(s)).
-        - Data (i.e., list of entries, each a list of string(s)).
+        - Entries (i.e., list of entries, each a list of string(s)).
         '''
         def INTERNAL_fromFile(f_src:FileUtils.File, delimiter=','):
             with open(str(f_src), mode='r', encoding='utf-8') as csv_file:
                 reader = csv.DictReader(csv_file, delimiter=delimiter)
                 header = reader.fieldnames
-                data = [list(row.values()) for row in reader]
-                result = [header, data]
-            return result
+                entries = [list(row.values()) for row in reader]
+                data = [header, entries]
+            return data
         
         def INTERNAL_saveAs(data, f_dst:FileUtils.File, delimiter=','):
             pass
@@ -28,13 +28,17 @@ class Format:
         List of dictionaries.
         '''
         def INTERNAL_fromFile(f_src:FileUtils.File, delimiter=','):
-            with open(str(f_src), mode='r', encoding='utf-8') as csv_file:
+            with open(str(f_src), mode='r', encoding='utf-8', newline='') as csv_file:
                 reader = csv.DictReader(csv_file, delimiter=delimiter)
-                result = [row for row in reader]
-            return result
+                data = [row for row in reader]
+            return data
 
         def INTERNAL_saveAs(data, f_dst:FileUtils.File, delimiter=','):
-            pass
+            with open(str(f_dst), mode='w', encoding='utf-8', newline='') as csv_file:
+                header = data[0].keys()
+                writer = csv.DictWriter(csv_file, fieldnames=header, delimiter=delimiter)
+                writer.writeheader()
+                writer.writerows(data)
 
 def fromFile(f_src:FileUtils.File, format=Format.ListOfDictionaries, delimiter=','):
     '''
