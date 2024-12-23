@@ -325,8 +325,7 @@ class INTERNAL_VideoProcessing:
             
             # Fetch, and extract info from result.
             result = INTERNAL_VideoProcessing.FFMPEGWrapper.queryInfo(f_src, 'QueryGeneralInfo')
-            result = result.strip()
-            result = StringUtils.Regex.replaceAll(r'\s+', ' ', result)
+            result = StringUtils.Normalize.asSentence(result)
             fields = result.split(' ')
             
             for field in fields:
@@ -344,8 +343,7 @@ class INTERNAL_VideoProcessing:
 
             # Fetch, and extract info from result.
             result = INTERNAL_VideoProcessing.FFMPEGWrapper.queryInfo(f_src, 'QueryKeyframes')
-            result = result.strip()
-            result = StringUtils.Regex.replaceAll(r'\s+', ' ', result)
+            result = StringUtils.Normalize.asSentence(result)
             resultList = result.split(' ')
             
             keyframes = [TimeUtils.Time.createFromSeconds(float(x.split(',')[0])) for x in resultList]
