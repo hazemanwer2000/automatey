@@ -12,27 +12,41 @@ class Format:
         - Header (i.e., list of column name(s)).
         - Entries (i.e., list of entries, each a list of string(s)).
         '''
+        @staticmethod
         def INTERNAL_fromFile(f_src:FileUtils.File, delimiter=','):
-            with open(str(f_src), mode='r', encoding='utf-8') as csv_file:
-                reader = csv.DictReader(csv_file, delimiter=delimiter)
-                header = reader.fieldnames
-                entries = [list(row.values()) for row in reader]
-                data = [header, entries]
-            return data
+            data = Format.ListOfDictionaries.INTERNAL_fromFile(f_src, delimiter=delimiter)
+            return Format.HeaderAndData.fromDictionaries(data)
         
+        @staticmethod
         def INTERNAL_saveAs(data, f_dst:FileUtils.File, delimiter=','):
-            pass
+            Format.ListOfDictionaries.INTERNAL_saveAs(
+                Format.HeaderAndData.toDictionaries(*data),
+                f_dst,
+                delimiter=delimiter
+            )
+        
+        @staticmethod
+        def fromDictionaries(data):
+            header = data[0].keys()
+            entries = [list(x.values()) for x in data]
+            return (header, entries)
+
+        @staticmethod
+        def toDictionaries(header, entries):
+            return dict(zip(header, entries))
 
     class ListOfDictionaries:
         '''
         List of dictionaries.
         '''
+        @staticmethod
         def INTERNAL_fromFile(f_src:FileUtils.File, delimiter=','):
             with open(str(f_src), mode='r', encoding='utf-8', newline='') as csv_file:
                 reader = csv.DictReader(csv_file, delimiter=delimiter)
                 data = [row for row in reader]
             return data
 
+        @staticmethod
         def INTERNAL_saveAs(data, f_dst:FileUtils.File, delimiter=','):
             with open(str(f_dst), mode='w', encoding='utf-8', newline='') as csv_file:
                 header = data[0].keys()
