@@ -737,6 +737,9 @@ class Widgets:
                     self.eventHandlers[GUtils.EventHandlers.TextChangeEventHandler].fcn()
 
         class EntryTable(Widget):
+            '''
+            An input entry-table.
+            '''
             
             def __init__(self, header:list):
                 self.layout = Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=0)
@@ -746,6 +749,7 @@ class Widgets:
                 self.qTableWidget = QtWidgets.QTableWidget(1, len(header))
                 self.layout.setWidget(Widget(self.qTableWidget), 0, 1)
                 # ? ? Assign header.
+                self.header = header
                 self.qTableWidget.setHorizontalHeaderLabels(header)
                 # ? ? Fix header-column, and row size.
                 qVerticalHeader = self.qTableWidget.verticalHeader()
@@ -824,20 +828,20 @@ class Widgets:
                 self.INTERNAL_setEntry(idx2, data1)
                 self.INTERNAL_setEntry(idx1, data2)
 
-            def getEntry(self, idx):
+            def getEntry(self, idx) -> dict:
                 '''
-                Get entry, as a list of string(s).
+                Get entry.
                 '''
                 columnCount = self.qTableWidget.columnCount()
                 data = []
                 for columnIdx in range(columnCount):
                     qItem = self.qTableWidget.item(idx, columnIdx)
                     data.append(qItem.text() if (qItem != None) else '')
-                return data
+                return dict(zip(self.header, data))
 
             def getEntries(self):
                 '''
-                Get a list of all entries, each a list of string(s).
+                Get a list of all entries.
                 '''
                 rowCount = self.qTableWidget.rowCount()
                 entries = []
