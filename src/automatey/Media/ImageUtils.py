@@ -7,6 +7,7 @@ import PIL.ImageEnhance
 import PIL.ImageFilter
 import imageio
 import numpy as np
+import typing
 
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
@@ -76,6 +77,27 @@ class INTERNAL_FrameProcessing:
             return imgHandler
 
     class CV2Wrapper:
+        
+        @staticmethod
+        def createByTiling(f_list:typing.List[FileUtils.File], rowCount:int, columnCount:int):
+            '''
+            Create an `Image` by tiling image(s) in a grid.
+            '''
+            
+            # ? Read image(s) from file(s).
+            imgHandlers = [cv2.imread(str(f)) for f in f_list]
+
+            # ? Tile image(s).
+            rowImgHandlers = []
+            for rowIdx in range(rowCount):
+                startIdx = rowIdx * columnCount
+                endIdx = startIdx + columnCount
+                selectedImgHandlers = imgHandlers[startIdx:endIdx]
+                rowImgHandler = cv2.hconcat(selectedImgHandlers)
+                rowImgHandlers.append(rowImgHandler)
+            tiledImgHandler = cv2.vconcat(rowImgHandlers)
+            
+            return tiledImgHandler
         
         @staticmethod
         def createFromFile(f:FileUtils.File):
@@ -302,6 +324,14 @@ class Image:
         Get CV2 representation.
         '''
         return self.imgHandler
+
+    @staticmethod
+    def createByTiling(f_list:typing.List[FileUtils.File], rows:int, columns:int):
+        '''
+        Create an `Image` by tiling image(s) in a grid.
+        '''
+        imgHandler = INTERNAL_FrameProcessing.CV2Wrapper.createByTiling(f_list, rows, columns)
+        return Image(None, INTERNAL_imgHandler=imgHandler)
 
     @staticmethod
     def INTERNAL_createFromCV2(imgHandler):
