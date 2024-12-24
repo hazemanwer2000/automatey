@@ -157,6 +157,31 @@ class File:
         self.handler.close()
         self.handler = None
 
+    def quickRead(self, mode:str):
+        '''
+        Read all, without having to open and close.
+        
+        Mode(s):
+            'b' - Binary
+            't' - Text
+        '''
+        self.openFile('r' + mode)
+        data = self.readAny()
+        self.closeFile()
+        return data
+
+    def quickWrite(self, data, mode:str):
+        '''
+        Write all, without having to open and close.
+        
+        Mode(s):
+            'b' - Binary
+            't' - Text
+        '''
+        self.openFile('w' + mode)
+        self.writeAny(data)
+        self.closeFile()
+
     def __enter__(self):
         return self
     
