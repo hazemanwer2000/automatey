@@ -209,7 +209,7 @@ class File:
         @staticmethod
         def getWorkingDirectory() -> "File":
             '''
-            Returns the working directory.
+            Returns the working directory, in *absolute* form.
             '''
             return File(os.getcwd())
         
@@ -263,13 +263,17 @@ class File:
             def modifyName(path, name=None, suffix=None, extension=None):
                 '''
                 Modify name (e.g., replace extension, add suffix).
+                
+                Note that,
+                - If `extension` is `''`, it is removed.
                 '''
                 split = os.path.split(path)
                 splitExt = os.path.splitext(split[1])
                 
                 parentDir = split[0]
                 name = name if (name != None) else (splitExt[0])
-                extension = ('.' + extension) if (extension != None) else (splitExt[1])
+                extension = ('.' + extension) if (extension != None) else splitExt[1]
+                extension = '' if (extension == '.') else extension
                 suffix = suffix if (suffix != None) else ''
                 
                 return os.path.join(parentDir, name + suffix + extension)
