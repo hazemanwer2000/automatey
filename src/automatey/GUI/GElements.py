@@ -4,6 +4,7 @@ import PyQt6.QtWidgets as QtWidgets
 import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as QtCore
 import vlc
+import typing
 
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
@@ -200,6 +201,15 @@ class Widget:
         qWidget.setLayout(layout.qLayout)
         widget = Widget(qWidget)
         return widget
+
+class CustomWidget(Widget):
+    '''
+    Can be inherited from, to implement user-defined widget(s).
+    '''
+    
+    def __init__(self, widget:Widget):
+        self.widget = widget
+        Widget.__init__(self, widget.qWidget)
 
 class Widgets:
 
@@ -1495,6 +1505,48 @@ class Widgets:
                 Get underlying renderer.
                 '''
                 return self.renderer
+
+        class FilterList(Widget):
+            
+            def __init__(self, filterOptionClassList:typing.List["FilterOption"]):
+                
+                filterOptionContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                dropDownList = Widgets.Basics.DropDownList([filterOptionClass.getName() for filterOptionClass in filterOptionClassList])
+                buttonContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                button = Widgets.Basics.Button(text='XXX')
+                buttonContainer.insertWidget(button)
+                
+                rootLayout = Layouts.GridLayout(2, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                rootLayout.setWidget(filterOptionContainer, 1, 1)
+                rootLayout.setWidget(dropDownList, 0, 1)
+                rootLayout.setRowMinimumSize(0, 0)
+                rootLayout.setColumnMinimumSize(0, 0)
+                
+                Widget.__init__(self, Widget.fromLayout(rootLayout).qWidget)
+            
+            class FilterOption(CustomWidget):
+                '''
+                (Interface) A filter option.
+                
+                Interface includes:
+                - `getName` static-method, to get the name of option.
+                - `getData` method, to collect data (abstract), and return it.
+                '''
+                def __init__(self, widget):
+                    CustomWidget.__init__(self, widget)
+                
+                def getData(self):
+                    '''
+                    (Interface) Collects data.
+                    '''
+                    return None
+
+                @staticmethod
+                def getName() -> str:
+                    '''
+                    (Interface) Get name.
+                    '''
+                    return 'Filter Option'
 
 class Application:
     '''
