@@ -801,7 +801,7 @@ class Widgets:
             '''
             
             def __init__(self, header:list):
-                self.layout = Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=0)
+                self.layout = Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
                 Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
                 
                 # ? Create table.
@@ -816,7 +816,7 @@ class Widgets:
                 qVerticalHeader.setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Fixed)
 
                 # ? Create (control-)panel.
-                self.verticalContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+                self.verticalContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
                 self.layout.setWidget(self.verticalContainer, 0, 0)
                 self.layout.setColumnMinimumSize(0, 0)
                 # ? ? Create insert button.
@@ -1273,7 +1273,7 @@ class Widgets:
             
             def __init__(self):
                 # ? Setting up root (...)
-                self.rootLayout = Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(5), 5)
+                self.rootLayout = Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), 5)
                 Widget.__init__(self, Widget.fromLayout(self.rootLayout).qWidget)
                 
                 # ? Setting-up video-renderer.
