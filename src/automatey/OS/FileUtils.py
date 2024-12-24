@@ -42,6 +42,12 @@ class File:
         '''
         return os.path.isdir(self.path)
     
+    def isEmptyDirectory(self) -> bool:
+        '''
+        Check if directory is empty.
+        '''
+        return os.path.isdir(self.path) and (len(os.listdir(self.path)) == 0)
+    
     def isFile(self) -> bool:
         '''
         Check if it exists, and is a file.
@@ -240,7 +246,7 @@ class File:
                 send2trash(str(f).replace('/', '\\'))
         
         @staticmethod
-        def replicateDirectoryStructure(srcDir, dstDir):
+        def replicateDirectoryStructure(srcDir:"File", dstDir:"File"):
             '''
             Creates all the sub-directories, recursive, of a source directory, under the destination directory.
             '''
@@ -249,6 +255,15 @@ class File:
             for subDirRelPath in resultList:
                 newSubDir = dstDir.traverseDirectory(subDirRelPath)
                 newSubDir.makeDirectory()
+
+        @staticmethod
+        def removeEmptySubDirectories(dir:"File"):
+            '''
+            Remove all the empty sub-directories, recursive.
+            '''
+            emptyDirs = dir.listDirectory(isRecursive=True, conditional=lambda f: f.isEmptyDirectory())
+            for emptyDir in emptyDirs:
+                os.rmdir(str(emptyDir))
         
         class Path:
             
