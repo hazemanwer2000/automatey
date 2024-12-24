@@ -1510,19 +1510,52 @@ class Widgets:
             
             def __init__(self, filterOptionClassList:typing.List["FilterOption"]):
                 
-                filterOptionContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
-                dropDownList = Widgets.Basics.DropDownList([filterOptionClass.getName() for filterOptionClass in filterOptionClassList])
-                buttonContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
-                button = Widgets.Basics.Button(text='XXX')
-                buttonContainer.insertWidget(button)
+                # ? Construct `FilterOptionContainer`.
+                self.filterOptionContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
                 
+                # ? Construct `DropDownList`.
+                self.dropDownList = Widgets.Basics.DropDownList([filterOptionClass.getName() for filterOptionClass in filterOptionClassList])
+                
+                # ? Construct `ButtonContainer`.
+                self.buttonContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                
+                # ? ? Create insert button.
+                self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/plus.svg'))), toolTip='Insert Entry')
+                self.insertButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_insertButton_clickEvent))
+                self.buttonContainer.insertWidget(self.insertButton)
+                # ? ? Create move-up button.
+                self.moveUpButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-up.svg'))), toolTip='Move Entry Up')
+                self.moveUpButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveUpButton_clickEvent))
+                self.buttonContainer.insertWidget(self.moveUpButton)
+                # ? ? Create move-down button.
+                self.moveDownButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-down.svg'))), toolTip='Move Entry Down')
+                self.moveDownButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveDownButton_clickEvent))
+                self.buttonContainer.insertWidget(self.moveDownButton)
+                # ? ? Create delete button.
+                self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/x.svg'))), toolTip='Delete Entry')
+                self.deleteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_deleteButton_clickEvent))
+                self.buttonContainer.insertWidget(self.deleteButton)
+                
+                # ? Construct root layout.
                 rootLayout = Layouts.GridLayout(2, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
-                rootLayout.setWidget(filterOptionContainer, 1, 1)
-                rootLayout.setWidget(dropDownList, 0, 1)
+                rootLayout.setWidget(self.filterOptionContainer, 1, 1)
+                rootLayout.setWidget(self.dropDownList, 0, 1)
+                rootLayout.setWidget(self.buttonContainer, 0, 0, rowSpan=2)
                 rootLayout.setRowMinimumSize(0, 0)
                 rootLayout.setColumnMinimumSize(0, 0)
-                
                 Widget.__init__(self, Widget.fromLayout(rootLayout).qWidget)
+                
+            def INTERNAL_insertButton_clickEvent(self):
+                pass
+            
+            def INTERNAL_moveUpButton_clickEvent(self):
+                pass
+            
+            def INTERNAL_moveDownButton_clickEvent(self):
+                pass
+            
+            def INTERNAL_deleteButton_clickEvent(self):
+                pass
             
             class FilterOption(CustomWidget):
                 '''
