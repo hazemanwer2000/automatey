@@ -101,6 +101,9 @@ class Layouts:
                                     elementMargin.right,
                                     elementMargin.bottom)
             self.qLayout.setSpacing(elementSpacing)
+            
+            # ? Maintain widget list.
+            self.widgetList = []
 
         HorizontalAlignment2AlignmentFlag = {
             AbstractGraphics.Alignment.Horizontal.Left: QtCore.Qt.AlignmentFlag.AlignLeft,
@@ -115,6 +118,9 @@ class Layouts:
             self.qLayout.insertWidget(idx, 
                                       widget.qWidget,
                                       alignment=Layouts.VerticalLayout.HorizontalAlignment2AlignmentFlag[alignment])
+            
+            # ? Update widget list.
+            self.widgetList.insert((idx if (idx != -1) else self.getCount()), widget)
 
         def removeWidgetAtIndex(self, idx=-1):
             '''
@@ -123,6 +129,9 @@ class Layouts:
             if idx == -1:
                 idx = self.qLayout.count() - 1
             self.removeWidget(self.qLayout.itemAt(idx).widget())
+            
+            # ? Update widget list.
+            self.widgetList.pop(idx)
 
         def removeWidget(self, widget):
             '''
@@ -130,12 +139,21 @@ class Layouts:
             '''
             self.qLayout.removeWidget(widget)
             widget.setParent(None)
+
+            # ? Update widget list.
+            self.widgetList.remove(widget)
         
         def getCount(self):
             '''
             Get number of widget(s).
             '''
             return self.qLayout.count()
+
+        def getWidgets(self):
+            '''
+            Get all widget(s), ordered.
+            '''
+            return self.widgetList
 
     class HorizontalLayout(Layout):
         '''
