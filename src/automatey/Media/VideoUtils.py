@@ -703,8 +703,6 @@ class INTERNAL_VideoProcessing:
                 newCommandList, f_finalTmpDst = actionProcessor(f_finalTmpDst, f_tmpBase, action, generalInfo)
                 commandList += newCommandList
             
-            pprint(commandList, width=400)
-            
             try:
                 # Execute command-list.
                 INTERNAL_VideoProcessing.FFMPEGWrapper.executeCommands(commandList)
