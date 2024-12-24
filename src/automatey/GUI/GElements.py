@@ -1506,19 +1506,19 @@ class Widgets:
                 # ? ? Create insert button.
                 self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/plus.svg'))), toolTip='Insert Entry')
                 self.insertButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_insertButton_clickEvent))
-                self.buttonContainer.insertWidget(self.insertButton)
+                self.buttonContainer.getLayout().insertWidget(self.insertButton)
                 # ? ? Create move-up button.
                 self.moveUpButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-up.svg'))), toolTip='Move Entry Up')
                 self.moveUpButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveUpButton_clickEvent))
-                self.buttonContainer.insertWidget(self.moveUpButton)
+                self.buttonContainer.getLayout().insertWidget(self.moveUpButton)
                 # ? ? Create move-down button.
                 self.moveDownButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-down.svg'))), toolTip='Move Entry Down')
                 self.moveDownButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveDownButton_clickEvent))
-                self.buttonContainer.insertWidget(self.moveDownButton)
+                self.buttonContainer.getLayout().insertWidget(self.moveDownButton)
                 # ? ? Create delete button.
                 self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/x.svg'))), toolTip='Delete Entry')
                 self.deleteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_deleteButton_clickEvent))
-                self.buttonContainer.insertWidget(self.deleteButton)
+                self.buttonContainer.getLayout().insertWidget(self.deleteButton)
                 
                 # ? Construct root layout.
                 rootLayout = Layouts.GridLayout(2, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
@@ -1532,8 +1532,9 @@ class Widgets:
             def INTERNAL_insertButton_clickEvent(self):
                 selectedIdx = self.dropDownList.getSelectedIndex()
                 newFilterOption = self.filterOptionClassList[selectedIdx]()
-                self.filterOptionContainer.insertWidget(Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator(newFilterOption),
-                                                        alignment=AbstractGraphics.Alignment.Horizontal.Left)
+                newFilterOptionDec = Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator(newFilterOption)
+                newFilterOptionDec.selectionNotificationFcn = self.INTERNAL_filterOptDec_selectionNotification
+                self.filterOptionContainer.getLayout().insertWidget(newFilterOptionDec, alignment=AbstractGraphics.Alignment.Horizontal.Left)
             
             def INTERNAL_moveUpButton_clickEvent(self):
                 pass
@@ -1544,6 +1545,11 @@ class Widgets:
             def INTERNAL_deleteButton_clickEvent(self):
                 pass
             
+            def INTERNAL_filterOptDec_selectionNotification(self, selectedfilterOptDec:"Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator"):
+                for filterOptDec in self.filterOptionContainer.getLayout().getWidgets():
+                    filterOptDec.deselect()
+                selectedfilterOptDec.select()
+
             class FilterOption(CustomWidget):
                 '''
                 (Interface) A filter option.
@@ -1570,12 +1576,20 @@ class Widgets:
                 
             class INTERNAL_FilterOptionDecorator(Widget):
                 
-                def __init__(self, filterOption):
+                Constants = {
+                    'color' : {
+                        'de-selected' : ColorUtils.Colors.RED,
+                        'selected' : ColorUtils.Colors.GREEN,
+                    }
+                }
+                
+                def __init__(self,
+                             filterOption:"Widgets.Complex.FilterList.FilterOption"):
                     
                     self.filterOption = filterOption
                     
                     # ? Setup color block (i.e., selector).
-                    self.colorBlock = Widgets.Basics.ColorBlock(ColorUtils.Colors.RED)
+                    self.colorBlock = Widgets.Basics.ColorBlock(__class__.Constants['color']['de-selected'])
                     
                     # ? ? Setup root layout.
                     self.layout = Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
@@ -1587,8 +1601,18 @@ class Widgets:
                     # ? Setup event-handler(s).
                     self.colorBlock.qWidget.mousePressEventFcn = self.INTERNAL_colorBlock_clickEvent
                     
+                    # ? Setup registerable notification(s).
+                    self.selectionNotificationFcn = None
+                    
                 def INTERNAL_colorBlock_clickEvent(self, event):
-                    self.colorBlock.setColor(ColorUtils.Colors.GREEN)
+                    if self.selectionNotificationFcn != None:
+                        self.selectionNotificationFcn(self)
+                
+                def select(self):
+                    self.colorBlock.setColor(__class__.Constants['color']['selected'])
+                    
+                def deselect(self):
+                    self.colorBlock.setColor(__class__.Constants['color']['de-selected'])
 
 class Application:
     '''
