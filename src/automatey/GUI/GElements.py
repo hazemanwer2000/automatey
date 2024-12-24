@@ -528,7 +528,7 @@ class Widgets:
             A list of items.
             '''
             
-            def __init__(self, itemList, isMultiSelection=False):
+            def __init__(self, itemList, isMultiSelection=False, isDragNDrop=False):
                 self.qWidget = QtWidgets.QListWidget()
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
@@ -537,6 +537,9 @@ class Widgets:
                 
                 if isMultiSelection:
                     self.qWidget.setSelectionMode(self.qWidget.SelectionMode.MultiSelection)
+                
+                if isDragNDrop:
+                    self.qWidget.setDragDropMode(QtWidgets.QListWidget.DragDropMode.InternalMove)
                 
                 # PyQt6: Enforce that the scroll-bar is always present.
                 self.qWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
@@ -562,6 +565,21 @@ class Widgets:
                 Get index of current item. If none are selected, `-1` is returned.
                 '''
                 return self.qWidget.currentRow()
+
+            def getAllItems(self):
+                '''
+                Get all item(s), ordered.
+                '''
+                items = []
+                for i in range(self.getCount()):
+                    items.append(self.qWidget.item(i).text())
+                return items
+
+            def getCount(self):
+                '''
+                Get number of items.
+                '''
+                return self.qWidget.count()
 
             def insert(self, item, index=-1):
                 '''
