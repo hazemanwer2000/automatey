@@ -325,29 +325,11 @@ class Widgets:
                 self.verticalLayout = Layouts.VerticalLayout(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=elementSpacing)
                 self.gridLayout.setWidget(Widget.fromLayout(self.verticalLayout), 0, 0)
 
-            def insertWidget(self, widget, idx=-1, alignment=AbstractGraphics.Alignment.Horizontal.Center):
+            def getLayout(self) -> Layouts.VerticalLayout:
                 '''
-                Insert widget at index.
+                Get underlying layout.
                 '''
-                self.verticalLayout.insertWidget(widget, idx, alignment)
-
-            def removeWidgetAtIndex(self, idx=-1):
-                '''
-                Remove widget at index.
-                '''
-                self.verticalLayout.removeWidgetAtIndex(idx)
-
-            def removeWidget(self, widget):
-                '''
-                Remove widget.
-                '''
-                self.verticalLayout.removeWidget(widget)
-
-            def getCount(self):
-                '''
-                Get number of widget(s).
-                '''
-                return self.verticalLayout.getCount()
+                return self.verticalLayout
 
         class HorizontalContainer(Widget):
             '''
@@ -366,29 +348,11 @@ class Widgets:
                 self.horizontalLayout = Layouts.HorizontalLayout(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=elementSpacing)
                 self.gridLayout.setWidget(Widget.fromLayout(self.horizontalLayout), 0, 0)
 
-            def insertWidget(self, widget, idx=-1):
+            def getLayout(self) -> Layouts.HorizontalLayout:
                 '''
-                Insert widget at index.
+                Get underlying layout.
                 '''
-                self.horizontalLayout.insertWidget(widget, idx)
-
-            def removeWidgetAtIndex(self, idx=-1):
-                '''
-                Remove widget at index.
-                '''
-                self.horizontalLayout.removeWidgetAtIndex(idx)
-
-            def removeWidget(self, widget):
-                '''
-                Remove widget.
-                '''
-                self.horizontalLayout.removeWidget(widget)
-
-            def getCount(self):
-                '''
-                Get number of widget(s).
-                '''
-                return self.verticalLayout.getCount()
+                return self.horizontalLayout
 
         class TabContainer(Widget, INTERNAL.EventManager):
             '''
@@ -850,19 +814,19 @@ class Widgets:
                 # ? ? Create insert button.
                 self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/plus.svg'))), toolTip='Insert Entry')
                 self.insertButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_insertButton_clickEvent))
-                self.verticalContainer.insertWidget(self.insertButton)
+                self.verticalContainer.getLayout().insertWidget(self.insertButton)
                 # ? ? Create move-up button.
                 self.moveUpButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-up.svg'))), toolTip='Move Entry Up')
                 self.moveUpButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveUpButton_clickEvent))
-                self.verticalContainer.insertWidget(self.moveUpButton)
+                self.verticalContainer.getLayout().insertWidget(self.moveUpButton)
                 # ? ? Create move-down button.
                 self.moveDownButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-down.svg'))), toolTip='Move Entry Down')
                 self.moveDownButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveDownButton_clickEvent))
-                self.verticalContainer.insertWidget(self.moveDownButton)
+                self.verticalContainer.getLayout().insertWidget(self.moveDownButton)
                 # ? ? Create delete button.
                 self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/x.svg'))), toolTip='Delete Entry')
                 self.deleteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_deleteButton_clickEvent))
-                self.verticalContainer.insertWidget(self.deleteButton)
+                self.verticalContainer.getLayout().insertWidget(self.deleteButton)
             
             def INTERNAL_insertButton_clickEvent(self):
                 currentRowIdx = self.qTableWidget.currentRow()
