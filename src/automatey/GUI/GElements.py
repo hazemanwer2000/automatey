@@ -529,7 +529,7 @@ class Widgets:
             '''
             
             def __init__(self, itemList, isMultiSelection=False, isDragNDrop=False):
-                self.qWidget = QtWidgets.QListWidget()
+                self.qWidget = PyQt6Wrapper.QListWidget()
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
                 
@@ -546,6 +546,11 @@ class Widgets:
                 
                 # ? Event-handlers.
                 self.qWidget.itemSelectionChanged.connect(self.INTERNAL_itemSelectionChange)
+                self.qWidget.dropEventFcn = self.INTERNAL_dropEvent
+            
+            def INTERNAL_dropEvent(self, event):
+                if GUtils.EventHandlers.OrderChangeEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.OrderChangeEventHandler].fcn()
             
             def getAllSelected(self):
                 '''

@@ -128,6 +128,9 @@ class EventHandlers:
     class TextChangeEventHandler(EventHandler):
         pass
     
+    class OrderChangeEventHandler(EventHandler):
+        pass
+    
     class KeyEventHandler(EventHandler):
         
         def __init__(self, key2FcnDict:dict):

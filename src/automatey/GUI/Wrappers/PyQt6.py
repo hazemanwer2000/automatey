@@ -102,6 +102,17 @@ class QPlainTextEdit(QtWidgets.QPlainTextEdit):
             if (self.keyPressEventFcn(event) != 0):
                 QtWidgets.QPlainTextEdit.keyPressEvent(self, event)
 
+class QListWidget(QtWidgets.QListWidget):
+
+    def __init__(self):
+        QtWidgets.QListWidget.__init__(self)
+        self.dropEventFcn = None
+
+    def dropEvent(self, event):
+        if self.dropEventFcn != None:
+            self.dropEventFcn(event)
+        QtWidgets.QListWidget.dropEvent(self, event)
+
 class QWidget(QtWidgets.QWidget):
     
     def __init__(self):
