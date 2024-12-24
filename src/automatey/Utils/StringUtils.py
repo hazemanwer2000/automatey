@@ -37,8 +37,13 @@ class Normalize:
     @staticmethod
     def asParagraph(text:str):
         '''
-        Strip, and remove all lines that are empty, or with white-space character(s) only.
+        Remove all lines that are empty, or with white-space character(s) only, then normalize each line as sentence.
         '''
+        # ? Remove all lines that are empty.
         strippedText = text.strip()
         normalizedText = Regex.replaceAll(r'\n\s*\n', '\n', strippedText)
-        return normalizedText
+        # ? Strip each line.
+        lines = normalizedText.split('\n')
+        for i in range(len(lines)):
+            lines[i] = Normalize.asSentence(lines[i])
+        return '\n'.join(lines)
