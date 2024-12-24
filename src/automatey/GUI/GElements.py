@@ -671,7 +671,7 @@ class Widgets:
                 '''
                 return self.qWidget.value()
 
-        class DropDownList(QtWidgets.QComboBox, INTERNAL.EventManager):
+        class DropDownList(Widget, INTERNAL.EventManager):
             '''
             A drop-down list.
             '''
@@ -691,13 +691,13 @@ class Widgets:
                 '''
                 Get current item.
                 '''
-                return self.currentText()
+                return self.qWidget.currentText()
             
             def getSelectedIndex(self):
                 '''
                 Get index of the current item.
                 '''
-                return self.currentIndex()
+                return self.qWidget.currentIndex()
 
             def INTERNAL_currentIndexChanged(self, newIndex):
                 if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
@@ -1510,6 +1510,8 @@ class Widgets:
             
             def __init__(self, filterOptionClassList:typing.List["FilterOption"]):
                 
+                self.filterOptionClassList = filterOptionClassList
+                
                 # ? Construct `FilterOptionContainer`.
                 self.filterOptionContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
                 
@@ -1546,7 +1548,10 @@ class Widgets:
                 Widget.__init__(self, Widget.fromLayout(rootLayout).qWidget)
                 
             def INTERNAL_insertButton_clickEvent(self):
-                pass
+                selectedIdx = self.dropDownList.getSelectedIndex()
+                newFilterOption = self.filterOptionClassList[selectedIdx]()
+                self.filterOptionContainer.insertWidget(Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator(newFilterOption),
+                                                        alignment=AbstractGraphics.Alignment.Horizontal.Left)
             
             def INTERNAL_moveUpButton_clickEvent(self):
                 pass
@@ -1580,6 +1585,28 @@ class Widgets:
                     (Interface) Get name.
                     '''
                     return 'Filter Option'
+                
+            class INTERNAL_FilterOptionDecorator(Widget):
+                
+                def __init__(self, filterOption):
+                    
+                    self.filterOption = filterOption
+                    
+                    # ? Setup color block (i.e., selector).
+                    self.colorBlock = Widgets.Basics.ColorBlock(ColorUtils.Colors.RED)
+                    
+                    # ? ? Setup root layout.
+                    self.layout = Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                    self.layout.setWidget(self.colorBlock, 0, 0)
+                    self.layout.setWidget(self.filterOption, 0, 1)
+                    self.layout.setColumnMinimumSize(0, 10)
+                    Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
+                    
+                    # ? Setup event-handler(s).
+                    self.colorBlock.qWidget.mousePressEventFcn = self.INTERNAL_colorBlock_clickEvent
+                    
+                def INTERNAL_colorBlock_clickEvent(self, event):
+                    self.colorBlock.setColor(ColorUtils.Colors.GREEN)
 
 class Application:
     '''
