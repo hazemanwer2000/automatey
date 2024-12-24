@@ -1580,6 +1580,31 @@ class StandardDialog:
             colorSelected = ColorUtils.Color.fromHEX(colorDialog.selectedColor().name()[1:])
         return colorSelected
 
+    class Message:
+        
+        class Announce:
+            '''
+            Announce information to the user.
+            '''
+            
+            def INTERNAL_Announce(title:str, msg:str, qIcon):
+                qMsgBox = QtWidgets.QMessageBox(None)
+                qMsgBox.setWindowTitle(title)
+                qMsgBox.setText(msg)
+                qMsgBox.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
+                qMsgBox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+                qMsgBox.setIcon(qIcon)
+                qMsgBox.exec()
+        
+            def Error(msg:str):
+                StandardDialog.Message.Announce.INTERNAL_Announce('Error', msg, QtWidgets.QMessageBox.Icon.Critical)
+
+            def Warning(msg:str):
+                StandardDialog.Message.Announce.INTERNAL_Announce('Warning', msg, QtWidgets.QMessageBox.Icon.Warning)
+
+            def Information(msg:str):
+                StandardDialog.Message.Announce.INTERNAL_Announce('Information', msg, QtWidgets.QMessageBox.Icon.Information)
+
     class BackgroundActivity:
         '''
         Handles dialog, meant to block user until a background-activity completes.
