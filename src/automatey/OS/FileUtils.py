@@ -207,7 +207,14 @@ class File:
     class Utils:
         
         @staticmethod
-        def getTemporaryDirectory():
+        def getWorkingDirectory() -> "File":
+            '''
+            Returns the working directory.
+            '''
+            return File(os.getcwd())
+        
+        @staticmethod
+        def getTemporaryDirectory() -> "File":
             '''
             Returns a *File* object, of the temporary directory.
             '''
