@@ -137,8 +137,8 @@ class Layouts:
             '''
             Remove widget.
             '''
-            self.qLayout.removeWidget(widget)
-            widget.setParent(None)
+            self.qLayout.removeWidget(widget.qWidget)
+            widget.qWidget.setParent(None)
 
             # ? Update widget list.
             self.widgetList.remove(widget)
@@ -1528,6 +1528,9 @@ class Widgets:
                 rootLayout.setRowMinimumSize(0, 0)
                 rootLayout.setColumnMinimumSize(0, 0)
                 Widget.__init__(self, Widget.fromLayout(rootLayout).qWidget)
+
+                # ? Track currently selected filter-option.
+                self.selectedFilterOptDec = None
                 
             def INTERNAL_insertButton_clickEvent(self):
                 selectedIdx = self.dropDownList.getSelectedIndex()
@@ -1543,12 +1546,21 @@ class Widgets:
                 pass
             
             def INTERNAL_deleteButton_clickEvent(self):
-                pass
+                
+                if self.selectedFilterOptDec != None:
+                    self.filterOptionContainer.getLayout().removeWidget(self.selectedFilterOptDec)
+                    self.selectedFilterOptDec.discard()
+                    self.selectedFilterOptDec = None
             
-            def INTERNAL_filterOptDec_selectionNotification(self, selectedfilterOptDec:"Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator"):
+            def INTERNAL_filterOptDec_selectionNotification(self, selectedFilterOptDec:"Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator"):
+                
+                # ? De-select all, except (...)
                 for filterOptDec in self.filterOptionContainer.getLayout().getWidgets():
                     filterOptDec.deselect()
-                selectedfilterOptDec.select()
+                selectedFilterOptDec.select()
+
+                # ? Track currently selected filter-option.
+                self.selectedFilterOptDec = selectedFilterOptDec
 
             class FilterOption(CustomWidget):
                 '''
