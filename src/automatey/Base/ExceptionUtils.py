@@ -1,12 +1,4 @@
 
-import traceback
-
-def getStackTrace() -> str:
-    '''
-    Must be called from an `except` context.
-    '''
-    return traceback.format_exc()
-
 class Error(Exception):
     '''
     (Abstract) Base-class for all exception(s).
