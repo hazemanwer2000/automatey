@@ -1,6 +1,7 @@
 
 # Internal Libraries
 import automatey.OS.FileUtils as FileUtils
+import automatey.Base.ExceptionUtils as ExceptionUtils
 
 # External Libraries
 import csv
@@ -58,4 +59,6 @@ def saveAs(data, f_dst:FileUtils.File, format=Format.ListOfDictionaries, delimit
     Note that,
     - Format used by default is `ListOfDictionaries`.
     '''
+    if f_dst.isExists():
+        raise ExceptionUtils.ValidationError('Destination file must not exist.')
     return Format.ListOfDictionaries.INTERNAL_saveAs(data, f_dst, delimiter=delimiter)

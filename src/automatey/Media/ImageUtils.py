@@ -13,6 +13,7 @@ import typing
 import automatey.OS.FileUtils as FileUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.Base.ColorUtils as ColorUtils
+import automatey.Base.ExceptionUtils as ExceptionUtils
 
 class INTERNAL_FrameProcessing:
     '''
@@ -471,6 +472,8 @@ class Image:
         '''
         Save image, into a file.
         '''
+        if f.isExists():
+            raise ExceptionUtils.ValidationError('Destination file must not exist.')
         INTERNAL_FrameProcessing.CV2Wrapper.saveAs(self.imgHandler, f)
 
     class Utils:
@@ -685,6 +688,9 @@ class GIF:
         '''
         Save into file.
         '''
+        if f.isExists():
+            raise ExceptionUtils.ValidationError('Destination file must not exist.')
+        
         if fps == None:
             fps = self.fps
         

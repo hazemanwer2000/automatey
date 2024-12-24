@@ -1,6 +1,7 @@
 
 # Internal Libraries
 import automatey.OS.FileUtils as FileUtils
+import automatey.Base.ExceptionUtils as ExceptionUtils
 
 # External Libraries
 import json
@@ -17,6 +18,9 @@ def saveAs(data, f_dst:FileUtils.File, isMinified=False, indent:int=4):
     '''
     Write JSON data to file, from either `dict` or `list`.
     '''
+    if f_dst.isExists():
+        raise ExceptionUtils.ValidationError('Destination file must not exist.')
+    
     with open(str(f_dst), mode='w', encoding='utf-8') as json_file:
         kwargs = {}
         if isMinified:

@@ -2,6 +2,7 @@
 # Internal libraries
 import automatey.Utils.StringUtils as StringUtils
 import automatey.OS.FileUtils as FileUtils
+import automatey.Base.ExceptionUtils as ExceptionUtils
 
 # Standard libraries
 import subprocess
@@ -74,6 +75,9 @@ class FileTemplate:
             '''
             Save to file.
             '''
+            if f.isExists():
+                raise ExceptionUtils.ValidationError('Destination file must not exist.')
+
             with f.openFile('wt') as f_opened:
                 f_opened.writeAny(str(self))
     

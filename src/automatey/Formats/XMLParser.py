@@ -2,6 +2,7 @@
 # Internal Libraries
 import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.StringUtils as StringUtils
+import automatey.Base.ExceptionUtils as ExceptionUtils
 
 # External Libraries
 import typing
@@ -39,6 +40,9 @@ class XML:
         '''
         Save as XML file.
         '''
+        if f.isExists():
+            raise ExceptionUtils.ValidationError('Destination file must not exist.')
+
         with f.openFile('wt') as handler:
             handler.writeAny(self.toString(indent=indent))
     

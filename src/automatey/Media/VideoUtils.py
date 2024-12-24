@@ -772,6 +772,8 @@ class Video:
         '''
         Processes registered action(s), and save end-file.
         '''
+        if f_dst.isExists():
+            raise ExceptionUtils.ValidationError('Destination file must not exist.')
         INTERNAL_VideoProcessing.FFMPEGWrapper.processActions(self.f_src, f_dst, self.actions, self.generalInfo)
     
     def clearActions(self):
@@ -784,10 +786,10 @@ class Video:
         '''
         Generate thumb-nails at equi-distant interval(s).
         '''
-        
-        # ? Create directory.
         if f_dstDir.isExists():
             raise ExceptionUtils.ValidationError('Destination directory must not exist.')
+        
+        # ? Create directory.
         f_dstDir.makeDirectory()
         
         # ? Generate thumbnail(s).
@@ -802,8 +804,6 @@ class Video:
         '''
         Generate thumb-nail at a specific time-stamp.
         '''
-        
-        # ? Create directory.
         if f_dst.isExists():
             raise ExceptionUtils.ValidationError('Destination file must not exist.')
 
