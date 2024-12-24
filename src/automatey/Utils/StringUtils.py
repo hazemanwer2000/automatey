@@ -35,15 +35,22 @@ class Normalize:
         return normalizedText
 
     @staticmethod
-    def asParagraph(text:str):
+    def asParagraph(text:str, INTERNAL_newLine:str='\n'):
         '''
         Remove all lines that are empty, or with white-space character(s) only, then normalize each line as sentence.
         '''
         # ? Remove all lines that are empty.
         strippedText = text.strip()
-        normalizedText = Regex.replaceAll(r'\n\s*\n', '\n', strippedText)
+        normalizedText = Regex.replaceAll(r'\n\s*\n', INTERNAL_newLine, strippedText)
         # ? Strip each line.
         lines = normalizedText.split('\n')
         for i in range(len(lines)):
             lines[i] = Normalize.asSentence(lines[i])
         return '\n'.join(lines)
+
+    @staticmethod
+    def asParagraphs(text:str):
+        '''
+        Similar to `asParagraph`, but consecutive empty-line(s) are replaced with a single empty-line.
+        '''
+        return Normalize.asParagraph(text, INTERNAL_newLine='\n\n')
