@@ -1533,11 +1533,34 @@ class Widgets:
                 self.selectedFilterOptDec = None
                 
             def INTERNAL_insertButton_clickEvent(self):
-                selectedIdx = self.dropDownList.getSelectedIndex()
-                newFilterOption = self.filterOptionClassList[selectedIdx]()
+                
+                filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                
+                # ? Create filter-option.
+                selectedClassIdx = self.dropDownList.getSelectedIndex()
+                newFilterOption = self.filterOptionClassList[selectedClassIdx]()
                 newFilterOptionDec = Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator(newFilterOption)
                 newFilterOptionDec.selectionNotificationFcn = self.INTERNAL_filterOptDec_selectionNotification
-                self.filterOptionContainer.getLayout().insertWidget(newFilterOptionDec, alignment=AbstractGraphics.Alignment.Horizontal.Left)
+                
+                # ? Insert filter-option.
+                insertionIdx = -1
+                
+                # ? ? If there's a selected option (...)
+                if self.selectedFilterOptDec != None:    
+                    
+                    # ? ? Insertion occurs after selected option.
+                    selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
+                    insertionIdx = selectedIdx + 1
+                    
+                    # ? ? De-select currently selected option.
+                    self.selectedFilterOptDec.deselect()
+                
+                # ? Select filter option, and update selection.
+                self.selectedFilterOptDec = newFilterOptionDec
+                newFilterOptionDec.select()
+                
+                # ? Insert option.
+                self.filterOptionContainer.getLayout().insertWidget(newFilterOptionDec, idx=insertionIdx, alignment=AbstractGraphics.Alignment.Horizontal.Left)
             
             def INTERNAL_moveUpButton_clickEvent(self):
                 pass
@@ -1554,7 +1577,7 @@ class Widgets:
                     count = len(filterOptDecList)
                     
                     # ? Find next filter-option. 
-                    nextFilterOptDecIdx = None
+                    nextFilterOptDec = None 
                     
                     # ? ? Case: If current option(s) are more than one.
                     if count > 1:
@@ -1563,10 +1586,6 @@ class Widgets:
                             nextFilterOptDecIdx = selectedIdx - 1
                         else:
                             nextFilterOptDecIdx = selectedIdx + 1
-
-                    # ? ? (...)
-                    nextFilterOptDec = None 
-                    if nextFilterOptDecIdx != None:
                         nextFilterOptDec = filterOptDecList[nextFilterOptDecIdx]
 
                     # ? Discard selected filter-option.
