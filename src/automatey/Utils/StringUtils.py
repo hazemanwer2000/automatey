@@ -59,6 +59,6 @@ class Split:
     
     def atWords(text:str):
         '''
-        Given a concatenated string of words (e.g., `AsAnExample`), returns a list of words (e.g., `['As', 'An', 'Example']`).
+        Given a concatenated string of words (e.g., `GIFForExample`), returns a list of words (e.g., `['GIF', 'For', 'Example']`).
         '''
-        return Regex.findAll(r'[A-Z][^A-Z]*', text)
+        return Regex.findAll(r'[A-Z]+(?=[A-Z][a-z]|$)|[A-Z][a-z]*', text)

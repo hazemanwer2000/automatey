@@ -105,7 +105,7 @@ class Modifiers:
                 
         class Sharpen(INTERNAL_Utils.Filter):
             '''
-            Pixelate.
+            Sharpen.
             
             Value(s) are factor(s) (i.e., '1.0' has no effect).
             
@@ -149,7 +149,7 @@ class Modifiers:
             
             If either set to '-1', aspect ratio is preserved.
             '''
-            def __init__(self, width, height):
+            def __init__(self, width=-1, height=-1):
                 self.width = width
                 self.height = height
 
