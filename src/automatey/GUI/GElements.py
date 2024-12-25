@@ -942,6 +942,23 @@ class Widgets:
                 '''
                 return self.contextInfo
 
+            def setContextMenu(self, menu:GUtils.Menu):
+                '''
+                Set context menu.
+                
+                Note that, it is shown only if on a cell, and cell is not empty.
+                '''
+                self.qContextMenu = QtWidgets.QMenu()
+                menu.INTERNAL_instantiate(self.qContextMenu, self.qWidget)
+
+            def getCell(self, rowIdx:int, colIdx:int):
+                '''
+                Get cell.
+                '''
+                qItem = self.qTableWidget.item(rowIdx, colIdx)
+                text = qItem.text() if (qItem != None) else ''
+                return text
+
             def getEntry(self, idx) -> dict:
                 '''
                 Get entry.
