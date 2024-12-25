@@ -235,6 +235,19 @@ class CustomWidget(Widget):
 class Widgets:
 
     class Decorators:
+        
+        class Margin(Widget):
+            '''
+            Adds a margin around the specified element.
+            '''
+            
+            def __init__(self, widget, elementMargin:AbstractGraphics.Margin):
+                Widget.__init__(self, QtWidgets.QWidget())
+                
+                # ? Setting element.
+                layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
+                layout.setWidget(widget, 0, 0, 1, 1)
+                self.qWidget.setLayout(layout.qLayout)
 
         class Outline(Widget):
             '''
@@ -258,13 +271,13 @@ class Widgets:
             Encapsulates any element, to allow for vertical/horizontal scrolling.
             '''
             
-            def __init__(self, widget, isVerticalScrollBar=False, isHorizontalScrollBar=False):
+            def __init__(self, widget, elementMargin:AbstractGraphics.Margin, isVerticalScrollBar=False, isHorizontalScrollBar=False):
                 self.qWidget = QtWidgets.QScrollArea()
                 Widget.__init__(self, self.qWidget)
                 
                 # ? Set element.
                 self.qWidget.setWidgetResizable(True)
-                self.qWidget.setWidget(widget.qWidget)
+                self.qWidget.setWidget(Widgets.Decorators.Margin(widget, elementMargin=elementMargin).qWidget)
                 
                 # ? Specify if vertical/horizontal scrolling is always on.
                 
