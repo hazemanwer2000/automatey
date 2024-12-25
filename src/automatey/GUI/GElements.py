@@ -1531,6 +1531,13 @@ class Widgets:
 
                 # ? Track currently selected filter-option.
                 self.selectedFilterOptDec = None
+
+            def getData(self):
+                '''
+                Collect data, as a list.
+                '''
+                filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                return [filterOptDec.filterOption.getData() for filterOptDec in filterOptDecList]
                 
             def INTERNAL_insertButton_clickEvent(self):
                 
@@ -1662,8 +1669,7 @@ class Widgets:
                     }
                 }
                 
-                def __init__(self,
-                             filterOption:"Widgets.Complex.FilterList.FilterOption"):
+                def __init__(self, filterOption:"Widgets.Complex.FilterList.FilterOption"):
                     
                     self.filterOption = filterOption
                     
