@@ -1546,7 +1546,7 @@ class Widgets:
                 insertionIdx = -1
                 
                 # ? ? If there's a selected option (...)
-                if self.selectedFilterOptDec != None:    
+                if self.selectedFilterOptDec != None:
                     
                     # ? ? Insertion occurs after selected option.
                     selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
@@ -1563,10 +1563,31 @@ class Widgets:
                 self.filterOptionContainer.getLayout().insertWidget(newFilterOptionDec, idx=insertionIdx, alignment=AbstractGraphics.Alignment.Horizontal.Left)
             
             def INTERNAL_moveUpButton_clickEvent(self):
-                pass
+                
+                if self.selectedFilterOptDec != None:
+                    
+                    filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                    selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
+                    
+                    # ? Case: Selected index is not zero.
+                    if selectedIdx > 0:
+                        # ? ? Move filter-option up.
+                        self.filterOptionContainer.getLayout().removeWidget(self.selectedFilterOptDec)
+                        self.filterOptionContainer.getLayout().insertWidget(self.selectedFilterOptDec, idx=(selectedIdx - 1), alignment=AbstractGraphics.Alignment.Horizontal.Left)
             
             def INTERNAL_moveDownButton_clickEvent(self):
-                pass
+
+                if self.selectedFilterOptDec != None:
+                    
+                    filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                    selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
+                    count = len(filterOptDecList)
+                    
+                    # ? Case: Selected index is not zero.
+                    if selectedIdx < (count - 1):
+                        # ? ? Move filter-option down.
+                        self.filterOptionContainer.getLayout().removeWidget(self.selectedFilterOptDec)
+                        self.filterOptionContainer.getLayout().insertWidget(self.selectedFilterOptDec, idx=(selectedIdx + 1), alignment=AbstractGraphics.Alignment.Horizontal.Left)
             
             def INTERNAL_deleteButton_clickEvent(self):
                 
