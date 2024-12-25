@@ -1523,8 +1523,12 @@ class Widgets:
 
         class FilterList(Widget):
             
-            def __init__(self, filterOptionClassList:typing.List["FilterOption"]):
+            def __init__(self, filterOptionClassList:typing.List["FilterOption"],
+                               selectedColor:ColorUtils.Color=ColorUtils.Colors.BLACK,
+                               deselectedColor:ColorUtils.Color=ColorUtils.Colors.GREY):
                 
+                self.selectedColor = selectedColor
+                self.deselectedColor = deselectedColor
                 self.filterOptionClassList = filterOptionClassList
                 
                 # ? Construct `FilterOptionContainer`.
@@ -1588,7 +1592,9 @@ class Widgets:
                 # ? Create filter-option.
                 selectedClassIdx = self.dropDownList.getSelectedIndex()
                 newFilterOption = self.filterOptionClassList[selectedClassIdx]()
-                newFilterOptionDec = Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator(newFilterOption)
+                newFilterOptionDec = Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator(newFilterOption,
+                                                                                               selectedColor=self.selectedColor,
+                                                                                               deselectedColor=self.deselectedColor)
                 newFilterOptionDec.selectionNotificationFcn = self.INTERNAL_filterOptDec_selectionNotification
                 
                 # ? Insert filter-option.
@@ -1707,19 +1713,16 @@ class Widgets:
                 
             class INTERNAL_FilterOptionDecorator(Widget):
                 
-                Constants = {
-                    'color' : {
-                        'de-selected' : ColorUtils.Colors.RED,
-                        'selected' : ColorUtils.Colors.GREEN,
-                    }
-                }
-                
-                def __init__(self, filterOption:"Widgets.Complex.FilterList.FilterOption"):
+                def __init__(self, filterOption:"Widgets.Complex.FilterList.FilterOption",
+                                   selectedColor:ColorUtils.Color,
+                                   deselectedColor:ColorUtils.Color):
                     
                     self.filterOption = filterOption
+                    self.selectedColor = selectedColor
+                    self.deselectedColor = deselectedColor
                     
                     # ? Setup color block (i.e., selector).
-                    self.colorBlock = Widgets.Basics.ColorBlock(__class__.Constants['color']['de-selected'])
+                    self.colorBlock = Widgets.Basics.ColorBlock(deselectedColor)
                     
                     # ? ? Setup root layout.
                     self.layout = Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
@@ -1739,10 +1742,10 @@ class Widgets:
                         self.selectionNotificationFcn(self)
                 
                 def select(self):
-                    self.colorBlock.setColor(__class__.Constants['color']['selected'])
+                    self.colorBlock.setColor(self.selectedColor)
                     
                 def deselect(self):
-                    self.colorBlock.setColor(__class__.Constants['color']['de-selected'])
+                    self.colorBlock.setColor(self.deselectedColor)
 
 class Application:
     '''
