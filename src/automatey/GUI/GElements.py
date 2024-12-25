@@ -860,6 +860,16 @@ class Widgets:
                 self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/x.svg'))), toolTip='Delete Entry')
                 self.deleteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_deleteButton_clickEvent))
                 self.verticalContainer.getLayout().insertWidget(self.deleteButton)
+                
+                # ? Setup context-menu.
+                self.qTableWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+                self.qTableWidget.customContextMenuRequested.connect(self.INTERNAL_contextMenuEvent)
+                self.qContextMenu:QtWidgets.QMenu = None
+                # ? ? Context-Info is meant to be fetched by the user, within a context-menu handler. 
+                self.contextInfo = {
+                    'row' : 0,
+                    'column' : 0,
+                }
             
             def INTERNAL_insertButton_clickEvent(self):
                 currentRowIdx = self.qTableWidget.currentRow()
@@ -911,6 +921,26 @@ class Widgets:
                 data2 = self.getEntry(idx2)
                 self.INTERNAL_setEntry(idx2, data1)
                 self.INTERNAL_setEntry(idx1, data2)
+
+            def INTERNAL_contextMenuEvent(self, pos:QtCore.QPoint):
+
+                if self.qContextMenu != None:
+                    item = self.qTableWidget.itemAt(pos)
+                    # ? If triggered on a non-empty cell. 
+                    if item != None:
+                        self.contextInfo['row'] = item.row()
+                        self.contextInfo['column'] = item.column()
+                        self.qContextMenu.exec(self.qTableWidget.viewport().mapToGlobal(pos))
+
+            def getContextInfo(self) -> dict:
+                '''
+                Context-Info is meant to be fetched by the user, within a context-menu handler. 
+                
+                Returns,
+                - `row`: Row of relevant cell.
+                - `column`: Column of relevant cell.
+                '''
+                return self.contextInfo
 
             def getEntry(self, idx) -> dict:
                 '''
