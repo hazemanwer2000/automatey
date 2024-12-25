@@ -286,6 +286,12 @@ class Widgets:
                 
                 self.qWidget.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
                 self.qWidget.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
+            
+            def ensureWidgetVisible(self, widget):
+                '''
+                Ensure a widget is visible.
+                '''
+                self.qWidget.ensureWidgetVisible(widget.qWidget)
 
         class Central(Widget):
             '''
@@ -1523,6 +1529,7 @@ class Widgets:
                 
                 # ? Construct `FilterOptionContainer`.
                 self.filterOptionContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                self.filterOptionContainerScrollArea = Widgets.Decorators.ScrollArea(self.filterOptionContainer, elementMargin=AbstractGraphics.SymmetricMargin(5), isVerticalScrollBar=True)
                 
                 # ? Construct `DropDownList`.
                 self.dropDownList = Widgets.Basics.DropDownList([filterOptionClass.getName() for filterOptionClass in filterOptionClassList])
@@ -1549,7 +1556,7 @@ class Widgets:
                 
                 # ? Construct root layout.
                 rootLayout = Layouts.GridLayout(2, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
-                rootLayout.setWidget(self.filterOptionContainer, 1, 1)
+                rootLayout.setWidget(self.filterOptionContainerScrollArea, 1, 1)
                 rootLayout.setWidget(self.dropDownList, 0, 1)
                 rootLayout.setWidget(self.buttonContainer, 0, 0, rowSpan=2)
                 rootLayout.setRowMinimumSize(0, 0)
@@ -1565,8 +1572,16 @@ class Widgets:
                 '''
                 filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
                 return [filterOptDec.filterOption.getData() for filterOptDec in filterOptDecList]
-                
+            
+            def INTERNAL_ensureSelectedOptionVisible(self):
+                if self.selectedFilterOptDec != None:
+                    self.filterOptionContainerScrollArea.ensureWidgetVisible(self.selectedFilterOptDec)
+            
             def INTERNAL_insertButton_clickEvent(self):
+                
+                # PyQt6: Called at the beginning (i.e., not at the end, as would be expected), because newly created option,
+                #          to be selected, is not fully created yet by 'Qt'. Hence, will scroll to (N-1) widget option.
+                self.INTERNAL_ensureSelectedOptionVisible()
                 
                 filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
                 
@@ -1608,6 +1623,8 @@ class Widgets:
                         # ? ? Move filter-option up.
                         self.filterOptionContainer.getLayout().removeWidget(self.selectedFilterOptDec)
                         self.filterOptionContainer.getLayout().insertWidget(self.selectedFilterOptDec, idx=(selectedIdx - 1))
+                    
+                    self.INTERNAL_ensureSelectedOptionVisible()
             
             def INTERNAL_moveDownButton_clickEvent(self):
 
@@ -1622,6 +1639,8 @@ class Widgets:
                         # ? ? Move filter-option down.
                         self.filterOptionContainer.getLayout().removeWidget(self.selectedFilterOptDec)
                         self.filterOptionContainer.getLayout().insertWidget(self.selectedFilterOptDec, idx=(selectedIdx + 1))
+                    
+                    self.INTERNAL_ensureSelectedOptionVisible()
             
             def INTERNAL_deleteButton_clickEvent(self):
                 
@@ -1652,6 +1671,8 @@ class Widgets:
                     if nextFilterOptDec != None:
                         nextFilterOptDec.select()
                         self.selectedFilterOptDec = nextFilterOptDec
+                    
+                    self.INTERNAL_ensureSelectedOptionVisible()
             
             def INTERNAL_filterOptDec_selectionNotification(self, selectedFilterOptDec:"Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator"):
                 
