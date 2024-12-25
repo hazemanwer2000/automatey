@@ -867,8 +867,8 @@ class Widgets:
                 self.qContextMenu:QtWidgets.QMenu = None
                 # ? ? Context-Info is meant to be fetched by the user, within a context-menu handler. 
                 self.contextInfo = {
-                    'row' : 0,
-                    'column' : 0,
+                    'row-index' : 0,
+                    'column-index' : 0,
                 }
             
             def INTERNAL_insertButton_clickEvent(self):
@@ -928,8 +928,8 @@ class Widgets:
                     item = self.qTableWidget.itemAt(pos)
                     # ? If triggered on a non-empty cell. 
                     if item != None:
-                        self.contextInfo['row'] = item.row()
-                        self.contextInfo['column'] = item.column()
+                        self.contextInfo['row-index'] = item.row()
+                        self.contextInfo['column-index'] = item.column()
                         self.qContextMenu.exec(self.qTableWidget.viewport().mapToGlobal(pos))
 
             def getContextInfo(self) -> dict:
