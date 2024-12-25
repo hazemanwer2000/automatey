@@ -1548,9 +1548,36 @@ class Widgets:
             def INTERNAL_deleteButton_clickEvent(self):
                 
                 if self.selectedFilterOptDec != None:
+
+                    filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                    selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
+                    count = len(filterOptDecList)
+                    
+                    # ? Find next filter-option. 
+                    nextFilterOptDecIdx = None
+                    
+                    # ? ? Case: If current option(s) are more than one.
+                    if count > 1:
+                        # ? ? Case: Selected option is last option.
+                        if selectedIdx == (count - 1):
+                            nextFilterOptDecIdx = selectedIdx - 1
+                        else:
+                            nextFilterOptDecIdx = selectedIdx + 1
+
+                    # ? ? (...)
+                    nextFilterOptDec = None 
+                    if nextFilterOptDecIdx != None:
+                        nextFilterOptDec = filterOptDecList[nextFilterOptDecIdx]
+
+                    # ? Discard selected filter-option.
                     self.filterOptionContainer.getLayout().removeWidget(self.selectedFilterOptDec)
                     self.selectedFilterOptDec.discard()
                     self.selectedFilterOptDec = None
+                    
+                    # ? Select next filter-option (if applicable).
+                    if nextFilterOptDec != None:
+                        nextFilterOptDec.select()
+                        self.selectedFilterOptDec = nextFilterOptDec
             
             def INTERNAL_filterOptDec_selectionNotification(self, selectedFilterOptDec:"Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator"):
                 
