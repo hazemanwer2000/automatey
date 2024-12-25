@@ -425,13 +425,15 @@ class Widgets:
                 if size != None:
                     self.qWidget.setFixedSize(size[0], size[1])
 
-        class ColorBlock(Widget):
+        class ColorBlock(Widget, INTERNAL.EventManager):
             '''
             A simple color-block.
             '''
             
             def __init__(self, initColor:ColorUtils.Color, size=None):
-                Widget.__init__(self, PyQt6Wrapper.QWidget())
+                self.qWidget = PyQt6Wrapper.QWidget()
+                Widget.__init__(self, self.qWidget)
+                INTERNAL.EventManager.__init__(self)
                 
                 # ? Setting fill-color of widget.
                 self.setColor(initColor)
@@ -440,6 +442,13 @@ class Widgets:
                 # ? Set (i.e., fix) size, if specified.
                 if size != None:
                     self.qWidget.setFixedSize(size[0], size[1])
+
+                # ? Setup event-handler(s).
+                self.qWidget.mousePressEventFcn = self.INTERNAL_mousePressEvent
+
+            def INTERNAL_mousePressEvent(self, event):
+                if GUtils.EventHandlers.ClickEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.ClickEventHandler].fcn()
 
             def setColor(self, color:ColorUtils.Color):
                 '''
@@ -1317,12 +1326,12 @@ class Widgets:
                 # ? Set initial color, and (fixed-)size.
                 self.colorBlock = Widgets.Basics.ColorBlock(initColor=initColor, size=[30, 30])
                 Widget.__init__(self, self.colorBlock.qWidget)
-                self.colorBlock.qWidget.mousePressEventFcn = self.INTERNAL_mousePressEvent
+                self.colorBlock.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_colorBlock_onClick))
             
             def getColor(self):
                 return self.colorBlock.getColor()
                 
-            def INTERNAL_mousePressEvent(self, event):
+            def INTERNAL_colorBlock_onClick(self):
                 newColor = StandardDialog.selectColor(initColor=self.colorBlock.getColor())
                 if newColor != None:
                     self.colorBlock.setColor(newColor)
@@ -1779,12 +1788,12 @@ class Widgets:
                     Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
                     
                     # ? Setup event-handler(s).
-                    self.colorBlock.qWidget.mousePressEventFcn = self.INTERNAL_colorBlock_clickEvent
+                    self.colorBlock.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_colorBlock_onClick))
                     
                     # ? Setup registerable notification(s).
                     self.selectionNotificationFcn = None
                     
-                def INTERNAL_colorBlock_clickEvent(self, event):
+                def INTERNAL_colorBlock_onClick(self):
                     if self.selectionNotificationFcn != None:
                         self.selectionNotificationFcn(self)
                 
