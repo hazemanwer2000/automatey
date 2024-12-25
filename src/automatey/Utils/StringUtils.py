@@ -54,3 +54,11 @@ class Normalize:
         Similar to `asParagraph`, but consecutive empty-line(s) are replaced with a single empty-line.
         '''
         return Normalize.asParagraph(text, INTERNAL_newLine='\n\n')
+
+class Split:
+    
+    def atWords(text:str):
+        '''
+        Given a concatenated string of words (e.g., `AsAnExample`), returns a list of words (e.g., `['As', 'An', 'Example']`).
+        '''
+        return Regex.findAll(r'[A-Z][^A-Z]*', text)
