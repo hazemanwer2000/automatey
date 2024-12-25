@@ -18,6 +18,7 @@ import automatey.Resources as Resources
 import automatey.Utils.MathUtils as MathUtils
 import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
 import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.StringUtils as StringUtils
 import automatey.OS.Clipboard as Clipboard
 
 class INTERNAL:
@@ -1652,24 +1653,21 @@ class Widgets:
                 (Interface) A filter option.
                 
                 Interface includes:
-                - `getName` static-method, to get the name of option.
+                - `getName` class-method, to get the name of option.
                 - `getData` method, to collect data (abstract), and return it.
                 '''
-                def __init__(self, widget):
-                    CustomWidget.__init__(self, widget)
-                
                 def getData(self):
                     '''
                     (Interface) Collects data.
                     '''
                     return None
 
-                @staticmethod
-                def getName() -> str:
+                @classmethod
+                def getName(cls) -> str:
                     '''
                     (Interface) Get name.
                     '''
-                    return 'Filter Option'
+                    return '-'.join(StringUtils.Split.atWords(cls.__name__))
                 
             class INTERNAL_FilterOptionDecorator(Widget):
                 
