@@ -391,6 +391,17 @@ class Widgets:
                 return self.qTabWidget.tabText(self.getCurrentTabByIndex())
 
     class Basics:
+        
+        class Null(Widget):
+            '''
+            A widget with no appearance.
+            '''
+            def __init__(self, size=None):
+                Widget.__init__(self, PyQt6Wrapper.QWidget())
+                
+                # ? Set (i.e., fix) size, if specified.
+                if size != None:
+                    self.qWidget.setFixedSize(size[0], size[1])
 
         class ColorBlock(Widget):
             '''
