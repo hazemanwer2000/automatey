@@ -1528,8 +1528,8 @@ class Widgets:
                 self.filterOptionClassList = filterOptionClassList
                 
                 # ? Construct `FilterOptionContainer`.
-                self.filterOptionContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
-                self.filterOptionContainerScrollArea = Widgets.Decorators.ScrollArea(self.filterOptionContainer, elementMargin=AbstractGraphics.SymmetricMargin(5), isVerticalScrollBar=True)
+                self.filterOptDecContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                self.filterOptDecContainerScrollArea = Widgets.Decorators.ScrollArea(self.filterOptDecContainer, elementMargin=AbstractGraphics.SymmetricMargin(5), isVerticalScrollBar=True)
                 
                 # ? Construct `DropDownList`.
                 self.dropDownList = Widgets.Basics.DropDownList([filterOptionClass.getName() for filterOptionClass in filterOptionClassList])
@@ -1556,7 +1556,7 @@ class Widgets:
                 
                 # ? Construct root layout.
                 rootLayout = Layouts.GridLayout(2, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
-                rootLayout.setWidget(self.filterOptionContainerScrollArea, 1, 1)
+                rootLayout.setWidget(self.filterOptDecContainerScrollArea, 1, 1)
                 rootLayout.setWidget(self.dropDownList, 0, 1)
                 rootLayout.setWidget(self.buttonContainer, 0, 0, rowSpan=2)
                 rootLayout.setRowMinimumSize(0, 0)
@@ -1570,12 +1570,12 @@ class Widgets:
                 '''
                 Collect data, as a list.
                 '''
-                filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                filterOptDecList = self.filterOptDecContainer.getLayout().getWidgets()
                 return [filterOptDec.filterOption.getData() for filterOptDec in filterOptDecList]
             
             def INTERNAL_ensureSelectedOptionVisible(self):
                 if self.selectedFilterOptDec != None:
-                    self.filterOptionContainerScrollArea.ensureWidgetVisible(self.selectedFilterOptDec)
+                    self.filterOptDecContainerScrollArea.ensureWidgetVisible(self.selectedFilterOptDec)
             
             def INTERNAL_insertButton_clickEvent(self):
                 
@@ -1583,7 +1583,7 @@ class Widgets:
                 #          to be selected, is not fully created yet by 'Qt'. Hence, will scroll to (N-1) widget option.
                 self.INTERNAL_ensureSelectedOptionVisible()
                 
-                filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                filterOptDecList = self.filterOptDecContainer.getLayout().getWidgets()
                 
                 # ? Create filter-option.
                 selectedClassIdx = self.dropDownList.getSelectedIndex()
@@ -1609,20 +1609,20 @@ class Widgets:
                 newFilterOptionDec.select()
                 
                 # ? Insert option.
-                self.filterOptionContainer.getLayout().insertWidget(newFilterOptionDec, idx=insertionIdx)
+                self.filterOptDecContainer.getLayout().insertWidget(newFilterOptionDec, idx=insertionIdx)
             
             def INTERNAL_moveUpButton_clickEvent(self):
                 
                 if self.selectedFilterOptDec != None:
                     
-                    filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                    filterOptDecList = self.filterOptDecContainer.getLayout().getWidgets()
                     selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
                     
                     # ? Case: Selected index is not zero.
                     if selectedIdx > 0:
                         # ? ? Move filter-option up.
-                        self.filterOptionContainer.getLayout().removeWidget(self.selectedFilterOptDec)
-                        self.filterOptionContainer.getLayout().insertWidget(self.selectedFilterOptDec, idx=(selectedIdx - 1))
+                        self.filterOptDecContainer.getLayout().removeWidget(self.selectedFilterOptDec)
+                        self.filterOptDecContainer.getLayout().insertWidget(self.selectedFilterOptDec, idx=(selectedIdx - 1))
                     
                     self.INTERNAL_ensureSelectedOptionVisible()
             
@@ -1630,15 +1630,15 @@ class Widgets:
 
                 if self.selectedFilterOptDec != None:
                     
-                    filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                    filterOptDecList = self.filterOptDecContainer.getLayout().getWidgets()
                     selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
                     count = len(filterOptDecList)
                     
                     # ? Case: Selected index is not zero.
                     if selectedIdx < (count - 1):
                         # ? ? Move filter-option down.
-                        self.filterOptionContainer.getLayout().removeWidget(self.selectedFilterOptDec)
-                        self.filterOptionContainer.getLayout().insertWidget(self.selectedFilterOptDec, idx=(selectedIdx + 1))
+                        self.filterOptDecContainer.getLayout().removeWidget(self.selectedFilterOptDec)
+                        self.filterOptDecContainer.getLayout().insertWidget(self.selectedFilterOptDec, idx=(selectedIdx + 1))
                     
                     self.INTERNAL_ensureSelectedOptionVisible()
             
@@ -1646,7 +1646,7 @@ class Widgets:
                 
                 if self.selectedFilterOptDec != None:
 
-                    filterOptDecList = self.filterOptionContainer.getLayout().getWidgets()
+                    filterOptDecList = self.filterOptDecContainer.getLayout().getWidgets()
                     selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
                     count = len(filterOptDecList)
                     
@@ -1663,7 +1663,7 @@ class Widgets:
                         nextFilterOptDec = filterOptDecList[nextFilterOptDecIdx]
 
                     # ? Discard selected filter-option.
-                    self.filterOptionContainer.getLayout().removeWidget(self.selectedFilterOptDec)
+                    self.filterOptDecContainer.getLayout().removeWidget(self.selectedFilterOptDec)
                     self.selectedFilterOptDec.discard()
                     self.selectedFilterOptDec = None
                     
@@ -1677,7 +1677,7 @@ class Widgets:
             def INTERNAL_filterOptDec_selectionNotification(self, selectedFilterOptDec:"Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator"):
                 
                 # ? De-select all, except (...)
-                for filterOptDec in self.filterOptionContainer.getLayout().getWidgets():
+                for filterOptDec in self.filterOptDecContainer.getLayout().getWidgets():
                     filterOptDec.deselect()
                 selectedFilterOptDec.select()
 
