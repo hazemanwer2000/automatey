@@ -1,4 +1,6 @@
 
+import automatey.Base.ExceptionUtils as ExceptionUtils
+
 import colorsys
 
 class Color:
@@ -36,10 +38,22 @@ class Color:
     def fromHEX(hexCode:str):
         '''
         Creates 'Color' from HEX code.
-        
-        Note,
-        - '#' is not expected at the beginning of the hex-code.
         '''
+        # ? Validation (...)
+        # ? ? Assert: Type is 'str'.
+        if type(hexCode) != str:
+            raise ExceptionUtils.ValidationError("HEX-Code must be of type 'str'.")
+        # ? ? Remove '#' token if present.
+        hexCode = hexCode[1:] if (hexCode[0] == '#') else hexCode
+        # ? ? Assert: Length is 6.
+        if len(hexCode) != 6:
+            raise ExceptionUtils.ValidationError("HEX-Code must consist of 6 HEX-digits.")
+        # ? ? Assert: HEX-digits only.
+        try:
+            int(hexCode, 16)
+        except:
+            raise ExceptionUtils.ValidationError("HEX-Code must consist of HEX-digits only.")
+        
         RGBFormat = tuple(int(hexCode[i:i+2], 16) for i in (0, 2, 4))
         return Color(RGBFormat[0],
                      RGBFormat[1],
