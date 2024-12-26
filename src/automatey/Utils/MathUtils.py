@@ -1,5 +1,6 @@
 
 import copy
+import bisect
 
 def mapValue(value, rangeFrom, rangeTo):
     '''
@@ -14,6 +15,27 @@ def clampValue(value, minValue, maxValue):
     Clamp a (float-)value between a minimum, and a maximum (all-inclusive).
     '''
     return min(maxValue, max(minValue, value))
+
+def findNearestValues(value, orderedValues):
+    '''
+    Returns a tuple `(x, y)`, where,
+    - `x` is the smallest value from `orderedValues`, larger than `value`.
+    - `y` is the largest value from `orderedValues`, smaller than `value`.
+    
+    If, for example, `value` is larger than all value(s) in `orderedValues`, `None` is returned.
+    '''
+    x = None
+    y = None
+
+    insertIdx = bisect.bisect_left(orderedValues, value)
+    if insertIdx > 0:
+        x = orderedValues[insertIdx - 1]
+
+    insertIdx = bisect.bisect_right(orderedValues, value)
+    if insertIdx < len(orderedValues):
+        y = orderedValues[insertIdx]
+        
+    return (x, y)
 
 class MediaSpecific:
 
