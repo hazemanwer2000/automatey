@@ -875,19 +875,19 @@ class Widgets:
                 self.layout.setWidget(self.verticalContainer, 0, 0)
                 self.layout.setColumnMinimumSize(0, 0)
                 # ? ? Create insert button.
-                self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/plus.svg'))), toolTip='Insert Entry')
+                self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-plus.png'))), toolTip='Insert')
                 self.insertButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_insertButton_clickEvent))
                 self.verticalContainer.getLayout().insertWidget(self.insertButton)
                 # ? ? Create move-up button.
-                self.moveUpButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-up.svg'))), toolTip='Move Entry Up')
+                self.moveUpButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-arrow-top.png'))), toolTip='Move Up')
                 self.moveUpButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveUpButton_clickEvent))
                 self.verticalContainer.getLayout().insertWidget(self.moveUpButton)
                 # ? ? Create move-down button.
-                self.moveDownButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-down.svg'))), toolTip='Move Entry Down')
+                self.moveDownButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-arrow-bottom.png'))), toolTip='Move Down')
                 self.moveDownButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveDownButton_clickEvent))
                 self.verticalContainer.getLayout().insertWidget(self.moveDownButton)
                 # ? ? Create delete button.
-                self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/x.svg'))), toolTip='Delete Entry')
+                self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-x.png'))), toolTip='Delete')
                 self.deleteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_deleteButton_clickEvent))
                 self.verticalContainer.getLayout().insertWidget(self.deleteButton)
                 
@@ -1624,19 +1624,19 @@ class Widgets:
                 self.buttonContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
                 
                 # ? ? Create insert button.
-                self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/plus.svg'))), toolTip='Insert Entry')
+                self.insertButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-plus.png'))), toolTip='Insert')
                 self.insertButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_insertButton_clickEvent))
                 self.buttonContainer.getLayout().insertWidget(self.insertButton)
                 # ? ? Create move-up button.
-                self.moveUpButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-up.svg'))), toolTip='Move Entry Up')
+                self.moveUpButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-arrow-top.png'))), toolTip='Move Up')
                 self.moveUpButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveUpButton_clickEvent))
                 self.buttonContainer.getLayout().insertWidget(self.moveUpButton)
                 # ? ? Create move-down button.
-                self.moveDownButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/arrow-down.svg'))), toolTip='Move Entry Down')
+                self.moveDownButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-arrow-bottom.png'))), toolTip='Move Down')
                 self.moveDownButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_moveDownButton_clickEvent))
                 self.buttonContainer.getLayout().insertWidget(self.moveDownButton)
                 # ? ? Create delete button.
-                self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/feather/x.svg'))), toolTip='Delete Entry')
+                self.deleteButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-x.png'))), toolTip='Delete')
                 self.deleteButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_deleteButton_clickEvent))
                 self.buttonContainer.getLayout().insertWidget(self.deleteButton)
                 
