@@ -557,6 +557,12 @@ class Widgets:
                 if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
 
+            def __bool__(self):
+                return self.isChecked()
+            
+            def __str__(self):
+                return str(bool(self))
+
         class List(Widget, INTERNAL.EventManager):
             '''
             A list of items.
@@ -695,6 +701,12 @@ class Widgets:
                 '''
                 return self.qWidget.value()
 
+            def __int__(self):
+                return self.getValue()
+
+            def __str__(self):
+                return str(int(self))
+
         class DropDownList(Widget, INTERNAL.EventManager):
             '''
             A drop-down list.
@@ -726,6 +738,9 @@ class Widgets:
             def INTERNAL_currentIndexChanged(self, newIndex):
                 if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn()
+
+            def __str__(self):
+                return str(self.getSelected())
 
         class LineEdit(Widget, INTERNAL.EventManager):
             
@@ -774,6 +789,9 @@ class Widgets:
             def INTERNAL_textChanged(self):
                 if GUtils.EventHandlers.TextChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.TextChangeEventHandler].fcn()
+
+            def __str__(self):
+                return self.getText()
 
         class TextEdit(Widget, INTERNAL.EventManager):
             
@@ -828,6 +846,9 @@ class Widgets:
             def INTERNAL_textChanged(self):
                 if GUtils.EventHandlers.TextChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.TextChangeEventHandler].fcn()
+
+            def __str__(self):
+                return self.getText()
 
         class EntryTable(Widget):
             '''
@@ -1335,6 +1356,9 @@ class Widgets:
                 newColor = StandardDialog.selectColor(initColor=self.colorBlock.getColor())
                 if newColor != None:
                     self.colorBlock.setColor(newColor)
+            
+            def __str__(self):
+                return str(self.getColor())
 
         class VideoPlayer(Widget):
             '''
