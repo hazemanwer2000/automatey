@@ -371,9 +371,6 @@ class INTERNAL_VideoProcessing:
             command_GenerateThumbnail.assertParameter('output-file', str(f_dst))
             command_GenerateThumbnail.assertParameter('time', str(time))
             
-            # Execute.
-            print(str(command_GenerateThumbnail))
-            
             proc = ProcessUtils.Process(str(command_GenerateThumbnail))
             proc.run()
 
@@ -719,7 +716,6 @@ class INTERNAL_VideoProcessing:
         @staticmethod
         def executeCommands(commandList):
             for command in commandList:
-                print(command)
                 proc = ProcessUtils.Process(str(command))
                 if (proc.run() != 0):
                     raise ExceptionUtils.BackendError(proc.STDERR())
