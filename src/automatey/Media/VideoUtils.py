@@ -52,7 +52,7 @@ class Actions:
             self.isMute = isMute
             self.isNearestKeyframe = isNearestKeyframe
             self.quality = quality
-            self.modifiers = [] if (modifiers == None) else modifiers
+            self.modifiers = [] if (modifiers is None) else modifiers
 
     class Join(INTERNAL_Utils.Action):
         '''
@@ -560,14 +560,14 @@ class INTERNAL_VideoProcessing:
 
             command_VideoTrim.assertParameter('input-file', str(f_src))
             
-            if trimAction.startTime != None:
+            if not(trimAction.startTime is None):
                 startTime = trimAction.startTime
                 command_VideoTrim.assertSection('start-time', {'time' : startTime.toString(precision=3)})
             else:
                 startTime = TimeUtils.Time(0)
                 command_VideoTrim.excludeSection('start-time')
                 
-            if trimAction.endTime != None:
+            if not(trimAction.endTime is None):
                 duration = trimAction.endTime - startTime
                 command_VideoTrim.assertSection('duration', {'time' : duration.toString(precision=3)})
             else:
