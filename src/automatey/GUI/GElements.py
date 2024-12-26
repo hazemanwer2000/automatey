@@ -1939,6 +1939,18 @@ class StandardDialog:
             colorSelected = ColorUtils.Color.fromHEX(colorDialog.selectedColor().name()[1:])
         return colorSelected
 
+    @staticmethod
+    def showInformation(title:str, text:str, minimumSize, isSizeFixed:bool):
+        # ? (...)
+        textEdit = Widgets.Basics.TextEdit(isEditable=False, isMonospaced=True)
+        textEdit.setText(text)
+        # ? (...)
+        rootLayout = Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=0)
+        rootLayout.setWidget(textEdit, 0, 0)
+        # ? (...)
+        dialog = Dialog(title=title, rootLayout=rootLayout, minimumSize=minimumSize, isSizeFixed=isSizeFixed)
+        dialog.run()
+
     class Message:
         
         class Announce:
