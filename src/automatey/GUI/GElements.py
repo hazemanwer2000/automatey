@@ -1974,7 +1974,7 @@ class StandardDialog:
                 StandardDialog.Message.Announce.INTERNAL_Announce('Warning', msg, QtWidgets.QMessageBox.Icon.Warning)
 
             def Information(msg:str):
-                StandardDialog.Message.Announce.INTERNAL_Announce('Information', msg, QtWidgets.QMessageBox.Icon.Information)
+                StandardDialog.Message.Announce.INTERNAL_Announce('Info', msg, QtWidgets.QMessageBox.Icon.Question)
 
     class BackgroundActivity:
         '''

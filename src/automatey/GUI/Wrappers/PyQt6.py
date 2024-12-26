@@ -8,9 +8,10 @@ class QThread(QtCore.QThread):
     
     notifySignal = QtCore.pyqtSignal(dict)
     
-    def __init__(self, mainFcn, notifyFcn):
+    def __init__(self, mainFcn, mainFcnArgs, notifyFcn):
         QtCore.QThread.__init__(self)
         self.mainFcn = mainFcn
+        self.mainFcnArgs = mainFcnArgs
         self.notifySignal.connect(notifyFcn)
 
     def WNotify(self, data:dict):
@@ -18,7 +19,7 @@ class QThread(QtCore.QThread):
 
     @QtCore.pyqtSlot()
     def run(self):
-        self.mainFcn(self)
+        self.mainFcn(*self.mainFcnArgs)
 
 class QSlider(QtWidgets.QSlider):
     

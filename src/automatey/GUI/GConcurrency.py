@@ -19,7 +19,7 @@ class Thread:
     
     def __init__(self, mainFcn, notifyFcn):
         
-        self.qThread = PyQt6Wrapper.QThread(mainFcn, notifyFcn)
+        self.qThread = PyQt6Wrapper.QThread(mainFcn, [self], notifyFcn)
         
     def run(self):
         '''
