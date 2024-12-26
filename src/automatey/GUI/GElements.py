@@ -1604,12 +1604,14 @@ class Widgets:
         class FilterList(Widget):
             
             def __init__(self, filterOptionClassList:typing.List["FilterOption"],
+                               isSingleOptionInstance=True,
                                selectedColor:ColorUtils.Color=ColorUtils.Colors.BLACK,
                                deselectedColor:ColorUtils.Color=ColorUtils.Colors.GREY):
                 
+                self.filterOptionClassList = filterOptionClassList
+                self.isSingleOptionInstance = isSingleOptionInstance
                 self.selectedColor = selectedColor
                 self.deselectedColor = deselectedColor
-                self.filterOptionClassList = filterOptionClassList
                 
                 # ? Construct `FilterOptionContainer`.
                 self.filterOptDecContainer = Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
@@ -1660,42 +1662,45 @@ class Widgets:
             def INTERNAL_ensureSelectedOptionVisible(self):
                 if self.selectedFilterOptDec != None:
                     self.filterOptDecContainerScrollArea.ensureWidgetVisible(self.selectedFilterOptDec)
-            
+                        
             def INTERNAL_insertButton_clickEvent(self):
                 
-                # PyQt6: Called at the beginning (i.e., not at the end, as would be expected), because newly created option,
-                #          to be selected, is not fully created yet by 'Qt'. Hence, will scroll to (N-1) widget option.
-                self.INTERNAL_ensureSelectedOptionVisible()
-                
                 filterOptDecList = self.filterOptDecContainer.getLayout().getWidgets()
+                presentFilterOptClasses = [type(filterOptDec.filterOption) for filterOptDec in filterOptDecList]
+                targetFilterOptClass = self.filterOptionClassList[self.dropDownList.getSelectedIndex()]
                 
-                # ? Create filter-option.
-                selectedClassIdx = self.dropDownList.getSelectedIndex()
-                newFilterOption = self.filterOptionClassList[selectedClassIdx]()
-                newFilterOptionDec = Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator(newFilterOption,
-                                                                                               selectedColor=self.selectedColor,
-                                                                                               deselectedColor=self.deselectedColor)
-                newFilterOptionDec.selectionNotificationFcn = self.INTERNAL_filterOptDec_selectionNotification
-                
-                # ? Insert filter-option.
-                insertionIdx = -1
-                
-                # ? ? If there's a selected option (...)
-                if self.selectedFilterOptDec != None:
+                if (not self.isSingleOptionInstance) or (self.isSingleOptionInstance and (targetFilterOptClass not in presentFilterOptClasses)):
+
+                    # PyQt6: Called at the beginning (i.e., not at the end, as would be expected), because newly created option,
+                    #          to be selected, is not fully created yet by 'Qt'. Hence, will scroll to (N-1) widget option.
+                    self.INTERNAL_ensureSelectedOptionVisible()           
                     
-                    # ? ? Insertion occurs after selected option.
-                    selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
-                    insertionIdx = selectedIdx + 1
+                    # ? Create filter-option.
+                    newFilterOption = targetFilterOptClass()
+                    newFilterOptionDec = Widgets.Complex.FilterList.INTERNAL_FilterOptionDecorator(newFilterOption,
+                                                                                                selectedColor=self.selectedColor,
+                                                                                                deselectedColor=self.deselectedColor)
+                    newFilterOptionDec.selectionNotificationFcn = self.INTERNAL_filterOptDec_selectionNotification
                     
-                    # ? ? De-select currently selected option.
-                    self.selectedFilterOptDec.deselect()
-                
-                # ? Select filter option, and update selection.
-                self.selectedFilterOptDec = newFilterOptionDec
-                newFilterOptionDec.select()
-                
-                # ? Insert option.
-                self.filterOptDecContainer.getLayout().insertWidget(newFilterOptionDec, idx=insertionIdx)
+                    # ? Insert filter-option.
+                    insertionIdx = -1
+                    
+                    # ? ? If there's a selected option (...)
+                    if self.selectedFilterOptDec != None:
+                        
+                        # ? ? Insertion occurs after selected option.
+                        selectedIdx = filterOptDecList.index(self.selectedFilterOptDec)
+                        insertionIdx = selectedIdx + 1
+                        
+                        # ? ? De-select currently selected option.
+                        self.selectedFilterOptDec.deselect()
+                    
+                    # ? Select filter option, and update selection.
+                    self.selectedFilterOptDec = newFilterOptionDec
+                    newFilterOptionDec.select()
+                    
+                    # ? Insert option.
+                    self.filterOptDecContainer.getLayout().insertWidget(newFilterOptionDec, idx=insertionIdx)
             
             def INTERNAL_moveUpButton_clickEvent(self):
                 
