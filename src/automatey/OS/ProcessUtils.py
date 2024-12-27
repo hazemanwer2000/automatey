@@ -251,7 +251,7 @@ class Process:
         stdoutRedirection = subprocess.DEVNULL if STDOUT2DEVNULL else subprocess.PIPE
         stderrRedirection = subprocess.DEVNULL if STDERR2DEVNULL else subprocess.PIPE
         
-        proc = subprocess.Popen(self.command, stdout=stdoutRedirection, stderr=stderrRedirection, text=True)
+        proc = subprocess.Popen(self.command, stdout=stdoutRedirection, stderr=stderrRedirection, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
         self.stdout, self.stderr = proc.communicate()
         return proc.returncode
     
