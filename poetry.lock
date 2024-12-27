@@ -460,7 +460,17 @@ nativelib = ["pyobjc-framework-Cocoa", "pywin32"]
 objc = ["pyobjc-framework-Cocoa"]
 win32 = ["pywin32"]
 
+[[package]]
+name = "winshell"
+version = "0.6"
+description = "Windows shell functions"
+optional = false
+python-versions = "*"
+files = [
+    {file = "winshell-0.6.zip", hash = "sha256:16812fcd6a43391d6c0b707b4d67e809e52286a739683a91623baa0804ea0d41"},
+]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "d03dcb248f118ff2f27ae9d0f65a8869a80c0cf1f02251690247c937501864c5"
+content-hash = "3c9580dc949755c1e546f8e81a491f8cf8557323c54760e56599fedfd86ec51a"

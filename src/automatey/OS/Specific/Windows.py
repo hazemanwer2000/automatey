@@ -4,6 +4,8 @@ import automatey.OS.FileUtils as FileUtils
 
 # ? Standard Libraries
 import winreg
+import os
+import winshell
 
 class INTERNAL:
 
@@ -59,3 +61,22 @@ class Registry:
                 winreg.SetValue(entryKey, "", winreg.REG_SZ, name)
                 winreg.SetValue(entryKey, "command", winreg.REG_SZ, command)
                 winreg.SetValueEx(entryKey, "Icon", 0, winreg.REG_SZ, INTERNAL.asPath(f_icon))
+
+class Shortcut:
+    
+    @staticmethod
+    def toStartMenu(name:str, f_icon:FileUtils.File, f_exe:FileUtils.File):
+        '''
+        Create a shortcut, and place it in the `Start Menu`.
+        '''
+        targetPath = INTERNAL.asPath(f_exe)
+        iconPath = INTERNAL.asPath(f_icon)
+        start_menu_path = os.path.join(winshell.start_menu(), "Programs")
+        shortcut_path = os.path.join(start_menu_path, f"{name}.lnk")
+        
+        # ? Create the shortcut.
+        with winshell.shortcut(shortcut_path) as shortcut:
+            shortcut.path = targetPath
+            shortcut.description = name
+            shortcut.working_directory = os.path.dirname(targetPath)
+            shortcut.icon_location = (iconPath, 0)
