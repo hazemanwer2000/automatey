@@ -243,6 +243,7 @@ class File:
             Move file/directory to 'Recycle Bin' (or, equivalent).
             '''
             if f.isExists():
+                # (!) OS-specific (Windows-OS)
                 send2trash(str(f).replace('/', '\\'))
         
         @staticmethod

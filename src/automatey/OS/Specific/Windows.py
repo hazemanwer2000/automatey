@@ -1,7 +1,20 @@
 
+# ? Internal Libraries
 import automatey.OS.FileUtils as FileUtils
 
+# ? Standard Libraries
 import winreg
+
+class INTERNAL:
+
+    def asPath(f:FileUtils.File, isQuoted=False) -> str:
+        '''
+        Returns *Windows*-specific path of file.
+        '''
+        path = str(f).replace('/', '\\')
+        if isQuoted:
+            path = '"' + path + '"'
+        return path
 
 class Registry:
     
@@ -40,10 +53,6 @@ class Registry:
             entryKeyPath = fr"{baseKeyPath}\{name}"
             commandKeyPath = fr"{entryKeyPath}\command"
             iconKeyPath = fr"{entryKeyPath}\DefaultIcon"
-            
-            print(commandKeyPath)
-            
-            exit(0)
 
             # ? Key: Entry.
             with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, entryKeyPath) as entryKey:
@@ -54,5 +63,5 @@ class Registry:
                 winreg.SetValue(commandKey, "", winreg.REG_SZ, command)
 
             # ? Key: Icon.
-            #with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, iconKeyPath) as iconKey:
-            #    winreg.SetValue(iconKey, "", winreg.REG_SZ, f_icon)  # Set icon path
+            with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, iconKeyPath) as iconKey:
+                winreg.SetValue(iconKey, "", winreg.REG_SZ, INTERNAL.asPath(f_icon))
