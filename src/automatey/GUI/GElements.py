@@ -5,6 +5,7 @@ import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as QtCore
 import vlc
 import typing
+import ctypes
 
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
@@ -1846,6 +1847,10 @@ class Application:
         
         # PyQt6: A cross-platform style called 'Fusion'.
         self.qApplication.setStyle('Fusion')
+        
+        # (!) OS-specific (Windows-OS)
+        # ? Workaround, to display app's icon in Windows task-bar.
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('mycompany.myproduct.subproduct.version')
         
     def run(self):
         '''

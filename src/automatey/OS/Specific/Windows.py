@@ -54,14 +54,8 @@ class Registry:
             commandKeyPath = fr"{entryKeyPath}\command"
             iconKeyPath = fr"{entryKeyPath}\DefaultIcon"
 
-            # ? Key: Entry.
+            # ? Setting key.
             with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, entryKeyPath) as entryKey:
                 winreg.SetValue(entryKey, "", winreg.REG_SZ, name)
-
-            # ? Key: Command.
-            with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, commandKeyPath) as commandKey:
-                winreg.SetValue(commandKey, "", winreg.REG_SZ, command)
-
-            # ? Key: Icon.
-            with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, iconKeyPath) as iconKey:
-                winreg.SetValue(iconKey, "", winreg.REG_SZ, INTERNAL.asPath(f_icon))
+                winreg.SetValue(entryKey, "command", winreg.REG_SZ, command)
+                winreg.SetValueEx(entryKey, "Icon", 0, winreg.REG_SZ, INTERNAL.asPath(f_icon))
