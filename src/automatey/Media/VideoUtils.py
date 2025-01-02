@@ -569,7 +569,7 @@ class INTERNAL_VideoProcessing:
                 command_VideoTrim.assertSection('duration', {'time' : duration.toString(precision=3)})
             else:
                 duration = generalInfo['duration'] - startTime
-                command_VideoTrim.excludeSection('end-time')
+                command_VideoTrim.excludeSection('duration')
             
             # If trimming is not at nearest key-frame, then it is possible to specify filter(s), and CRF value.
             if not (trimAction.isNearestKeyframe):
