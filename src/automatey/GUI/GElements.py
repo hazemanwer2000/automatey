@@ -998,7 +998,7 @@ class Widgets:
                 data = []
                 for columnIdx in range(columnCount):
                     qItem = self.qTableWidget.item(idx, columnIdx)
-                    data.append(qItem.text() if (qItem != None) else '')
+                    data.append(qItem.text().strip() if (qItem != None) else '')
                 return dict(zip(self.header, data))
 
             def getEntries(self):
