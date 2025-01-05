@@ -53,14 +53,24 @@ class Registry:
             # ? Key path(s).
             baseKeyPath = fr"{fileAssociation}\shell"
             entryKeyPath = fr"{baseKeyPath}\{name}"
-            commandKeyPath = fr"{entryKeyPath}\command"
-            iconKeyPath = fr"{entryKeyPath}\DefaultIcon"
 
             # ? Setting key.
             with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, entryKeyPath) as entryKey:
                 winreg.SetValue(entryKey, "", winreg.REG_SZ, name)
                 winreg.SetValue(entryKey, "command", winreg.REG_SZ, command)
                 winreg.SetValueEx(entryKey, "Icon", 0, winreg.REG_SZ, INTERNAL.asPath(f_icon))
+    
+    @staticmethod            
+    def setAutoRun(f_batch:FileUtils.File):
+        '''
+        Sets the Auto-Run batch file (i.e., `.bat` file that executes automatically with every CMD opened).
+        '''
+        targetPath = INTERNAL.asPath(f_batch, isQuoted=True)
+        entryKeyPath = fr"Software\Microsoft\Command Processor"
+
+        # ? Setting key.
+        with winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE, entryKeyPath) as entryKey:
+            winreg.SetValueEx(entryKey, "AutoRun", 0, winreg.REG_SZ, targetPath)
 
 class Shortcut:
     
