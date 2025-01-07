@@ -936,13 +936,12 @@ class Widgets:
                     # ? Select (appropriate) row.
                     self.qTableWidget.setCurrentCell(nextRowIdx, self.qTableWidget.currentColumn())
 
-            def INTERNAL_setEntry(self, idx, data):
+            def INTERNAL_setEntry(self, idx, data:dict):
                 '''
                 Set entry, from a list of string(s).
                 '''
-                columnCount = self.qTableWidget.columnCount()
-                for columnIdx in range(columnCount):
-                    self.qTableWidget.setItem(idx, columnIdx, QtWidgets.QTableWidgetItem(data[columnIdx]))
+                for columnIdx, columnTitle in enumerate(self.header):
+                    self.qTableWidget.setItem(idx, columnIdx, QtWidgets.QTableWidgetItem(data[columnTitle]))
             
             def INTERNAL_swapEntries(self, idx1, idx2):
                 '''
