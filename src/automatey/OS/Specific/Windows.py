@@ -5,11 +5,14 @@ import automatey.OS.FileUtils as FileUtils
 # ? Standard Libraries
 import winreg
 import os
+
+# ? External Libraries
 import winshell
+import natsort
 
 class INTERNAL:
 
-    def asPath(f:FileUtils.File, isQuoted=False) -> str:
+    def fileAsPath(f:FileUtils.File, isQuoted=False) -> str:
         '''
         Returns *Windows*-specific path of file.
         '''
@@ -58,14 +61,14 @@ class Registry:
             with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, entryKeyPath) as entryKey:
                 winreg.SetValue(entryKey, "", winreg.REG_SZ, name)
                 winreg.SetValue(entryKey, "command", winreg.REG_SZ, command)
-                winreg.SetValueEx(entryKey, "Icon", 0, winreg.REG_SZ, INTERNAL.asPath(f_icon))
+                winreg.SetValueEx(entryKey, "Icon", 0, winreg.REG_SZ, INTERNAL.fileAsPath(f_icon))
     
     @staticmethod            
     def setAutoRun(f_batch:FileUtils.File):
         '''
         Sets the Auto-Run batch file (i.e., `.bat` file that executes automatically with every CMD opened).
         '''
-        targetPath = INTERNAL.asPath(f_batch, isQuoted=True)
+        targetPath = INTERNAL.fileAsPath(f_batch, isQuoted=True)
         entryKeyPath = fr"Software\Microsoft\Command Processor"
 
         # ? Setting key.
@@ -79,8 +82,8 @@ class Shortcut:
         '''
         Create a shortcut, and place it in the `Start Menu`.
         '''
-        targetPath = INTERNAL.asPath(f_exe)
-        iconPath = INTERNAL.asPath(f_icon)
+        targetPath = INTERNAL.fileAsPath(f_exe)
+        iconPath = INTERNAL.fileAsPath(f_icon)
         start_menu_path = os.path.join(winshell.start_menu(), "Programs")
         shortcut_path = os.path.join(start_menu_path, f"{name}.lnk")
         
@@ -90,3 +93,28 @@ class Shortcut:
             shortcut.description = name
             shortcut.working_directory = os.path.dirname(targetPath)
             shortcut.icon_location = (iconPath, 0)
+
+class Utils:
+    
+    @staticmethod
+    def sorted(iterable, key=None):
+        '''
+        Sort a list, via a key-string, according to criteria used by Windows Built-in Application(s) (e.g., File Explorer).
+    
+        Note that, similar to Python's built-in `sorted`, creates a new list.
+        '''
+        return natsort.natsorted(iterable, key=key)
+    
+    @staticmethod
+    def sort(iterable, key=None):
+        '''
+        Sort a list, via a key-string, according to criteria used by Windows Built-in Application(s) (e.g., File Explorer).
+    
+        Note that, similar to Python's built-in `sort`, sorts in-place.
+        '''
+        natsort_key = natsort.natsort_keygen()
+        kwargs = {}
+        if key != None:
+            kwargs['key'] = lambda x: natsort_key(key(x))
+        iterable.sort(**kwargs)
+    
