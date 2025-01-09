@@ -9,11 +9,6 @@ import automatey.Utils.StringUtils as StringUtils
 import automatey.Base.ExceptionUtils as ExceptionUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 
-class Quality:
-    
-    class HIGH: pass
-    class AVERAGE: pass
-
 class INTERNAL_Utils:    
 
     class Action:
@@ -45,13 +40,13 @@ class Actions:
                      endTime:TimeUtils.Time,
                      isMute=False,
                      isNearestKeyframe:bool=False,
-                     quality=Quality.HIGH,
+                     CRF:int=None,
                      modifiers=None):
             self.startTime = startTime
             self.endTime = endTime
             self.isMute = isMute
             self.isNearestKeyframe = isNearestKeyframe
-            self.quality = quality
+            self.CRF = CRF
             self.modifiers = [] if (modifiers is None) else modifiers
 
     class Join(INTERNAL_Utils.Action):
@@ -191,11 +186,6 @@ class INTERNAL_VideoProcessing:
     
     class FFMPEGWrapper:
         
-        Constants = {
-            'AverageCRF' : 17,
-            'HighCRF' : 12,
-        }
-        
         CommandTemplates = {
             'VideoTrimNearestKeyframe' : ProcessUtils.CommandTemplate(
                 r'ffmpeg',
@@ -278,11 +268,6 @@ class INTERNAL_VideoProcessing:
                 r'-vframes 1',
                 r'{{{OUTPUT-FILE}}}',
             ),
-        }
-
-        QualityToCRF = {
-            Quality.AVERAGE : Constants['AverageCRF'],
-            Quality.HIGH : Constants['HighCRF'],
         }
 
         @staticmethod
@@ -574,8 +559,7 @@ class INTERNAL_VideoProcessing:
             # If trimming is not at nearest key-frame, then it is possible to specify filter(s), and CRF value.
             if not (trimAction.isNearestKeyframe):
                 # Deriving CRF value.
-                CRFValue = INTERNAL_VideoProcessing.FFMPEGWrapper.QualityToCRF[trimAction.quality]
-                command_VideoTrim.assertParameter('crf', str(CRFValue))
+                command_VideoTrim.assertParameter('crf', str(trimAction.CRF))
                 
                 # Processing modifier(s).
                 modifiers = [modifier for modifier in trimAction.modifiers if issubclass(type(modifier), INTERNAL_Utils.Modifier)]
