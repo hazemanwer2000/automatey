@@ -381,8 +381,6 @@ class INTERNAL_VideoProcessing:
             command_GenerateThumbnails.assertParameter('output-directory', str(f_dstDir))
             command_GenerateThumbnails.assertParameter('capture-fps', f"{captureFPS:.6f}")
             
-            print(str(command_GenerateThumbnails))
-            
             proc = ProcessUtils.Process(str(command_GenerateThumbnails))
             proc.run()
 
