@@ -1,6 +1,7 @@
 
 # Standard libraries
 from datetime import datetime
+import time
 
 class Constants:
     US_IN_HOUR = 3600000000
@@ -126,3 +127,11 @@ class Time:
         '''
         total_us = int(milliseconds*Constants.US_IN_MS)
         return Time(total_us)
+    
+    @staticmethod
+    def getEpochTime():
+        '''
+        Gets the (current) Epoch time.
+        '''
+        return Time(int(time.time() * 1_000_000))
+    
