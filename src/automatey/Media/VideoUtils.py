@@ -268,6 +268,14 @@ class INTERNAL_VideoProcessing:
                 r'-vframes 1',
                 r'{{{OUTPUT-FILE}}}',
             ),
+            'ThumbnailsGenerate' : ProcessUtils.CommandTemplate(
+                r'ffmpeg',
+                r'-hide_banner',
+                r'-loglevel error',
+                r'-i {{{INPUT-FILE}}}',
+                r'-vf fps={{{CAPTURE-FPS}}}',
+                r'{{{OUTPUT-DIRECTORY}}}/%03d.png',
+            ),
         }
 
         @staticmethod
@@ -357,6 +365,25 @@ class INTERNAL_VideoProcessing:
             command_GenerateThumbnail.assertParameter('time', str(time))
             
             proc = ProcessUtils.Process(str(command_GenerateThumbnail))
+            proc.run()
+
+        @staticmethod
+        def generateThumbnails(f_src:FileUtils.File, f_dstDir:FileUtils.File, N:int, generalInfo:dict):
+            '''
+            Generate N thumbnails, at equidistant timestamps.
+            '''
+            
+            captureFPS = 1 / (generalInfo['duration'].toSeconds() / N)
+            
+            # Format command.
+            command_GenerateThumbnails = INTERNAL_VideoProcessing.FFMPEGWrapper.CommandTemplates['ThumbnailsGenerate'].createFormatter()
+            command_GenerateThumbnails.assertParameter('input-file', str(f_src))
+            command_GenerateThumbnails.assertParameter('output-directory', str(f_dstDir))
+            command_GenerateThumbnails.assertParameter('capture-fps', f"{captureFPS:.6f}")
+            
+            print(str(command_GenerateThumbnails))
+            
+            proc = ProcessUtils.Process(str(command_GenerateThumbnails))
             proc.run()
 
         class VideoFilterConstructors:
@@ -771,12 +798,7 @@ class Video:
         f_dstDir.makeDirectory()
         
         # ? Generate thumbnail(s).
-        incrementTime = self.getDuration() / (N + 1)
-        totalTime = TimeUtils.Time(0)
-        for i in range(1, N + 1):
-            totalTime += incrementTime
-            f_dst = f_dstDir.traverseDirectory(f"thumbs-{i:04d}.png")
-            INTERNAL_VideoProcessing.FFMPEGWrapper.generateThumbnail(self.f_src, f_dst, totalTime)
+        INTERNAL_VideoProcessing.FFMPEGWrapper.generateThumbnails(self.f_src, f_dstDir, N, self.generalInfo)
 
     def generateThumbnail(self, f_dst:FileUtils.File, time:TimeUtils.Time):
         '''
