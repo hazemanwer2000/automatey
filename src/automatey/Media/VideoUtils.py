@@ -8,6 +8,7 @@ import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Base.ExceptionUtils as ExceptionUtils
 import automatey.Abstract.Graphics as AbstractGraphics
+import automatey.Utils.Validation as Validation
 
 class INTERNAL_Utils:    
 
@@ -348,7 +349,14 @@ class INTERNAL_VideoProcessing:
             result = StringUtils.Normalize.asSentence(result)
             resultList = result.split(' ')
             
-            keyframes = [TimeUtils.Time.createFromSeconds(float(x.split(',')[0])) for x in resultList]
+            keyframes = []
+            for resultItem in resultList:
+                floatAsString = resultItem.split(',')[0]
+                try:
+                    floatValue = Validation.asFloat(floatAsString)
+                except:
+                    continue
+                keyframes.append(TimeUtils.Time.createFromSeconds(floatValue))
             
             return keyframes
 
