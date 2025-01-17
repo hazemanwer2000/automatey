@@ -33,6 +33,23 @@ class Alignment:
         class Bottom: pass
         class Center: pass
 
+class Rotation:
+    
+    def __init__(self, degrees):
+        while degrees < 0:
+            degrees += 360
+        while degrees >= 360:
+            degrees -= 360
+        self.degrees = degrees
+    
+    def __int__(self):
+        return int(self.degrees)
+
+class Mirror:
+    
+    class Horizontal: pass
+    class Vertical: pass
+
 # Drawable(s)
 
 class Point:

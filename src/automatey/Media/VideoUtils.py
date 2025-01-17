@@ -165,6 +165,25 @@ class Modifiers:
             def __init__(self, duration:TimeUtils.Time):
                 self.duration = duration
 
+    class Transformations:
+        
+        class Rotate:
+            '''
+            Apply rotation.
+            
+            Note that,
+            - Only `90` degree multiple(s) are supported.
+            '''
+            def __init__(self, rotation:AbstractGraphics.Rotation):
+                self.rotation = rotation
+        
+        class Mirror:
+            '''
+            Mirror, either vertically or horizontally.
+            '''
+            def __init__(self, mirror):
+                self.mirror = mirror
+
 class AudioModifiers:
     
     class Transitions:
@@ -408,6 +427,12 @@ class INTERNAL_VideoProcessing:
                 # Transition(s)
                 'FadeIn' : ProcessUtils.CommandTemplate(r'fade=t=in:st=0:d={{{DURATION}}}'),
                 'FadeOut' : ProcessUtils.CommandTemplate(r"fade=t=out:st={{{OFFSET}}}:d={{{DURATION}}}"),
+                # Transformation(s)
+                'Rotate-90-CW' : ProcessUtils.CommandTemplate(r'transpose=1'),
+                'Rotate-90-CCW' : ProcessUtils.CommandTemplate(r'transpose=2'),
+                'Rotate-180' : ProcessUtils.CommandTemplate(r'hflip,vflip'),
+                'MirrorVertical' : ProcessUtils.CommandTemplate(r'vflip'),
+                'MirrorHorizontal' : ProcessUtils.CommandTemplate(r'hflip'),
             }
             
             @staticmethod
@@ -497,6 +522,38 @@ class INTERNAL_VideoProcessing:
                 formatter.assertParameter('duration', f"{durationInSeconds:.3f}")
                 
                 return str(formatter)
+            
+            Degrees2FilterTemplateName = {
+                90 : 'Rotate-90-CW',
+                270 : 'Rotate-90-CCW',
+                180 : 'Rotate-180',
+            }
+    
+            @staticmethod
+            def Rotate(modifier:Modifiers.Transformations.Rotate, generalInfo, specificInfo):
+                
+                # ? Validate degree(s).
+                degrees = int(modifier.rotation)
+                if degrees % 90 != 0:
+                    raise ExceptionUtils.ValidationError('Rotation must be a 90-degree(s) multiple.')
+                
+                # ? Acquire and format filter.
+                filterTemplateName = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.Degrees2FilterTemplateName[degrees]
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates[filterTemplateName].createFormatter()
+                return str(formatter)
+
+            Mirror2FilterTemplateName = {
+                AbstractGraphics.Mirror.Vertical : 'MirrorVertical',
+                AbstractGraphics.Mirror.Horizontal: 'MirrorHorizontal',
+            }
+
+            @staticmethod
+            def Mirror(modifier:Modifiers.Transformations.Mirror, generalInfo, specificInfo):
+                
+                # ? Acquire and format filter.
+                filterTemplateName = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.Mirror2FilterTemplateName[modifier.mirror]
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates[filterTemplateName].createFormatter()
+                return str(formatter)
     
         ModifierToVideoFilter = {
             # Filter(s)
@@ -512,6 +569,9 @@ class INTERNAL_VideoProcessing:
             # Transition(s)
             Modifiers.Transitions.FadeIn : VideoFilterConstructors.FadeIn,
             Modifiers.Transitions.FadeOut : VideoFilterConstructors.FadeOut,
+            # Transformation(s)
+            Modifiers.Transformations.Rotate : VideoFilterConstructors.Rotate,
+            Modifiers.Transformations.Mirror : VideoFilterConstructors.Mirror,
         }
 
         @staticmethod
