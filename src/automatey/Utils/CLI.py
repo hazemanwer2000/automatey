@@ -1,8 +1,14 @@
 
 import automatey.Base.ColorUtils as ColorUtils
+import automatey.Base.TimeUtils as TimeUtils
+import automatey.Utils.RandomUtils as RandomUtils
 import automatey.Abstract.Graphics as Graphics
 
 import click
+
+import queue
+import threading
+import time
 
 class INTERNAL:
     
@@ -87,10 +93,94 @@ class LineOverwriter:
 
         # ? Echo (all).
         echo(prefix + message, textColor=textColor)
-        echo(suffix)
+        if len(suffix) > 0:
+            echo(suffix)
     
     @staticmethod
     def skipToNextLine():
         LineOverwriter.INTERNAL.TrackedMaxMessageLength = 0
         LineOverwriter.INTERNAL.IsCurrentlyTracking = False
         echo('\n')
+
+class VocalTimer:
+    '''
+    A vocal timer, for CLI application(s) with long I/O operation(s).
+    
+    Feature(s):
+    - It runs on another thread.
+    - It may be re-used.
+    '''
+    class INTERNAL:
+
+        class State:
+            
+            def __init__(self):
+                self.isHalted:bool = True
+                self.referenceTime:TimeUtils.Time = None
+                self.label:str = None
+                self.textColor:str = None
+                self.isTerminateThread:bool = False
+        
+        @staticmethod
+        def sleep():
+            time.sleep(RandomUtils.Generation.Float(1.2, 0.8))
+
+    class Commands:
+        
+        class StartTimer:
+            
+            def __init__(self, label:str, textColor:Graphics.TextColor=None):
+                self.label = label
+                self.textColor = textColor
+                
+            def INTERNAL_stateTransition(self, state:"VocalTimer.INTERNAL.State"):
+                state.isHalted = False
+                state.referenceTime = TimeUtils.Time.getEpochTime()
+                state.label = self.label
+                state.textColor = self.textColor
+        
+        class StopTimer:
+
+            def INTERNAL_stateTransition(self, state:"VocalTimer.INTERNAL.State"):
+                state.isHalted = True
+                LineOverwriter.skipToNextLine()
+        
+        class DestroyTimer:
+            
+            def INTERNAL_stateTransition(self, state:"VocalTimer.INTERNAL.State"):
+                state.isTerminateThread = True
+    
+    def __init__(self):
+        
+        # ? Initialize large object(s).
+        self.commandQueue = queue.Queue()
+        self.thread = threading.Thread(target=self.INTERNAL_runner)
+        
+        # ? Start the thread.
+        self.thread.start()
+    
+    def INTERNAL_runner(self):
+
+        # ? Initialize working variable(s).
+        state = VocalTimer.INTERNAL.State()
+        
+        while (True):
+
+            # ? Check if there's a command pending in the queue.
+            while not self.commandQueue.empty():
+                command = self.commandQueue.get()
+                command.INTERNAL_stateTransition(state)
+            
+            # ? Check, if thread must be terminated.
+            if state.isTerminateThread:
+                break
+            
+            # ? If not halted, (...)
+            if not state.isHalted:
+                VocalTimer.INTERNAL.sleep()
+                deltaTime = TimeUtils.Time.getEpochTime() - state.referenceTime
+                message = state.label + '  ' + str(deltaTime)
+                LineOverwriter.write(message, textColor=state.textColor)
+    
+    def issueCommand(self, command):
+        self.commandQueue.put(command)
