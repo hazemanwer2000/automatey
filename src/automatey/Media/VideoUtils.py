@@ -91,9 +91,10 @@ class Modifiers:
             
             Value(s) are factor(s) (i.e., '1.0' has no effect).
             '''
-            def __init__(self, brightness=1.0, contrast=1.0):
+            def __init__(self, brightness=1.0, contrast=1.0, saturation=1.0):
                 self.brightness = brightness
                 self.contrast = contrast
+                self.saturation = saturation
         
         class GaussianBlur(INTERNAL_Utils.Filter):
             '''
@@ -420,7 +421,7 @@ class INTERNAL_VideoProcessing:
                 # Filter(s)
                 'SepiaTone' : ProcessUtils.CommandTemplate(r'colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131'),
                 'Grayscale' : ProcessUtils.CommandTemplate(r'format=gray'),
-                'BrightnessContrast' : ProcessUtils.CommandTemplate(r'eq=brightness={{{BRIGHTNESS}}}:contrast={{{CONTRAST}}}'),
+                'BrightnessContrast' : ProcessUtils.CommandTemplate(r'eq=brightness={{{BRIGHTNESS}}}:contrast={{{CONTRAST}}}:saturation={{{SATURATION}}}'),
                 'GaussianBlur' : ProcessUtils.CommandTemplate(r'gblur=sigma={{{SIGMA}}}'),
                 'Sharpen' : ProcessUtils.CommandTemplate(r'unsharp=luma_msize_x={{{KERNEL-SIZE}}}:luma_msize_y={{{KERNEL-SIZE}}}:luma_amount={{{FACTOR}}}'),
                 'Pixelate' : ProcessUtils.CommandTemplate(r'pixelize=width={{{PIXEL-SIZE}}}:height={{{PIXEL-SIZE}}}'),
@@ -453,6 +454,7 @@ class INTERNAL_VideoProcessing:
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['BrightnessContrast'].createFormatter()
                 formatter.assertParameter('brightness', f"{modifier.brightness-1:.3f}")
                 formatter.assertParameter('contrast', f"{modifier.contrast:.3f}")
+                formatter.assertParameter('saturation', f"{modifier.saturation:.3f}")
                 return str(formatter)
             
             @staticmethod
