@@ -538,7 +538,7 @@ class INTERNAL_VideoProcessing:
                 # ? Validate degree(s).
                 degrees = int(modifier.rotation)
                 if degrees % 90 != 0:
-                    raise ExceptionUtils.ValidationError('Rotation must be a 90-degree(s) multiple.')
+                    raise ExceptionUtils.ValidationError(f'Rotation must be a 90-degree(s) multiple. {degrees:d} given.')
                 
                 # ? Acquire and format filter.
                 filterTemplateName = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.Degrees2FilterTemplateName[degrees]
