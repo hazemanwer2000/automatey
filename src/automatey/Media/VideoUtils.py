@@ -125,6 +125,17 @@ class Modifiers:
             '''
             def __init__(self, factor):
                 self.factor = factor
+
+        class Noise(INTERNAL_Utils.Filter):
+            '''
+            Add noise.
+            
+            Value(s) are factor(s) (i.e., '1.0' has no effect).
+            
+            Note that, factor must be `>= 1.0`.
+            '''
+            def __init__(self, factor):
+                self.factor = factor
                 
         class AddBorder(INTERNAL_Utils.Filter):
             '''
@@ -425,6 +436,7 @@ class INTERNAL_VideoProcessing:
                 'GaussianBlur' : ProcessUtils.CommandTemplate(r'gblur=sigma={{{SIGMA}}}'),
                 'Sharpen' : ProcessUtils.CommandTemplate(r'unsharp=luma_msize_x={{{KERNEL-SIZE}}}:luma_msize_y={{{KERNEL-SIZE}}}:luma_amount={{{FACTOR}}}'),
                 'Pixelate' : ProcessUtils.CommandTemplate(r'pixelize=width={{{PIXEL-SIZE}}}:height={{{PIXEL-SIZE}}}'),
+                'Noise' : ProcessUtils.CommandTemplate(r'noise=alls={{{FACTOR}}}:allf=t+u'),
                 'AddBorder' : ProcessUtils.CommandTemplate(r'pad=iw+{{{THICKNESS}}}*2:ih+{{{THICKNESS}}}*2:{{{THICKNESS}}}:{{{THICKNESS}}}:color={{{COLOR}}}'),
                 'Crop' : ProcessUtils.CommandTemplate(r'crop={{{WIDTH}}}:{{{HEIGHT}}}:{{{X}}}:{{{Y}}}'), 
                 'Resize' : ProcessUtils.CommandTemplate(r'scale={{{WIDTH}}}:{{{HEIGHT}}}'),
@@ -476,6 +488,13 @@ class INTERNAL_VideoProcessing:
             def Pixelate(modifier:Modifiers.Filters.Pixelate, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Pixelate'].createFormatter()
                 formatter.assertParameter('pixel-size', f"{modifier.factor:.3f}")
+                return str(formatter)
+
+            @staticmethod
+            def Noise(modifier:Modifiers.Filters.Noise, generalInfo, specificInfo):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Noise'].createFormatter()
+                normalizedFactor = round(max((modifier.factor - 1) * 20.0, 1.0))
+                formatter.assertParameter('factor', f"{normalizedFactor:d}")
                 return str(formatter)
             
             @staticmethod
@@ -568,6 +587,7 @@ class INTERNAL_VideoProcessing:
             Modifiers.Filters.GaussianBlur : VideoFilterConstructors.GaussianBlur,
             Modifiers.Filters.Sharpen : VideoFilterConstructors.Sharpen,
             Modifiers.Filters.Pixelate : VideoFilterConstructors.Pixelate,
+            Modifiers.Filters.Noise : VideoFilterConstructors.Noise,
             Modifiers.Filters.AddBorder : VideoFilterConstructors.AddBorder,
             Modifiers.Filters.Crop : VideoFilterConstructors.Crop,
             Modifiers.Filters.Resize : VideoFilterConstructors.Resize,
