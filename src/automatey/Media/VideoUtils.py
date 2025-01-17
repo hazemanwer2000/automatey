@@ -493,7 +493,7 @@ class INTERNAL_VideoProcessing:
             @staticmethod
             def Noise(modifier:Modifiers.Filters.Noise, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Noise'].createFormatter()
-                normalizedFactor = round(max((modifier.factor - 1) * 20.0, 1.0))
+                normalizedFactor = round((modifier.factor - 1) * 20.0)
                 formatter.assertParameter('factor', f"{normalizedFactor:d}")
                 return str(formatter)
             
