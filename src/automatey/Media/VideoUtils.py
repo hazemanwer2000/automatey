@@ -445,7 +445,7 @@ class INTERNAL_VideoProcessing:
             @staticmethod
             def Pixelate(modifier:Modifiers.Filters.Pixelate, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Pixelate'].createFormatter()
-                formatter.assertParameter('pixel-size', f"{modifier.factor:d}")
+                formatter.assertParameter('pixel-size', f"{modifier.factor:.3f}")
                 return str(formatter)
             
             @staticmethod
