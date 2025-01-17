@@ -49,6 +49,23 @@ class Point:
     def __add__(self, other):
         return Point(self.x - other.x, self.y - other.y)
     
+class Line:
+    '''
+    (2D) Representation of a line.
+    '''
+    def __init__(self, thickness, color:ColorUtils.Color):
+        self.thickness = thickness
+        self.color = color
+        
+class StraightLine(Line):
+    '''
+    (2D) Representation of a straight line.
+    '''
+    def __init__(self, thickness, color:ColorUtils.Color, x:Point, y:Point):
+        Line.__init__(self, thickness, color)
+        self.x = x
+        self.y = y
+    
 class Border:
     '''
     (2D) Representation of a border.
@@ -80,3 +97,21 @@ class Rectangle(Shape):
         Shape.__init__(self, fillColor=fillColor, border=border)
         self.topLeft = topLeft
         self.bottomRight = bottomRight
+
+# Text.
+
+class TextStyle:
+    '''
+    Styling of text.
+    '''
+    def __init__(self, isItalic:bool=False, isBold:bool=False):
+        self.isItalic = isItalic
+        self.isBold = isBold
+
+class TextColor:
+    '''
+    Coloring of text.
+    '''
+    def __init__(self, foreground:ColorUtils.Color, background:ColorUtils.Color):
+        self.foreground = foreground
+        self.background = background
