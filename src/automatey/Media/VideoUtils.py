@@ -24,6 +24,9 @@ class INTERNAL_Utils:
     class Transition(Modifier):
         pass
 
+    class Transformation(Modifier):
+        pass
+
     class AudioModifier:
         pass
 
@@ -167,7 +170,7 @@ class Modifiers:
 
     class Transformations:
         
-        class Rotate:
+        class Rotate(INTERNAL_Utils.Transformation):
             '''
             Apply rotation.
             
@@ -177,7 +180,7 @@ class Modifiers:
             def __init__(self, rotation:AbstractGraphics.Rotation):
                 self.rotation = rotation
         
-        class Mirror:
+        class Mirror(INTERNAL_Utils.Transformation):
             '''
             Mirror, either vertically or horizontally.
             '''
