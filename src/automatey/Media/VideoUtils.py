@@ -85,9 +85,9 @@ class Modifiers:
         class Grayscale(INTERNAL_Utils.Filter):
             pass
         
-        class BrightnessContrast(INTERNAL_Utils.Filter):
+        class Brightness(INTERNAL_Utils.Filter):
             '''
-            Adjust brightness and contrast.
+            Adjust brightness, contrast, and saturation.
             
             Value(s) are factor(s) (i.e., '1.0' has no effect).
             '''
@@ -432,7 +432,7 @@ class INTERNAL_VideoProcessing:
                 # Filter(s)
                 'SepiaTone' : ProcessUtils.CommandTemplate(r'colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131'),
                 'Grayscale' : ProcessUtils.CommandTemplate(r'format=gray'),
-                'BrightnessContrast' : ProcessUtils.CommandTemplate(r'eq=brightness={{{BRIGHTNESS}}}:contrast={{{CONTRAST}}}:saturation={{{SATURATION}}}'),
+                'Brightness' : ProcessUtils.CommandTemplate(r'eq=brightness={{{BRIGHTNESS}}}:contrast={{{CONTRAST}}}:saturation={{{SATURATION}}}'),
                 'GaussianBlur' : ProcessUtils.CommandTemplate(r'gblur=sigma={{{SIGMA}}}'),
                 'Sharpen' : ProcessUtils.CommandTemplate(r'unsharp=luma_msize_x={{{KERNEL-SIZE}}}:luma_msize_y={{{KERNEL-SIZE}}}:luma_amount={{{FACTOR}}}'),
                 'Pixelate' : ProcessUtils.CommandTemplate(r'pixelize=width={{{PIXEL-SIZE}}}:height={{{PIXEL-SIZE}}}'),
@@ -462,8 +462,8 @@ class INTERNAL_VideoProcessing:
                 return str(formatter)
             
             @staticmethod
-            def BrightnessContrast(modifier:Modifiers.Filters.BrightnessContrast, generalInfo, specificInfo):
-                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['BrightnessContrast'].createFormatter()
+            def Brightness(modifier:Modifiers.Filters.Brightness, generalInfo, specificInfo):
+                formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Brightness'].createFormatter()
                 formatter.assertParameter('brightness', f"{modifier.brightness-1:.3f}")
                 formatter.assertParameter('contrast', f"{modifier.contrast:.3f}")
                 formatter.assertParameter('saturation', f"{modifier.saturation:.3f}")
@@ -583,7 +583,7 @@ class INTERNAL_VideoProcessing:
             # Filter(s)
             Modifiers.Filters.SepiaTone : VideoFilterConstructors.SepiaTone,
             Modifiers.Filters.Grayscale : VideoFilterConstructors.Grayscale,
-            Modifiers.Filters.BrightnessContrast : VideoFilterConstructors.BrightnessContrast,
+            Modifiers.Filters.Brightness : VideoFilterConstructors.Brightness,
             Modifiers.Filters.GaussianBlur : VideoFilterConstructors.GaussianBlur,
             Modifiers.Filters.Sharpen : VideoFilterConstructors.Sharpen,
             Modifiers.Filters.Pixelate : VideoFilterConstructors.Pixelate,
