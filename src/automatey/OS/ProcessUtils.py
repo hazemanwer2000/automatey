@@ -6,6 +6,7 @@ import automatey.Base.ExceptionUtils as ExceptionUtils
 
 # Standard libraries
 import subprocess
+import shlex
 
 class FileTemplate:
     '''
@@ -238,9 +239,11 @@ class Process:
     '''
     
     def __init__(self, *args):
-        # Joining all, then splitting again.
-        self.command = (' '.join(args)).split(sep=' ')
-        
+        # ? Joining all at space(s).
+        self.command = ' '.join(args)
+        # ? Splitting into argument(s), quote-sensitive.
+        self.command = shlex.split(self.command)
+
         self.stdout = None
         self.stderr = None
     
