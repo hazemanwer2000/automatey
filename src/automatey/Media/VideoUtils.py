@@ -903,6 +903,18 @@ class Video:
     
     class Utils:
         
+        SupportedExtensions = [
+            'mp4',
+            'mkv',
+            'wmv',
+            'mov',
+            'avi',
+            'webm',
+            'flv',
+            'mpeg',
+            'rm', 'rmvb',
+        ]
+        
         @staticmethod
         def isVideo(f:FileUtils.File):
             '''
@@ -910,4 +922,4 @@ class Video:
             
             Note, currently only 'mp4' format is supported.
             '''
-            return f.getExtension() == 'mp4'
+            return f.getExtension() in Video.Utils.SupportedExtensions
