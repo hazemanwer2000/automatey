@@ -171,6 +171,7 @@ class VocalTimer:
             while not self.commandQueue.empty():
                 command = self.commandQueue.get()
                 command.INTERNAL_stateTransition(state)
+                # ? ? Send notification back upon state-transition (i.e., a synchronous call)
                 self.notifyQueue.put(None)
             
             # ? Check, if thread must be terminated.
@@ -186,4 +187,4 @@ class VocalTimer:
     
     def issueCommand(self, command):
         self.commandQueue.put(command)
-        return self.notifyQueue.get()
+        self.notifyQueue.get()
