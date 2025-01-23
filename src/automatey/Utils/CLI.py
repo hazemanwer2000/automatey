@@ -154,6 +154,7 @@ class VocalTimer:
         
         # ? Initialize large object(s).
         self.commandQueue = queue.Queue()
+        self.notifyQueue = queue.Queue()
         self.thread = threading.Thread(target=self.INTERNAL_runner)
         
         # ? Start the thread.
@@ -170,6 +171,7 @@ class VocalTimer:
             while not self.commandQueue.empty():
                 command = self.commandQueue.get()
                 command.INTERNAL_stateTransition(state)
+                self.notifyQueue.put(None)
             
             # ? Check, if thread must be terminated.
             if state.isTerminateThread:
@@ -184,3 +186,4 @@ class VocalTimer:
     
     def issueCommand(self, command):
         self.commandQueue.put(command)
+        return self.notifyQueue.get()
