@@ -986,7 +986,7 @@ class Widgets:
                 Get cell.
                 '''
                 qItem = self.qTableWidget.item(rowIdx, colIdx)
-                text = qItem.text() if (qItem != None) else ''
+                text = qItem.text().strip() if (qItem != None) else ''
                 return text
 
             def getEntry(self, idx) -> dict:
