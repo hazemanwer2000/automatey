@@ -13,7 +13,7 @@ import automatey.Utils.RandomUtils as RandomUtils
 
 class INTERNAL_Constants:
     
-    RANDOM_FILE_NAME_LENGTH = 7
+    MINIMUM_RANDOM_LENGTH = 7
     
 class File:
     '''
@@ -239,7 +239,7 @@ class File:
             Returns a *File* object, of the temporary directory.
             '''
             baseTmpDir = File(tempfile.gettempdir())
-            newTmpDirName = RandomUtils.Generation.String(INTERNAL_Constants.RANDOM_FILE_NAME_LENGTH)
+            newTmpDirName = RandomUtils.Generation.String(INTERNAL_Constants.MINIMUM_RANDOM_LENGTH)
             newTmpDir = baseTmpDir.traverseDirectory(newTmpDirName)
             newTmpDir.makeDirectory()
             return newTmpDir
@@ -309,7 +309,7 @@ class File:
                 return os.path.join(parentDir, name + suffix + extension)
                 
             @staticmethod
-            def randomizeName(path, fileNameLength=INTERNAL_Constants.RANDOM_FILE_NAME_LENGTH, charPool=None):
+            def randomizeName(path, fileNameLength=INTERNAL_Constants.MINIMUM_RANDOM_LENGTH, charPool=None):
                 '''
                 Randomize name, preserving the extension (if present).
                 '''
@@ -317,13 +317,13 @@ class File:
                 return File.Utils.Path.modifyName(path, name=randomName)
             
             @staticmethod
-            def iterateName(path, suffix='-'):
+            def iterateName(path, suffix='-', iteratorLength=INTERNAL_Constants.MINIMUM_RANDOM_LENGTH):
                 '''
                 Adds an iterator value to name, incrementally, stopping if it does not exist. 
                 '''
                 iterator = 1
                 while (True):
-                    currentSuffix = suffix + str(iterator).zfill(4)
+                    currentSuffix = suffix + str(iterator).zfill(iteratorLength)
                     returnPath = File.Utils.Path.modifyName(path, suffix=currentSuffix)
                     if not os.path.exists(returnPath): break
                     iterator += 1
