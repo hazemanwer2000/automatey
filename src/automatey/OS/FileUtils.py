@@ -112,6 +112,20 @@ class File:
         pathWithoutExt = os.path.splitext(self.path)[0]
         return os.path.split(pathWithoutExt)[-1]
 
+    def getSize(self) -> int:
+        '''
+        Get the size, in bytes, of a file or directory.
+        
+        Note that,
+        - Size of a directory is the sum of the size(s) of all file(s) within.
+        '''
+        size = None
+        if self.isDirectory():
+            size = sum(f.stat().st_size for f in pathlib.Path(str(self)).glob('**/*') if f.is_file())
+        else:
+            size = os.path.getsize(str(self))
+        return size
+
     def openFile(self, mode:str) -> typing.Self:
         '''
         Opens a file, for read/write operation(s).

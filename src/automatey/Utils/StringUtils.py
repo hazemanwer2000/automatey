@@ -62,3 +62,12 @@ class Split:
         Given a concatenated string of words (e.g., `GIFForExample`), returns a list of words (e.g., `['GIF', 'For', 'Example']`).
         '''
         return Regex.findAll(r'[A-Z]+(?=[A-Z][a-z]|$)|[A-Z][a-z]*', text)
+
+class MakePretty:
+    
+    @staticmethod
+    def Size(sizeInBytes:int):
+        for unit in ['', 'KB', 'MB', 'GB', 'TB', 'PB']:
+            if sizeInBytes < 1024:
+                return f"{sizeInBytes:.2f} {unit}"
+            sizeInBytes /= 1024
