@@ -142,20 +142,34 @@ class Date:
     
     class INTERNAL:
         
-        EpochDateTime = datetime.datetime(1970, 1, 1)
+        ReferenceDateTime = datetime.datetime(1, 1, 1)
     
-    def __init__(self, daysSinceEpoch):
-        self.daysSinceEpoch = daysSinceEpoch
+    def __init__(self, daysSince):
+        self.daysSince = daysSince
     
     @staticmethod
     def createFromString(formattedString:str):
         datetimeObj = datetime.datetime.strptime(formattedString, "%Y%m%d")
-        return Date((datetimeObj - Date.INTERNAL.EpochDateTime).days)
+        return Date((datetimeObj - Date.INTERNAL.ReferenceDateTime).days)
     
     def toString(self):
-        datetimeObj = Date.INTERNAL.EpochDateTime + datetime.timedelta(days=self.daysSinceEpoch)
+        datetimeObj = Date.INTERNAL.ReferenceDateTime + datetime.timedelta(days=self.daysSince)
         return datetimeObj.strftime("%Y%m%d")
     
+    def toUnits(self):
+        datetimeObj = Date.INTERNAL.ReferenceDateTime + datetime.timedelta(days=self.daysSince)
+        return datetimeObj.year, datetimeObj.month, datetimeObj.day 
+
+    def __add__(self, obj):
+        if isinstance(obj, int):
+            return Date(self.daysSince + obj)
+
+    def __sub__(self, obj):
+        if isinstance(obj, int):
+            return Date(self.daysSince - obj)
+        elif isinstance(obj, Date):
+            return int(self.daysSince - obj.daysSince)
+
     def __str__(self) -> str:
         return self.toString()
     
