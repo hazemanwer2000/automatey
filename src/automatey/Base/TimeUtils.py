@@ -1,6 +1,6 @@
 
 # Standard libraries
-from datetime import datetime
+import datetime
 import time
 
 class Constants:
@@ -101,7 +101,7 @@ class Time:
         '''
         Create from string representation (HH:MM:SS.xxx)
         '''
-        timeObj = datetime.strptime(formattedString, "%H:%M:%S.%f").time()
+        timeObj = datetime.datetime.strptime(formattedString, "%H:%M:%S.%f").time()
         return Time.createFromTimeUnits(timeObj.hour, timeObj.minute, timeObj.second, timeObj.microsecond)
     
     @staticmethod
@@ -134,4 +134,30 @@ class Time:
         Gets the (current) Epoch time.
         '''
         return Time(int(time.time() * 1_000_000))
+
+class Date:
+    '''
+    Representation of a date (e.g., '20250123').
+    '''
     
+    class INTERNAL:
+        
+        EpochDateTime = datetime.datetime(1970, 1, 1)
+    
+    def __init__(self, daysSinceEpoch):
+        self.daysSinceEpoch = daysSinceEpoch
+    
+    @staticmethod
+    def createFromString(formattedString:str):
+        datetimeObj = datetime.datetime.strptime(formattedString, "%Y%m%d")
+        return Date((datetimeObj - Date.INTERNAL.EpochDateTime).days)
+    
+    def toString(self):
+        datetimeObj = Date.INTERNAL.EpochDateTime + datetime.timedelta(days=self.daysSinceEpoch)
+        return datetimeObj.strftime("%Y%m%d")
+    
+    def __str__(self) -> str:
+        return self.toString()
+    
+    def __repr__(self) -> str:
+        return str(self)
