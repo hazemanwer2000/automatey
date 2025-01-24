@@ -205,6 +205,13 @@ class DateTime:
         datetimeObj = Date.INTERNAL.ReferenceDateTime + datetime.timedelta(microseconds=self.microsecondsSince)
         return datetimeObj.strftime(DateTime.INTERNAL.FormatSyntax)
 
+    @staticmethod
+    def createFromNow():
+        datetimeObj = datetime.datetime.now()
+        datetimeDiffObj = (datetimeObj - Date.INTERNAL.ReferenceDateTime)
+        totalMicroseconds = (int(datetimeDiffObj.total_seconds()) * Constants.US_IN_SECOND) + datetimeDiffObj.microseconds
+        return DateTime(totalMicroseconds)
+
     def __add__(self, obj):
         if isinstance(obj, Time):
             return DateTime(self.microsecondsSince + obj.microseconds)
