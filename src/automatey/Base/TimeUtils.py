@@ -200,10 +200,6 @@ class DateTime:
         datetimeDiffObj = (datetimeObj - Date.INTERNAL.ReferenceDateTime)
         totalMicroseconds = (int(datetimeDiffObj.total_seconds()) * Constants.US_IN_SECOND) + datetimeDiffObj.microseconds
         return DateTime(totalMicroseconds)
-    
-    def toString(self):
-        datetimeObj = Date.INTERNAL.ReferenceDateTime + datetime.timedelta(microseconds=self.microsecondsSince)
-        return datetimeObj.strftime(DateTime.INTERNAL.FormatSyntax)
 
     @staticmethod
     def createFromNow():
@@ -211,6 +207,17 @@ class DateTime:
         datetimeDiffObj = (datetimeObj - Date.INTERNAL.ReferenceDateTime)
         totalMicroseconds = (int(datetimeDiffObj.total_seconds()) * Constants.US_IN_SECOND) + datetimeDiffObj.microseconds
         return DateTime(totalMicroseconds)
+
+    def toString(self):
+        datetimeObj = Date.INTERNAL.ReferenceDateTime + datetime.timedelta(microseconds=self.microsecondsSince)
+        return datetimeObj.strftime(DateTime.INTERNAL.FormatSyntax)[:-3]
+
+    def getDate(self) -> Date:
+        return Date.createFromString(str(self).split('-', maxsplit=1)[0])
+
+    def getTime(self) -> Time:
+        timeObj = datetime.datetime.strptime(str(self).split('-', maxsplit=1)[1], "%H%M%S-%f").time()
+        return Time.createFromTimeUnits(timeObj.hour, timeObj.minute, timeObj.second, timeObj.microsecond)
 
     def __add__(self, obj):
         if isinstance(obj, Time):
