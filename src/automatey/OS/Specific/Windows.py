@@ -27,11 +27,29 @@ class Registry:
         
         class FileCategory:
             
-            class AllDirectories: pass
-            class AllFiles: pass
-            class SpecificExtension: pass
+            class AllDirectories:
+                '''
+                Applies whenever a directory is right-clicked.
+                '''
+                pass
+            class AllDirectoriesAsBackground:
+                '''
+                Applies whenever the empty space within a directory is right-clicked.
+                '''
+                pass
+            class AllFiles:
+                '''
+                Applies whenever a file is right-clicked.
+                '''
+                pass
+            class SpecificExtension:
+                '''
+                Applies whenever a file with a specific extension is right-clicked.
+                '''
+                pass
             
             INTERNAL_mapping = {
+                AllDirectoriesAsBackground : 'Directory\Background',
                 AllDirectories : 'Directory',
                 AllFiles : '*',
                 SpecificExtension : None,
