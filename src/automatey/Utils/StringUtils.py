@@ -71,3 +71,13 @@ class MakePretty:
             if sizeInBytes < 1024:
                 return f"{sizeInBytes:.2f} {unit}"
             sizeInBytes /= 1024
+
+class HexString:
+    
+    @staticmethod
+    def fromBytes(_bytes:bytes) -> str:
+        return _bytes.hex()
+
+    @staticmethod
+    def toBytes(hexStr:bytes) -> bytes:
+        return bytes.fromhex(hexStr)
