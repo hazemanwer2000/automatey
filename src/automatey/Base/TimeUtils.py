@@ -143,18 +143,20 @@ class Date:
     class INTERNAL:
         
         ReferenceDateTime = datetime.datetime(1, 1, 1)
+        
+        FormatSyntax = "%Y%m%d"
     
     def __init__(self, daysSince):
         self.daysSince = daysSince
     
     @staticmethod
     def createFromString(formattedString:str):
-        datetimeObj = datetime.datetime.strptime(formattedString, "%Y%m%d")
+        datetimeObj = datetime.datetime.strptime(formattedString, Date.INTERNAL.FormatSyntax)
         return Date((datetimeObj - Date.INTERNAL.ReferenceDateTime).days)
     
     def toString(self):
         datetimeObj = Date.INTERNAL.ReferenceDateTime + datetime.timedelta(days=self.daysSince)
-        return datetimeObj.strftime("%Y%m%d")
+        return datetimeObj.strftime(Date.INTERNAL.FormatSyntax)
     
     def toUnits(self):
         datetimeObj = Date.INTERNAL.ReferenceDateTime + datetime.timedelta(days=self.daysSince)
@@ -169,6 +171,47 @@ class Date:
             return Date(self.daysSince - obj)
         elif isinstance(obj, Date):
             return int(self.daysSince - obj.daysSince)
+
+    def __str__(self) -> str:
+        return self.toString()
+    
+    def __repr__(self) -> str:
+        return str(self)
+
+class DateTime:
+    '''
+    Representation of a date-time (e.g., '20250123-121500-000000').
+    
+    It supports addition operation(s) with 'Time' object(s).
+    '''
+    
+    class INTERNAL:
+        
+        ReferenceDateTime = datetime.datetime(1, 1, 1)
+        
+        FormatSyntax = "%Y%m%d-%H%M%S-%f"
+    
+    def __init__(self, microsecondsSince):
+        self.microsecondsSince = microsecondsSince
+    
+    @staticmethod
+    def createFromString(formattedString:str):
+        datetimeObj = datetime.datetime.strptime(formattedString, DateTime.INTERNAL.FormatSyntax)
+        datetimeDiffObj = (datetimeObj - Date.INTERNAL.ReferenceDateTime)
+        totalMicroseconds = (int(datetimeDiffObj.total_seconds()) * Constants.US_IN_SECOND) + datetimeDiffObj.microseconds
+        return DateTime(totalMicroseconds)
+    
+    def toString(self):
+        datetimeObj = Date.INTERNAL.ReferenceDateTime + datetime.timedelta(microseconds=self.microsecondsSince)
+        return datetimeObj.strftime(DateTime.INTERNAL.FormatSyntax)
+
+    def __add__(self, obj):
+        if isinstance(obj, Time):
+            return DateTime(self.microsecondsSince + obj.microseconds)
+
+    def __sub__(self, obj):
+        if isinstance(obj, Time):
+            return DateTime(self.microsecondsSince - obj.microseconds)
 
     def __str__(self) -> str:
         return self.toString()
