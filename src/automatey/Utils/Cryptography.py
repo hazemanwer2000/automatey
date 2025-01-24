@@ -1,6 +1,8 @@
 
 import automatey.OS.FileUtils as FileUtils
 
+import hashlib
+
 class Feed:
     '''
     A feed encapsulates bytes, behind a `feed` call.
@@ -61,3 +63,26 @@ class Feeds:
                 self.idx = endIdx
             return readBytes
 
+class Hash:
+    
+    class Algorithms:
+        
+        SHA1 = 0
+        SHA256 = 1
+        SHA512 = 2
+    
+    INTERNAL_Algorithm2HashObject = {
+        Algorithms.SHA1: hashlib.sha1,
+        Algorithms.SHA256: hashlib.sha256,
+        Algorithms.SHA512: hashlib.sha512,
+    }
+    
+    @staticmethod
+    def generate(feed:Feed, algorithm=Algorithms.SHA256) -> bytes:
+        '''
+        Generate a hash, based on a feed.
+        '''
+        hashObject = Hash.INTERNAL_Algorithm2HashObject[algorithm]()
+        while (feedBytes := feed.feed()):
+            hashObject.update(feedBytes)
+        return bytes.fromhex(hashObject.hexdigest())
