@@ -14,6 +14,7 @@ import automatey.Utils.RandomUtils as RandomUtils
 class INTERNAL_Constants:
     
     MINIMUM_RANDOM_LENGTH = 7
+    MINIMUM_ITERATOR_LENGTH = 6
     
 class File:
     '''
@@ -317,7 +318,7 @@ class File:
                 return File.Utils.Path.modifyName(path, name=randomName)
             
             @staticmethod
-            def iterateName(path, suffix='-', iteratorLength=INTERNAL_Constants.MINIMUM_RANDOM_LENGTH):
+            def iterateName(path, suffix='-', iteratorLength=INTERNAL_Constants.MINIMUM_ITERATOR_LENGTH):
                 '''
                 Adds an iterator value to name, incrementally, stopping if it does not exist. 
                 '''
