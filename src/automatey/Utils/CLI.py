@@ -42,22 +42,23 @@ def echo(message:str, textColor:Graphics.TextColor=None):
 
 class ProgressBar:
     '''
-    Progress-bar renderer, that provides an iterator, with `i` in range `0` to `N-1`, inclusive.
+    Progress-bar renderer, that acts as a wrapper around an (actual) iterator.
     
     Note that,
     - A new-line is echo'ed at the end.
-    - `close` must called at the end.
     '''
-    def __init__(self, N:int, label:str):
-        self.label = label
-        self.progressbar = click.progressbar(range(N), label=self.label)
-        self.iterator = self.progressbar.__enter__()
     
-    def getIterator(self):
-        return self.iterator
-    
-    def close(self):
-        self.progressbar.__exit__(None, None, None)
+    @staticmethod
+    def create(iterator, label:str):
+        '''
+        Usage:
+        ```
+        with ProgressBar.create(...) as iteratorWrapper:
+            for item in iteratorWrapper:
+                ...
+        ```
+        '''
+        return click.progressbar(iterator, label=label)
 
 class LineOverwriter:
     '''
