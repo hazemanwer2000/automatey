@@ -725,6 +725,13 @@ class INTERNAL_VideoProcessing:
             commandList = []
             f_joinList = []
 
+            # Check if trim-action(s) demand re-encoding. In this case, (force-)use '.mp4' extension as output.
+            isNearestKeyframe = False
+            for trimAction in joinAction.trimActions:
+                isNearestKeyframe = isNearestKeyframe or trimAction.isNearestKeyframe
+            if not isNearestKeyframe:
+                f_tmpBase = FileUtils.File(FileUtils.File.Utils.Path.modifyName(str(f_tmpBase), extension='mp4'))
+
             # Process each associated 'Trim' action.
             for trimAction in joinAction.trimActions:
                 newCommandList, f_trimTmpDst = INTERNAL_VideoProcessing.FFMPEGWrapper.processTrimAction(f_src, f_tmpBase, trimAction, generalInfo)
