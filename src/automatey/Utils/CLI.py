@@ -123,7 +123,7 @@ class VocalTimer:
         
         @staticmethod
         def sleep():
-            time.sleep(RandomUtils.Generation.Float(1.2, 0.8))
+            time.sleep(RandomUtils.Generation.Float(0.08, 0.12))
 
     class Commands:
         
