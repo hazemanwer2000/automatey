@@ -10,6 +10,7 @@ from send2trash import send2trash
 
 # Internal libraries
 import automatey.Utils.RandomUtils as RandomUtils
+import automatey.Base.ExceptionUtils as ExceptionUtils
 
 class INTERNAL_Constants:
     
@@ -246,11 +247,50 @@ class File:
             return newTmpDir
         
         @staticmethod
-        def copyFile(srcFile, dstFile):
+        def copy(srcFile, dstFile):
             '''
             Copy a *File* object, into another.
             '''
-            shutil.copy(str(srcFile), str(dstFile))
+            # ? Assert: Destination file does not exist.
+            if dstFile.isExists():
+                raise ExceptionUtils.ValidationError('Destination file/directory already exists.')
+            
+            # ? Assert: Source file exists.
+            if not srcFile.isExists():
+                raise ExceptionUtils.ValidationError('Source file/directory does not exist.')
+            
+            # ? Copy (...)
+            if srcFile.isDirectory():
+                shutil.copytree(str(srcFile), str(dstFile))
+            else:
+                shutil.copy(str(srcFile), str(dstFile))
+        
+        @staticmethod
+        def move(srcFile, dstFile):
+            '''
+            Move a *File* object, to a different location.
+            '''
+            # ? Assert: Destination file does not exist.
+            if dstFile.isExists():
+                raise ExceptionUtils.ValidationError('Destination file/directory already exists.')
+            
+            # ? Assert: Source file exists.
+            if not srcFile.isExists():
+                raise ExceptionUtils.ValidationError('Source file/directory does not exist.')
+            
+            # ? Move (...)
+            os.rename(str(srcFile), str(dstFile))
+
+        @staticmethod
+        def rename(srcFile, newName):
+            '''
+            Rename a *File* object, to a new name.
+            
+            Note,
+            - Name should not contain extension.
+            '''
+            dstFile = File(File.Utils.Path.modifyName(str(srcFile), name=newName))
+            File.Utils.move(srcFile, dstFile)
 
         @staticmethod
         def recycle(f):
