@@ -814,7 +814,7 @@ class INTERNAL_VideoProcessing:
                 INTERNAL_VideoProcessing.FFMPEGWrapper.executeCommands(commandList)
                 
                 # Copy into (actual) destination, and delete temporary directory.
-                FileUtils.File.Utils.copyFile(f_finalTmpDst, f_dst)
+                FileUtils.File.Utils.copy(f_finalTmpDst, f_dst)
                 FileUtils.File.Utils.recycle(f_tmpDir)
                 
             except ExceptionUtils.BackendError as e:
