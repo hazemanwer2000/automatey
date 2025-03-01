@@ -29,3 +29,15 @@ def saveAs(data, f_dst:FileUtils.File, isMinified=False, indent:int=4):
         else:
             kwargs['indent'] = indent
         json.dump(data, json_file, **kwargs)
+
+def toString(data, isMinified=False, indent:int=4):
+    '''
+    Write JSON data to file, from either `dict` or `list`.
+    '''
+    kwargs = {}
+    if isMinified:
+        kwargs['indent'] = None
+        kwargs['separators'] = (',', ':')
+    else:
+        kwargs['indent'] = indent
+    return json.dumps(data, **kwargs)
