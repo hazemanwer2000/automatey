@@ -18,7 +18,7 @@ def asInt(value) -> int:
 def asBool(value) -> bool:
     '''
     Note,
-    - Succeeds only if value is a `true`, or `false` `str` (case irrelevant), `int`, or `bool`. 
+    - Succeeds only if value is a `true`/`yes`, or `false`/`no` `str` (case irrelevant), `int`, or `bool`. 
     '''
     result = None
     typeOfValue = type(value)
@@ -29,9 +29,9 @@ def asBool(value) -> bool:
         result = bool(value)
     elif typeOfValue == str:
         value = value.lower()
-        if value == 'true':
+        if value in ('true', 'yes'):
             result = True
-        elif value == 'false':
+        elif value in ('false', 'no'):
             result = False
     
     if result is None:
