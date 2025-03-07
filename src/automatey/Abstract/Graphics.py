@@ -32,6 +32,12 @@ class Alignment:
         class Top: pass
         class Bottom: pass
         class Center: pass
+        
+    class Corner:
+        class TopLeft: pass
+        class TopRight: pass
+        class BottomLeft: pass
+        class BottomRight: pass
 
 class Rotation:
     
@@ -132,3 +138,12 @@ class TextColor:
     def __init__(self, foreground:ColorUtils.Color, background:ColorUtils.Color):
         self.foreground = foreground
         self.background = background
+
+class TextAttributes:
+    '''
+    Attributes of a text.
+    '''
+    def __init__(self, size:int, color:TextColor, style:TextStyle):
+        self.size = size
+        self.color = color
+        self.style = style

@@ -8,7 +8,9 @@ import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Base.ExceptionUtils as ExceptionUtils
 import automatey.Abstract.Graphics as AbstractGraphics
+import automatey.Base.ColorUtils as ColorUtils
 import automatey.Utils.Validation as Validation
+import automatey.Resources as Resources
 
 class INTERNAL_Utils:    
 
@@ -217,6 +219,18 @@ class AudioModifiers:
             def __init__(self, duration:TimeUtils.Time):
                 self.duration = duration
 
+class ThumbnailTimestampAttributes:
+    
+    '''
+    All attributes related to a timestamp, for a thumbnail.
+    '''
+    
+    def __init__(self,
+                 textColor:ColorUtils.Color,
+                 cornerAlignment):
+        self.textColor = textColor
+        self.cornerAlignment = cornerAlignment
+
 class INTERNAL_VideoProcessing:
     
     class FFMPEGWrapper:
@@ -299,6 +313,7 @@ class INTERNAL_VideoProcessing:
                 r'-hide_banner',
                 r'-loglevel error',
                 r'-i {{{INPUT-FILE}}}',
+                r"{{{TIMESTAMP: -vf drawtext=text='%{pts\:hms}':{{{LOCATION}}}:fontsize={{{TEXT-SIZE}}}*h:fontcolor={{{TEXT-COLOR}}}:fontfile={{{FONT-PATH}}} :}}}",
                 r'-ss {{{TIME}}}',
                 r'-vframes 1',
                 r'{{{OUTPUT-FILE}}}',
@@ -310,6 +325,22 @@ class INTERNAL_VideoProcessing:
                 r'-i {{{INPUT-FILE}}}',
                 r'-vf fps={{{CAPTURE-FPS}}}',
                 r'{{{OUTPUT-DIRECTORY}}}/%03d.png',
+            ),
+        }
+        
+        ThumbnailTimestampDefaults = {
+            'Offset' : {
+                'X' : 10,
+                'Y' : 10,
+            },
+            # Note: Text size is specified in percentage of thumbnail height.
+            'TextSize' : 0.05,
+            'FontFile' : Resources.resolve(FileUtils.File('font/texgyrecursor/texgyrecursor-regular.otf')) 
+        }
+        
+        ThumbnailTimestampLocationTemplates = {
+            AbstractGraphics.Alignment.Corner.TopLeft : ProcessUtils.CommandTemplate(
+                r'x={{{X}}}:y={{{Y}}}',
             ),
         }
 
@@ -395,7 +426,22 @@ class INTERNAL_VideoProcessing:
             return keyframes
 
         @staticmethod
-        def generateThumbnail(f_src:FileUtils.File, f_dst:FileUtils.File, time:TimeUtils.Time):
+        def formatThumbnailTimestampAttributes(command:ProcessUtils.CommandTemplate.Formatter, timestampAttribs:ThumbnailTimestampAttributes):
+            if timestampAttribs is not None:
+                timestampLocationFormatter = INTERNAL_VideoProcessing.FFMPEGWrapper.ThumbnailTimestampLocationTemplates[timestampAttribs.cornerAlignment].createFormatter()
+                timestampLocationFormatter.assertParameter('X', str(INTERNAL_VideoProcessing.FFMPEGWrapper.ThumbnailTimestampDefaults['Offset']['X']))
+                timestampLocationFormatter.assertParameter('Y', str(INTERNAL_VideoProcessing.FFMPEGWrapper.ThumbnailTimestampDefaults['Offset']['Y']))
+                command.assertSection('timestamp', params={
+                    'location' : str(timestampLocationFormatter),
+                    'text-size' : str(INTERNAL_VideoProcessing.FFMPEGWrapper.ThumbnailTimestampDefaults['TextSize']),
+                    'text-color' : '#' + str(timestampAttribs.textColor),
+                    'font-path' : str(INTERNAL_VideoProcessing.FFMPEGWrapper.ThumbnailTimestampDefaults['FontFile'])
+                })
+            else:
+                command.excludeSection('timestamp')
+
+        @staticmethod
+        def generateThumbnail(f_src:FileUtils.File, f_dst:FileUtils.File, time:TimeUtils.Time, timestampAttribs:ThumbnailTimestampAttributes):
             '''
             Generate thumbnail at a specific timestamp.
             '''
@@ -405,12 +451,13 @@ class INTERNAL_VideoProcessing:
             command_GenerateThumbnail.assertParameter('input-file', str(f_src))
             command_GenerateThumbnail.assertParameter('output-file', str(f_dst))
             command_GenerateThumbnail.assertParameter('time', str(time))
+            INTERNAL_VideoProcessing.FFMPEGWrapper.formatThumbnailTimestampAttributes(command_GenerateThumbnail, timestampAttribs)
             
             proc = ProcessUtils.Process(str(command_GenerateThumbnail))
             proc.run()
 
         @staticmethod
-        def generateThumbnails(f_src:FileUtils.File, f_dstDir:FileUtils.File, N:int, generalInfo:dict):
+        def generateThumbnails(f_src:FileUtils.File, f_dstDir:FileUtils.File, N:int, isWithTimestamp:bool, generalInfo:dict):
             '''
             Generate N thumbnails, at equidistant timestamps.
             '''
@@ -898,7 +945,7 @@ class Video:
         # ? Generate thumbnail(s).
         INTERNAL_VideoProcessing.FFMPEGWrapper.generateThumbnails(self.f_src, f_dstDir, N, self.generalInfo)
 
-    def generateThumbnail(self, f_dst:FileUtils.File, time:TimeUtils.Time):
+    def generateThumbnail(self, f_dst:FileUtils.File, time:TimeUtils.Time, timestampAttribs:ThumbnailTimestampAttributes=None):
         '''
         Generate thumb-nail at a specific time-stamp.
         '''
@@ -906,7 +953,7 @@ class Video:
             raise ExceptionUtils.ValidationError('Destination file must not exist.')
 
         # ? Generate thumbnail.
-        INTERNAL_VideoProcessing.FFMPEGWrapper.generateThumbnail(self.f_src, f_dst, time)
+        INTERNAL_VideoProcessing.FFMPEGWrapper.generateThumbnail(self.f_src, f_dst, time, timestampAttribs)
     
     class Utils:
         
