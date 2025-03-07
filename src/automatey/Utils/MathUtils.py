@@ -2,6 +2,14 @@
 import copy
 import bisect
 
+def correlate(x, p1, p2):
+    '''
+    Given two points, use `y = mx + c` to get `y` for `x`.
+    '''
+    m = (p2[1] - p1[1]) / (p2[0] - p1[0])
+    c = p1[1] - (m * p1[0])
+    return (m * x) + c    
+
 def mapValue(value, rangeFrom, rangeTo):
     '''
     Map a (float-)value from one range to another.
