@@ -313,7 +313,7 @@ class INTERNAL_VideoProcessing:
                 r'-hide_banner',
                 r'-loglevel error',
                 r'-i {{{INPUT-FILE}}}',
-                r"{{{TIMESTAMP: -vf drawtext=text='%{pts\:hms}':{{{LOCATION}}}:fontsize={{{TEXT-SIZE}}}*h:fontcolor={{{TEXT-COLOR}}}:fontfile={{{FONT-PATH}}} :}}}",
+                r"{{{TIMESTAMP: -vf drawtext=text='%{pts\:hms}':{{{LOCATION}}}:fontsize={{{TEXT-SIZE}}}*h:fontcolor={{{TEXT-COLOR}}}:fontfile='{{{FONT-PATH}}}' :}}}",
                 r'-ss {{{TIME}}}',
                 r'-vframes 1',
                 r'{{{OUTPUT-FILE}}}',
@@ -435,7 +435,7 @@ class INTERNAL_VideoProcessing:
                     'location' : str(timestampLocationFormatter),
                     'text-size' : str(INTERNAL_VideoProcessing.FFMPEGWrapper.ThumbnailTimestampDefaults['TextSize']),
                     'text-color' : '#' + str(timestampAttribs.textColor),
-                    'font-path' : str(INTERNAL_VideoProcessing.FFMPEGWrapper.ThumbnailTimestampDefaults['FontFile'])
+                    'font-path' : str(INTERNAL_VideoProcessing.FFMPEGWrapper.ThumbnailTimestampDefaults['FontFile']).replace(':', '\\:')
                 })
             else:
                 command.excludeSection('timestamp')
