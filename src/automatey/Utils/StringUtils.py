@@ -63,6 +63,16 @@ class Split:
         '''
         return Regex.findAll(r'[A-Z]+(?=[A-Z][a-z]|$)|[A-Z][a-z]*', text)
 
+class Case:
+
+    @staticmethod
+    def Pascal2Snake(text:str, character:str='-'):
+        return character.join([x.lower() for x in Split.atWords(text)])
+
+    @staticmethod
+    def Snake2Pascal(text:str, character:str='-'):
+        return ''.join([x.capitalize() for x in text.split(character)])
+
 class MakePretty:
     
     @staticmethod
