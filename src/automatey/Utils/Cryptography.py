@@ -2,6 +2,7 @@
 import automatey.OS.FileUtils as FileUtils
 
 import hashlib
+import ecdsa
 
 class Feed:
     '''
@@ -86,3 +87,44 @@ class Hash:
         while (feedBytes := feed.feed()):
             hashObject.update(feedBytes)
         return bytes.fromhex(hashObject.hexdigest())
+
+class ECC:
+    
+    class Curve:
+        
+        class SECP256R1:
+            INTERNAL_ecdsa_curve = ecdsa.NIST256p
+            
+        class SECP384R1:
+            INTERNAL_ecdsa_curve = ecdsa.NIST384p
+    
+    @staticmethod
+    def generatePrivateKey(curve) -> bytes:
+        return ecdsa.SigningKey.generate(curve=curve.INTERNAL_ecdsa_curve).to_string()
+    
+    @staticmethod
+    def derivePublicKey(curve, privateKey:bytes) -> bytes:
+        ecdsa_privateKey = ecdsa.SigningKey.from_string(privateKey, curve=curve.INTERNAL_ecdsa_curve)
+        return ecdsa_privateKey.verifying_key.to_string()
+
+    class Signature:
+        
+        @staticmethod
+        def generate(curve, privateKey:bytes, message:bytes, hashAlgorithm) -> bytes:
+            hashFcn = Hash.INTERNAL_Algorithm2HashObject[hashAlgorithm]
+            ecdsa_privateKey = ecdsa.SigningKey.from_string(privateKey, curve=curve.INTERNAL_ecdsa_curve, hashfunc=hashFcn)
+            return ecdsa_privateKey.sign(message)
+        
+        @staticmethod
+        def verify(curve, publicKey:bytes, message:bytes, signature:bytes, hashAlgorithm) -> bool:
+            '''
+            Returns `True` if verification succeeds, `False` otherwise.
+            '''
+            hashFcn = Hash.INTERNAL_Algorithm2HashObject[hashAlgorithm]
+            ecdsa_publicKey = ecdsa.VerifyingKey.from_string(publicKey, curve=curve.INTERNAL_ecdsa_curve, hashfunc=hashFcn)
+            isVerified = True
+            try:
+                ecdsa_publicKey.verify(signature, message)
+            except:
+                isVerified = False
+            return isVerified
