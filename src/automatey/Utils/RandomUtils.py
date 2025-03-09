@@ -2,6 +2,7 @@
 # Standard libraries
 import string
 import random
+import os
 
 class Generation:
     
@@ -30,6 +31,13 @@ class Generation:
         Randomize float, all-inclusive.
         '''
         return random.uniform(start, end)
+    
+    @staticmethod
+    def Bytes(N:int) -> bytes:
+        '''
+        Returns a random number of bytes.
+        '''
+        return os.urandom(N)
     
 class Selection:
 
