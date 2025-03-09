@@ -91,3 +91,22 @@ class HexString:
     @staticmethod
     def toBytes(hexStr:bytes) -> bytes:
         return bytes.fromhex(hexStr)
+    
+    @staticmethod
+    def fromCArray(text:str) -> str:
+        hexBytesList = Regex.findAll(r'0[xX]([a-fA-F0-9]{1,2})', text)
+        for idx, hexByte in enumerate(hexBytesList):
+            if len(hexByte) == 1:
+                hexBytesList[idx] = '0' + hexBytesList[idx]
+        return ''.join(hexBytesList).lower()
+    
+    @staticmethod
+    def toCArray(text:str, bytesPerLine:int=8) -> str:
+        text = text.lower()
+        hexBytesList = [('0x' + text[i:i+2]) for i in range(0, len(text), 2)]
+        chunks = []
+        for i in range(0, len(hexBytesList), bytesPerLine):
+            chunkList = hexBytesList[i:i+bytesPerLine]
+            chunk = ', '.join(chunkList)
+            chunks.append(chunk)
+        return ',\n'.join(chunks)
