@@ -81,7 +81,7 @@ class XML:
         '''
         self.root.tag = tag
     
-    def attributes(self) -> dict:
+    def getAttributes(self) -> dict:
         '''
         Get attributes, as `dict`.
         
