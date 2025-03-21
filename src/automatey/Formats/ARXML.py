@@ -7,49 +7,73 @@ import automatey.Utils.StringUtils as StringUtils
 import typing
 
 class Model:
+    '''
+    Modelled (i.e., parsable) representation(s) of an element, with a specific type.
+    '''
     
     pass
 
 class Element:
+    '''
+    Representation of an element.
+    '''
     
-    def __init__(self, xml:XMLParser.XML):
-        self.xml = xml
+    def __init__(self, xmlElement:XMLParser.XML):
+
+        # ? XML element clean-up.
+        # ? ? Remove 'UUID' attribute.
+        xmlElementsWithUUID = xmlElement.XPath('./descendant-or-self::*[@UUID]')
+        for xmlElementWithUUID in xmlElementsWithUUID:
+            del xmlElementWithUUID.getAttributes()['UUID']
+        # ? ? Remove 'ADMIN-DATA' element.
+        xmlAllElements = xmlElement.XPath('./descendant-or-self::*')
+        for xmlWorkingElement in xmlAllElements:
+            xmlAdminDataSearchResult = xmlWorkingElement.XPath('./ADMIN-DATA')
+            if len(xmlAdminDataSearchResult) == 1:
+                xmlAdminData = xmlAdminDataSearchResult[0]
+                xmlWorkingElement.removeElement(xmlAdminData)
+        self.xmlElement = xmlElement
         
-        # ? Attributes, defined upon-demand.
-        self.packagePath = None
-        self.name = None
-        self.type = None
+        # ? Trace package path.
+        xmlWorkingElement = self.xmlElement
+        packagePathList = []
+        while True:
+            xmlParentElementSearchResult = xmlWorkingElement.XPath('./parent::*/parent::*')
+            if len(xmlParentElementSearchResult) != 1: break
+            xmlParentElement = xmlParentElementSearchResult[0]
+            if xmlParentElement.getTag() != 'AR-PACKAGE': break
+            packagePathList.append(xmlParentElement.XPath('./SHORT-NAME')[0].getText())
+            xmlWorkingElement = xmlParentElement
+        self.packagePath = '/' + '/'.join(reversed(packagePathList))
+        
+        # ? Fetch element name.
+        self.name = self.xmlElement.XPath('./SHORT-NAME')[0].getText()
+        
+        # ? Fetch element type.
+        self.type = self.xmlElement.getTag()
+        
+        # ? Construct model instance, if relevant model is defined.
         self.modelInstance = None
+        type_PascalCase = StringUtils.Case.Snake2Pascal(self.type, character='-')
+        if type_PascalCase in Model.__dict__:
+            self.modelInstance = Model.__dict__[type_PascalCase](self)
         
     def getXML(self) -> XMLParser.XML:
         '''
         Returns (raw) XML.
         '''
-        return self.xml
+        return self.xmlElement
 
     def getPackagePath(self) -> str:
         '''
         Return path of element (excluding name).
         '''
-        if self.packagePath is None:
-            workingElement = self.xml
-            pathList = []
-            while True:
-                parentElementSearchResult = workingElement.XPath('./parent::*/parent::*')
-                if len(parentElementSearchResult) != 1: break
-                parentElement = parentElementSearchResult[0]
-                if parentElement.getTag() != 'AR-PACKAGE': break
-                pathList.append(parentElement.XPath('./SHORT-NAME')[0].getText())
-                workingElement = parentElement
-            self.packagePath = '/' + '/'.join(reversed(pathList))
         return self.packagePath
     
     def getName(self) -> str:
         '''
         Get element name.
         '''
-        if self.name is None:
-            self.name = self.xml.XPath('./SHORT-NAME')[0].getText()
         return self.name
     
     def getPath(self) -> str:
@@ -62,8 +86,6 @@ class Element:
         '''
         Get element type.
         '''
-        if self.type is None:
-            self.type = self.xml.getTag()
         return self.type
 
     def getModel(self):
@@ -72,10 +94,6 @@ class Element:
         
         If no model is found, `None` is returned.
         '''
-        if self.modelInstance is None:
-            typeAsStr = StringUtils.Case.Snake2Pascal(self.getType(), character='-')
-            if typeAsStr in Model.__dict__:
-                self.modelInstance = Model.__dict__[typeAsStr](self)
         return self.modelInstance
 
 class Parser:
