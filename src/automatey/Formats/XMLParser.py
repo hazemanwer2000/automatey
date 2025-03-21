@@ -49,7 +49,7 @@ class XML:
     def toString(self, indent:str='\t'):
         text = lxml.etree.tostring(self.root, pretty_print=True, encoding='unicode')
         dom = xml.dom.minidom.parseString(text)
-        return StringUtils.Normalize.removeEmptyLines(dom.toprettyxml(indent=indent))
+        return StringUtils.EmptyLine.removeEmptyLines(dom.toprettyxml(indent=indent))
     
     def __str__(self):
         return self.toString()
