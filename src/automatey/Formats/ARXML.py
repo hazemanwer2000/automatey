@@ -14,7 +14,12 @@ class Element:
     
     def __init__(self, xml:XMLParser.XML):
         self.xml = xml
-        self.path = None
+        
+        # ? Attributes, defined upon-demand.
+        self.packagePath = None
+        self.name = None
+        self.type = None
+        self.modelInstance = None
         
     def getXML(self) -> XMLParser.XML:
         '''
@@ -22,35 +27,44 @@ class Element:
         '''
         return self.xml
 
-    def getPath(self) -> str:
+    def getPackagePath(self) -> str:
         '''
-        Return element path.
+        Return path of element (excluding name).
         '''
-        if self.path is None:
+        if self.packagePath is None:
             workingElement = self.xml
             pathList = []
-            while (True):
+            while True:
                 parentElementSearchResult = workingElement.XPath('./parent::*/parent::*')
                 if len(parentElementSearchResult) != 1: break
                 parentElement = parentElementSearchResult[0]
                 if parentElement.getTag() != 'AR-PACKAGE': break
                 pathList.append(parentElement.XPath('./SHORT-NAME')[0].getText())
                 workingElement = parentElement
-            self.path = '/' + '/'.join(reversed(pathList))
-        return self.path
+            self.packagePath = '/' + '/'.join(reversed(pathList))
+        return self.packagePath
     
     def getName(self) -> str:
         '''
         Get element name.
         '''
-        return self.xml.XPath('./SHORT-NAME')[0].getText()
+        if self.name is None:
+            self.name = self.xml.XPath('./SHORT-NAME')[0].getText()
+        return self.name
+    
+    def getPath(self) -> str:
+        '''
+        Return path of element (including name). 
+        '''
+        return self.getPackagePath() + '/' + self.getName()
 
-    def getType(self):
+    def getType(self) -> str:
         '''
-        Get element type (e.g., `ETHERNET-CLUSTER`).
+        Get element type.
         '''
-        modelName = StringUtils.Case.Snake2Pascal(self.xml.getTag(), character='-')
-        return modelName
+        if self.type is None:
+            self.type = self.xml.getTag()
+        return self.type
 
     def getModel(self):
         '''
@@ -58,7 +72,11 @@ class Element:
         
         If no model is found, `None` is returned.
         '''
-        modelName = StringUtils.Case.Snake2Pascal(self.xml.getTag(), character='-')
+        if self.modelInstance is None:
+            typeAsStr = StringUtils.Case.Snake2Pascal(self.getType(), character='-')
+            if typeAsStr in Model.__dict__:
+                self.modelInstance = Model.__dict__[typeAsStr](self)
+        return self.modelInstance
 
 class Parser:
     '''
@@ -67,7 +85,7 @@ class Parser:
     def __init__(self):
         self.elements = []
     
-    def process(self, f_arxml):
+    def processFile(self, f_arxml):
         '''
         Process a number of ARXML file(s).
         
