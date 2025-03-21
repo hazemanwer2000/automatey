@@ -6,7 +6,7 @@ import automatey.Utils.StringUtils as StringUtils
 # Standard Libraries
 import typing
 
-class Model:
+class Models:
     '''
     Modelled (i.e., parsable) representation(s) of an element, with a specific type.
     '''
@@ -55,8 +55,8 @@ class Element:
         # ? Construct model instance, if relevant model is defined.
         self.modelInstance = None
         type_PascalCase = StringUtils.Case.Snake2Pascal(self.type, character='-')
-        if type_PascalCase in Model.__dict__:
-            self.modelInstance = Model.__dict__[type_PascalCase](self)
+        if type_PascalCase in Models.__dict__:
+            self.modelInstance = Models.__dict__[type_PascalCase](self)
         
     def getXML(self) -> XMLParser.XML:
         '''
