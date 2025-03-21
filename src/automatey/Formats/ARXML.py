@@ -96,8 +96,11 @@ class Parser:
         xmlElements = xmlRoot.XPath('/descendant::AR-PACKAGE/ELEMENTS/*') + xmlRoot.XPath('/descendant::AUTOSAR/ELEMENTS/*')
         self.elements.extend([Element(xmlElement) for xmlElement in xmlElements])
     
-    def getElements(self) -> typing.List[Element]:
+    def getElements(self, conditional=None) -> typing.List[Element]:
         '''
         Access elements.
         '''
-        return self.elements
+        elements = self.elements
+        if conditional is not None:
+            elements = [element for element in elements if conditional(element)]
+        return elements
