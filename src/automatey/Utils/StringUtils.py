@@ -55,19 +55,52 @@ class Normalize:
         '''
         return Normalize.asParagraph(text, INTERNAL_newLine='\n\n')
     
+class EmptyLine:
+    
+    @staticmethod
+    def lstripLines(text:str):
+        textLines = text.split('\n')
+        
+        # ? Remove lines at the beginning.
+        while len(textLines) > 0:
+            if textLines[0].strip() == '':
+                del textLines[0]
+            else:
+                break
+        
+        return '\n'.join(textLines)
+    
+    @staticmethod
+    def rstripLines(text:str):
+        textLines = text.split('\n')
+        
+        # ? Remove lines at the end.
+        while len(textLines) > 0:
+            if textLines[-1].strip() == '':
+                del textLines[-1]
+            else:
+                break
+        
+        return '\n'.join(textLines)
+
+    @staticmethod
+    def stripLines(text:str):
+        return EmptyLine.rstripLines(EmptyLine.lstripLines(text))
+    
     @staticmethod
     def removeEmptyLines(text:str, INTERNAL_newLine='\n'):
         '''
         Remove all lines that are empty, or with white-space character(s) only.
         '''
-        return Regex.replaceAll(r'\n\s*\n', INTERNAL_newLine, text)
+        strippedText = EmptyLine.stripLines(text)
+        return Regex.replaceAll(r'\n\s*\n', INTERNAL_newLine, strippedText)
 
     @staticmethod
     def removeConsecutiveEmptyLines(text:str):
         '''
         Similar to `asParagraph`, but consecutive empty-line(s) are replaced with a single empty-line.
         '''
-        return Normalize.removeEmptyLines(text, INTERNAL_newLine='\n\n')
+        return EmptyLine.removeEmptyLines(text, INTERNAL_newLine='\n\n')
 
 class Split:
     
