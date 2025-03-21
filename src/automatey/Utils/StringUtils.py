@@ -54,6 +54,20 @@ class Normalize:
         Similar to `asParagraph`, but consecutive empty-line(s) are replaced with a single empty-line.
         '''
         return Normalize.asParagraph(text, INTERNAL_newLine='\n\n')
+    
+    @staticmethod
+    def removeEmptyLines(text:str, INTERNAL_newLine='\n'):
+        '''
+        Remove all lines that are empty, or with white-space character(s) only.
+        '''
+        return Regex.replaceAll(r'\n\s*\n', INTERNAL_newLine, text)
+
+    @staticmethod
+    def removeConsecutiveEmptyLines(text:str):
+        '''
+        Similar to `asParagraph`, but consecutive empty-line(s) are replaced with a single empty-line.
+        '''
+        return Normalize.removeEmptyLines(text, INTERNAL_newLine='\n\n')
 
 class Split:
     
