@@ -1,6 +1,7 @@
 
 import copy
 import bisect
+import collections
 
 def correlate(x, p1, p2):
     '''
@@ -110,3 +111,18 @@ class MediaSpecific:
                 position = None
             
             return position
+
+class CollectionSpecific:
+    
+    def countOccurrences(iterable, key=None):
+        '''
+        Given an iterable, returns a dictionary, with,
+        - each key mapping to an item, and,
+        - each value mapping to the number of occurrences of that item.
+        
+        Note that,
+        - If key is not `None`, iterable is first transformed into a list of `key(item) for item in iterable`. 
+        '''
+        if key is not None:
+            iterable = [key(item) for item in iterable]
+        return dict(collections.Counter(iterable))
