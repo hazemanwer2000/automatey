@@ -304,6 +304,34 @@ class Widgets:
                 layoutsWidget = Widget.fromLayout(self.layout)
                 Widget.__init__(self, layoutsWidget.qWidget)
 
+        class Titled(Widget):
+            
+            def __init__(self,
+                         widget,
+                         title:str,
+                         isInnerOutline:bool=False,
+                         isOuterOutline:bool=False,
+                         elementMargin:AbstractGraphics.Margin=AbstractGraphics.SymmetricMargin(5),
+                         elementSpacing:int=5):
+                self.layout = Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), elementSpacing)
+                self.labelTitle = Widgets.Basics.Label(title)
+                
+                # ? (...)
+                innerWidget = widget
+                if isInnerOutline:
+                    innerWidget = Widgets.Decorators.Outline(innerWidget, elementMargin)
+                
+                self.layout.setWidget(self.labelTitle, 0, 0)
+                self.layout.setWidget(innerWidget, 1, 0)
+                layoutsWidget = Widget.fromLayout(self.layout)
+                
+                # ? (...)
+                outerWidget = layoutsWidget
+                if isOuterOutline:
+                    outerWidget = Widgets.Decorators.Outline(outerWidget, elementMargin)
+                
+                Widget.__init__(self, outerWidget.qWidget)
+
     class Containers:
         
         class StackContainer(Widget):
