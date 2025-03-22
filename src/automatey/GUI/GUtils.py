@@ -164,11 +164,12 @@ class Menu:
     
     class EndPoint:
         
-        def __init__(self, text, fcn, icon:Icon=None, isCheckable=False):
+        def __init__(self, text, fcn, icon:Icon=None, isCheckable=False, isChecked=False):
             self.text = text
             self.fcn = fcn
             self.icon = icon
             self.isCheckable = isCheckable
+            self.isChecked = isChecked
         
         def INTERNAL_instantiate(self, qMenu, qParent):
             action = QtGui.QAction(
@@ -179,6 +180,7 @@ class Menu:
                 action.setIcon(self.icon.qIcon)
             action.triggered.connect(self.fcn)
             action.setCheckable(self.isCheckable)
+            action.setChecked(self.isChecked)
             qMenu.addAction(action)
         
     class SubMenu:
