@@ -1,5 +1,5 @@
 
-import automatey.Base.ColorUtils as ColorUtils
+import automatey.Utils.ColorUtils as ColorUtils
 
 # GUI-oriented
 

@@ -2,7 +2,7 @@
 # Internal Libraries
 import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.StringUtils as StringUtils
-import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 
 # External Libraries
 import typing

@@ -10,7 +10,7 @@ from send2trash import send2trash
 
 # Internal libraries
 import automatey.Utils.RandomUtils as RandomUtils
-import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 
 class INTERNAL_Constants:
     

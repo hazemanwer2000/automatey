@@ -12,8 +12,8 @@ import typing
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
 import automatey.Abstract.Graphics as AbstractGraphics
-import automatey.Base.ColorUtils as ColorUtils
-import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.ColorUtils as ColorUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 
 class INTERNAL_FrameProcessing:
     '''

@@ -1,5 +1,5 @@
 
-import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 
 def asFloat(value) -> float:
     try:

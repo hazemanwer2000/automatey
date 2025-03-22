@@ -3,12 +3,12 @@
 
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils
-import automatey.Base.TimeUtils as TimeUtils
+import automatey.Utils.TimeUtils as TimeUtils
 import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Utils.StringUtils as StringUtils
-import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Abstract.Graphics as AbstractGraphics
-import automatey.Base.ColorUtils as ColorUtils
+import automatey.Utils.ColorUtils as ColorUtils
 import automatey.Utils.Validation as Validation
 import automatey.Resources as Resources
 

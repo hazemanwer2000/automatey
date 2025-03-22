@@ -6,7 +6,7 @@ import PyQt6.QtCore as QtCore
 import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
 
 # Internal Libraries
-import automatey.Base.TimeUtils as TimeUtils
+import automatey.Utils.TimeUtils as TimeUtils
 
 class Thread:
     '''

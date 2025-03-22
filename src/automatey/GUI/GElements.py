@@ -10,15 +10,15 @@ import ctypes
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
 import automatey.GUI.GConcurrency as GConcurrency
-import automatey.Base.ColorUtils as ColorUtils
+import automatey.Utils.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.Abstract.Input as AbstractInput
-import automatey.Base.TimeUtils as TimeUtils
+import automatey.Utils.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
 import automatey.Resources as Resources
 import automatey.Utils.MathUtils as MathUtils
 import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
-import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.OS.Clipboard as Clipboard
 

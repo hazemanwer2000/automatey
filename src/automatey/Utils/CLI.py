@@ -1,6 +1,6 @@
 
-import automatey.Base.ColorUtils as ColorUtils
-import automatey.Base.TimeUtils as TimeUtils
+import automatey.Utils.ColorUtils as ColorUtils
+import automatey.Utils.TimeUtils as TimeUtils
 import automatey.Utils.RandomUtils as RandomUtils
 import automatey.Abstract.Graphics as Graphics
 
