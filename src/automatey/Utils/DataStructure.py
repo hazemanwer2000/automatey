@@ -47,7 +47,18 @@ class History:
         if (self.idx + 1) < len(self.deque):
             self.idx += 1
             item = self.deque[self.idx]
-        return item        
+        return item
+    
+    def current(self):
+        '''
+        Get current item.
+        
+        If current item is void, `None` is returned.
+        '''
+        item = None
+        if self.idx != -1:
+            item = self.deque[self.idx]
+        return item
     
     def __len__(self):
         return len(self.deque)
