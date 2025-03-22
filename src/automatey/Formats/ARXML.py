@@ -118,9 +118,9 @@ class Parser:
         Note that,
         - Processing is incremental (i.e., builds on previously processed file(s)).
         '''
-        xmlText = f_arxml.quickRead('t')
-        
         # (!) Workaround: Remove AUTOSAR namespace from XML, to ease XML navigation.
+        #       Very inefficient for large XML file(s).
+        xmlText = f_arxml.quickRead('t')
         xmlText = StringUtils.Regex.replaceAll(r'<AUTOSAR .*?>', r'<AUTOSAR>', xmlText)
         
         xmlRoot = XMLParser.XML.fromString(xmlText)
