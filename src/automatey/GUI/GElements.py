@@ -332,6 +332,23 @@ class Widgets:
                 
                 Widget.__init__(self, outerWidget.qWidget)
 
+        class LineEditEraser(Widget):
+            '''
+            Add an erasing button, left to a line-edit.
+            '''
+            
+            def __init__(self, lineEdit):
+                # ? Construct erase button.
+                self.eraseButton = Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-x.png'))))
+                self.eraseButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: lineEdit.setText('')))
+                # ? Construct layout.
+                self.layout = Layouts.GridLayout(1, 2, AbstractGraphics.SymmetricMargin(0), 5)
+                self.layout.setWidget(self.eraseButton, 0, 0)
+                self.layout.setWidget(lineEdit, 0, 1)
+                self.layout.setColumnMinimumSize(0, 0)
+                layoutsWidget = Widget.fromLayout(self.layout)
+                Widget.__init__(self, layoutsWidget.qWidget)
+
     class Containers:
         
         class StackContainer(Widget):
@@ -805,6 +822,12 @@ class Widgets:
                 Get text.
                 '''
                 return self.qWidget.text()
+            
+            def setText(self, text):
+                '''
+                Set text.
+                '''
+                return self.qWidget.setText(text)
             
             def INTERNAL_keyPressEvent(self, event):
                 qKey = event.key()
