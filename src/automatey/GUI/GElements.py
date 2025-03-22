@@ -824,9 +824,8 @@ class Widgets:
 
         class TextEdit(Widget, INTERNAL.EventManager):
             
-            def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False):
+            def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False, isWrapText=False):
                 self.qWidget = PyQt6Wrapper.QPlainTextEdit()
-                self.qWidget.setWordWrapMode(QtGui.QTextOption.WrapMode.NoWrap) 
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
                 
@@ -836,6 +835,10 @@ class Widgets:
                 # ? Event-handler(s).
                 self.qWidget.textChanged.connect(self.INTERNAL_textChanged)
                 self.qWidget.keyPressEventFcn = self.INTERNAL_keyPressEvent
+                
+                # ? By default, text is not wrapped.
+                if not isWrapText:
+                    self.qWidget.setWordWrapMode(QtGui.QTextOption.WrapMode.NoWrap)
             
                 # ? By default, font is 'Monospace'.
                 if isMonospaced:
