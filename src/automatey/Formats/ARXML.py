@@ -2,6 +2,7 @@
 # Internal Libraries
 import automatey.Formats.XMLParser as XMLParser
 import automatey.Utils.StringUtils as StringUtils
+import automatey.Utils.MathUtils as MathUtils
 
 # Standard Libraries
 import typing
@@ -96,6 +97,12 @@ class Element:
         '''
         return self.modelInstance
 
+    def __str__(self):
+        return self.getType() + ': ' + self.getType()
+    
+    def __repr__(self):
+        return str(self)
+
 class Parser:
     '''
     A parser of ARXML file(s).
@@ -123,17 +130,39 @@ class Parser:
             elements = [element for element in elements if conditional(element)]
         return elements
 
-    def toString(self, isIncludeElementPath:bool=True) -> str:
+    def getTypes(self) -> dict:
+        '''
+        Get dictionary of types, that points to a dictionary of,
+        - `count` : Number of elements.
+        - `elements` : List of elements.
+        '''
+        self.elements.sort(key=lambda x: (x.getType(), x.getPath()))
+        typeDict = MathUtils.CollectionSpecific.countOccurrences(self.elements, key=lambda x: x.getType())
+        for elementType in typeDict:
+            occurrenceCount = typeDict[elementType]
+            typeDict[elementType] = {
+                'count' : occurrenceCount,
+                'elements' : []
+            }
+        for element in self.elements:
+            typeDict[element.getType()]['elements'].append(element)
+        return typeDict
+
+    def summarize(self, isVerbose:bool=True) -> str:
         '''
         Summarize element(s).
         '''
-        # ? Sort element(s).
-        self.elements.sort(key=lambda x: (x.getType(), x.getPath()))
-        # ? (...)
         writer = StringUtils.Writer()
-        previousType = None
-        for element in self.elements:
-            currentType = element.getType()
-            if previousType != currentType:
-                
-                previousType = currentType
+        typeDict = self.getTypes()
+        for elementType in typeDict:
+            writer.write(f"{elementType} ({typeDict[elementType]['count']})")
+            if isVerbose:
+                for element in typeDict[elementType]['elements']:
+                    writer.write(f"  {element.getPath()}")
+        return str(writer)
+    
+    def __str__(self):
+        return self.summarize()
+    
+    def __repr__(self):
+        return str(self)
