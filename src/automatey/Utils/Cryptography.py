@@ -1,8 +1,33 @@
 
+import cryptography.hazmat
+import cryptography.hazmat.backends
+import cryptography.hazmat.primitives
+import cryptography.hazmat.primitives.asymmetric
+import cryptography.hazmat.primitives.asymmetric.ec
 import automatey.OS.FileUtils as FileUtils
 
 import hashlib
 import ecdsa
+import cryptography
+
+class INTERNAL_CryptoEngines:
+    
+    class cryptography:
+        
+        @staticmethod
+        def privateKeyFromBytes(curve, privateKey:bytes):
+            privateKeyInt = int.from_bytes(privateKey)
+            return cryptography.hazmat.primitives.asymmetric.ec.derive_private_key(privateKeyInt, curve.INTERNAL_cryptography_curve())
+        
+        @staticmethod
+        def publicKeyFromBytes(curve, publicKey:bytes):
+            NLength = len(publicKey) // 2
+            x_bytes = publicKey[:NLength]
+            y_bytes = publicKey[NLength:]
+            x_int = int.from_bytes(x_bytes, "big")
+            y_int = int.from_bytes(y_bytes, "big")
+            public_numbers = cryptography.hazmat.primitives.asymmetric.ec.EllipticCurvePublicNumbers(x_int, y_int, curve.INTERNAL_cryptography_curve())
+            return public_numbers.public_key()
 
 class Feed:
     '''
@@ -94,9 +119,11 @@ class ECC:
         
         class SECP256R1:
             INTERNAL_ecdsa_curve = ecdsa.NIST256p
+            INTERNAL_cryptography_curve = cryptography.hazmat.primitives.asymmetric.ec.SECP256R1
             
         class SECP384R1:
             INTERNAL_ecdsa_curve = ecdsa.NIST384p
+            INTERNAL_cryptography_curve = cryptography.hazmat.primitives.asymmetric.ec.SECP384R1
     
     @staticmethod
     def generatePrivateKey(curve) -> bytes:
@@ -106,6 +133,13 @@ class ECC:
     def derivePublicKey(curve, privateKey:bytes) -> bytes:
         ecdsa_privateKey = ecdsa.SigningKey.from_string(privateKey, curve=curve.INTERNAL_ecdsa_curve)
         return ecdsa_privateKey.verifying_key.to_string()
+
+    @staticmethod
+    def deriveSharedSecret(curve, privateKey:bytes, publicKey:bytes) -> bytes:
+        privateKey_cryptography = INTERNAL_CryptoEngines.cryptography.privateKeyFromBytes(curve, privateKey)
+        publicKey_cryptography = INTERNAL_CryptoEngines.cryptography.publicKeyFromBytes(curve, publicKey)
+        sharedSecret:bytes = privateKey_cryptography.exchange(cryptography.hazmat.primitives.asymmetric.ec.ECDH(), publicKey_cryptography)
+        return sharedSecret
 
     class Signature:
         
