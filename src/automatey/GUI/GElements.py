@@ -1916,6 +1916,12 @@ class Dialog:
         Interrupt the current GUI event-loop, and run the dialog's.
         '''
         self.qDialog.exec()
+    
+    def close(self):
+        '''
+        Force-close dialog.
+        '''
+        self.qDialog.close()
 
 class StandardDialog:
     '''
@@ -1982,6 +1988,21 @@ class StandardDialog:
         # ? (...)
         dialog = Dialog(title=title, rootLayout=rootLayout, minimumSize=minimumSize, isSizeFixed=isSizeFixed)
         dialog.run()
+
+    @staticmethod
+    def selectFromList(title:str, itemList:typing.List[str], minimumSize):
+        listWidget = Widgets.Basics.List(itemList)
+        selectButton = Widgets.Basics.Button('Select')
+        # ? (...)
+        rootLayout = Layouts.GridLayout(2, 2, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+        rootLayout.setWidget(listWidget, rowIdx=0, colIdx=0, colSpan=2)
+        rootLayout.setWidget(selectButton, rowIdx=1, colIdx=1)
+        rootLayout.setRowMinimumSize(1, 0)
+        # ? (...)
+        dialog = Dialog(title=title, rootLayout=rootLayout, minimumSize=minimumSize, isSizeFixed=True)
+        selectButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: dialog.close()))
+        dialog.run()
+        return listWidget.getSelectedIndex()
 
     class Message:
         
