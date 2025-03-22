@@ -1911,17 +1911,25 @@ class Dialog:
         # ? Setting root layout.
         self.qDialog.setLayout(rootLayout.qLayout)
         
-    def run(self):
+    def run(self) -> bool:
         '''
         Interrupt the current GUI event-loop, and run the dialog's.
+        
+        Returns `True` if dialog is not force-closed.
         '''
-        self.qDialog.exec()
+        return self.qDialog.exec() == QtWidgets.QDialog.DialogCode.Accepted
     
-    def close(self):
+    def accept(self):
         '''
-        Force-close dialog.
+        Accept dialog.
         '''
-        self.qDialog.close()
+        self.qDialog.accept()
+
+    def reject(self):
+        '''
+        Reject dialog.
+        '''
+        self.qDialog.reject()
 
 class StandardDialog:
     '''
@@ -1990,7 +1998,12 @@ class StandardDialog:
         dialog.run()
 
     @staticmethod
-    def selectFromList(title:str, itemList:typing.List[str], minimumSize):
+    def selectFromList(title:str, itemList:typing.List[str], minimumSize) -> int:
+        '''
+        Select an item from list, and return its index.
+        
+        If dialog is rejected (e.g., closed), `-1` is returned.
+        '''
         listWidget = Widgets.Basics.List(itemList)
         selectButton = Widgets.Basics.Button('Select')
         # ? (...)
@@ -2001,9 +2014,9 @@ class StandardDialog:
         rootLayout.setColumnMinimumSize(1, 0)
         # ? (...)
         dialog = Dialog(title=title, rootLayout=rootLayout, minimumSize=minimumSize, isSizeFixed=True)
-        selectButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: dialog.close()))
-        dialog.run()
-        return listWidget.getSelectedIndex()
+        selectButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: dialog.accept()))
+        result = dialog.run()
+        return (listWidget.getSelectedIndex() if result else -1)
 
     class Message:
         
