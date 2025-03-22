@@ -98,7 +98,7 @@ class Element:
         return self.modelInstance
 
     def __str__(self):
-        return self.getType() + ': ' + self.getType()
+        return self.getType() + ': ' + self.getPath()
     
     def __repr__(self):
         return str(self)

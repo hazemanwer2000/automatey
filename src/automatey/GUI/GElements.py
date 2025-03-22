@@ -826,6 +826,7 @@ class Widgets:
             
             def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False):
                 self.qWidget = PyQt6Wrapper.QPlainTextEdit()
+                self.qWidget.setWordWrapMode(QtGui.QTextOption.WrapMode.NoWrap) 
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
                 
