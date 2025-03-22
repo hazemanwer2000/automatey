@@ -2,6 +2,19 @@
 # Standard libraries
 import re
 
+class Indent:
+    '''
+    Add indentation to each line within a text.
+    '''
+    
+    @staticmethod
+    def prepend(text:str, indentation:str):
+        return indentation + text.replace('\n', indentation + '\n')
+
+    @staticmethod
+    def append(text:str, indentation:str):
+        return text.replace('\n', '\n' + indentation) + indentation
+
 class Regex:
 
     @staticmethod
@@ -157,3 +170,27 @@ class HexString:
             chunk = ', '.join(chunkList)
             chunks.append(chunk)
         return ',\n'.join(chunks)
+
+class Writer:
+    '''
+    To be used to write text, in a more clean way.
+    '''
+    
+    def __init__(self):
+        self.text = ''
+        
+    def write(self, newText, indentation:str=None, isAppendNewLine:bool=True):
+        if indentation is not None:
+            newText = Indent.prepend(newText, indentation)
+        if isAppendNewLine:
+            newText += '\n'
+        self.text += newText
+    
+    def writeLines(self, lines, indentation:str=None, isAppendNewLine:bool=True):
+        self.write('\n'.join(lines), indentation, isAppendNewLine)
+        
+    def newLine(self):
+        self.text += '\n'
+        
+    def clear(self):
+        self.text = ''

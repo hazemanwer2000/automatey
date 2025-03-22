@@ -101,7 +101,7 @@ class Parser:
     A parser of ARXML file(s).
     '''
     def __init__(self):
-        self.elements = []
+        self.elements:typing.List[Element] = []
     
     def processFile(self, f_arxml):
         '''
@@ -122,3 +122,18 @@ class Parser:
         if conditional is not None:
             elements = [element for element in elements if conditional(element)]
         return elements
+
+    def toString(self, isIncludeElementPath:bool=True) -> str:
+        '''
+        Summarize element(s).
+        '''
+        # ? Sort element(s).
+        self.elements.sort(key=lambda x: (x.getType(), x.getPath()))
+        # ? (...)
+        writer = StringUtils.Writer()
+        previousType = None
+        for element in self.elements:
+            currentType = element.getType()
+            if previousType != currentType:
+                
+                previousType = currentType
