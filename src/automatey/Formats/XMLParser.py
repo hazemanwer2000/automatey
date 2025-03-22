@@ -28,6 +28,14 @@ class XML:
         '''
         tree = lxml.etree.parse(str(f))
         return XML(tree.getroot())
+
+    @staticmethod
+    def fromString(text:str) -> "XML":
+        '''
+        Parse XML from string.
+        '''
+        root = lxml.etree.fromstring(text.encode("utf-8"))
+        return XML(root)
     
     @staticmethod
     def fromScratch(tag)-> "XML":

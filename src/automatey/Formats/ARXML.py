@@ -3,6 +3,7 @@
 import automatey.Formats.XMLParser as XMLParser
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Utils.MathUtils as MathUtils
+import automatey.OS.FileUtils as FileUtils
 
 # Standard Libraries
 import typing
@@ -110,14 +111,19 @@ class Parser:
     def __init__(self):
         self.elements:typing.List[Element] = []
     
-    def processFile(self, f_arxml):
+    def processFile(self, f_arxml:FileUtils.File):
         '''
         Process a number of ARXML file(s).
         
         Note that,
         - Processing is incremental (i.e., builds on previously processed file(s)).
         '''
-        xmlRoot = XMLParser.XML.fromFile(f_arxml)
+        xmlText = f_arxml.quickRead('t')
+        
+        # (!) Workaround: Remove AUTOSAR namespace from XML, to ease XML navigation.
+        xmlText = StringUtils.Regex.replaceAll(r'<AUTOSAR .*?>', r'<AUTOSAR>', xmlText)
+        
+        xmlRoot = XMLParser.XML.fromString(xmlText)
         xmlElements = xmlRoot.XPath('/descendant::AR-PACKAGE/ELEMENTS/*') + xmlRoot.XPath('/descendant::AUTOSAR/ELEMENTS/*')
         self.elements.extend([Element(xmlElement) for xmlElement in xmlElements])
     
