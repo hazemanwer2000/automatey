@@ -855,7 +855,7 @@ class Widgets:
                 '''
                 Get text.
                 '''
-                return self.qWidget.text()
+                return self.qWidget.toPlainText()
 
             def setText(self, text):
                 '''

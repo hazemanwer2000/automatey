@@ -245,6 +245,19 @@ class File:
             newTmpDir = baseTmpDir.traverseDirectory(newTmpDirName)
             newTmpDir.makeDirectory()
             return newTmpDir
+
+        @staticmethod
+        def getTemporaryFile(extension:str, prefix:str='') -> "File":
+            '''
+            Returns a *File* object, of the temporary directory.
+            
+            Note that,
+            - Extension does not include a `.`.
+            '''
+            baseTmpDir = File(tempfile.gettempdir())
+            newTmpFileName = prefix + RandomUtils.Generation.String(INTERNAL_Constants.MINIMUM_RANDOM_LENGTH) + '.' + extension
+            newTmpFile = baseTmpDir.traverseDirectory(newTmpFileName)
+            return newTmpFile
         
         @staticmethod
         def copy(srcFile, dstFile):
