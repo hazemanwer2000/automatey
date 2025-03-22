@@ -49,6 +49,9 @@ class History:
             item = self.deque[self.idx]
         return item        
     
+    def __len__(self):
+        return len(self.deque)
+    
     def __str__(self):
         return str(self.deque) + ', idx=' + str(self.idx)
     
