@@ -1998,6 +1998,7 @@ class StandardDialog:
         rootLayout.setWidget(listWidget, rowIdx=0, colIdx=0, colSpan=2)
         rootLayout.setWidget(selectButton, rowIdx=1, colIdx=1)
         rootLayout.setRowMinimumSize(1, 0)
+        rootLayout.setColumnMinimumSize(1, 0)
         # ? (...)
         dialog = Dialog(title=title, rootLayout=rootLayout, minimumSize=minimumSize, isSizeFixed=True)
         selectButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: dialog.close()))
