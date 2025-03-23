@@ -518,7 +518,7 @@ class Widgets:
             Can handle an icon, as well as text.
             '''
             
-            def __init__(self, text:str=None, icon:GUtils.Icon=None, toolTip=None):
+            def __init__(self, text:str=None, icon:GUtils.Icon=None, toolTip=None, isCheckable:bool=False):
                 self.qButton = QtWidgets.QPushButton()
                 Widget.__init__(self, self.qButton)
                 INTERNAL.EventManager.__init__(self)
@@ -537,6 +537,9 @@ class Widgets:
                 if toolTip != None:
                     self.qButton.setToolTip(toolTip)
                 
+                # ? Set checkable (optional).
+                self.qButton.setCheckable(isCheckable)
+                
                 # ? Event-handlers.
                 self.qButton.clicked.connect(self.INTERNAL_onClicked)
                 
@@ -546,6 +549,9 @@ class Widgets:
             def INTERNAL_onClicked(self):
                 if GUtils.EventHandlers.ClickEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.ClickEventHandler].fcn()
+
+            def isChecked(self) -> bool:
+                return self.qButton.isChecked()
 
         class Label:
             '''
