@@ -18,11 +18,11 @@ class Indent:
 class Regex:
 
     @staticmethod
-    def replaceAll(expr_match, expr_replace, txt):
+    def replaceAll(expr_match, expr_replace, txt, count=0):
         """
         Replace all (RegEx-)matches to an expression, with another expression.
         """
-        return re.sub(expr_match, expr_replace, txt)
+        return re.sub(expr_match, expr_replace, txt, count=count)
 
     @staticmethod
     def findAll(expr_match:str, txt:str) -> list:
