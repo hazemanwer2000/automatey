@@ -150,7 +150,9 @@ class Modifiers:
             '''
             Crop.
             
-            Note that (1, 1) specifies the pixel at the top-left corner.
+            Note that:
+            * `(1, 1)` specifies the pixel at the top-left corner.
+            * `-1` specifies the maximum value along the given axis.
             '''
             def __init__(self, topLeft:AbstractGraphics.Point, bottomRight:AbstractGraphics.Point):
                 self.topLeft = topLeft
@@ -241,6 +243,16 @@ class ThumbnailTimestampAttributes:
 class INTERNAL_VideoProcessing:
     
     class FFMPEGWrapper:
+
+        class Utils:
+            
+            @staticmethod
+            def preprocessPoint(p:AbstractGraphics.Point, generalInfo:dict):
+                '''
+                Performs pre-processing of a (on-screen) point.
+                '''
+                if p.x == -1: p.x = generalInfo['width']
+                if p.y == -1: p.y = generalInfo['height']
         
         CommandTemplates = {
             'VideoTrimNearestKeyframe' : ProcessUtils.CommandTemplate(
@@ -565,6 +577,10 @@ class INTERNAL_VideoProcessing:
             @staticmethod
             def Crop(modifier:Modifiers.Filters.Crop, generalInfo, specificInfo):
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Crop'].createFormatter()
+                
+                # Pre-processing (...)
+                INTERNAL_VideoProcessing.FFMPEGWrapper.Utils.preprocessPoint(modifier.topLeft)
+                INTERNAL_VideoProcessing.FFMPEGWrapper.Utils.preprocessPoint(modifier.bottomRight)
                 
                 x = modifier.topLeft.x - 1
                 y = modifier.topLeft.y - 1
