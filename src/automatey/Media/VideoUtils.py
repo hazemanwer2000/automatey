@@ -579,8 +579,8 @@ class INTERNAL_VideoProcessing:
                 formatter = INTERNAL_VideoProcessing.FFMPEGWrapper.VideoFilterConstructors.FilterTemplates['Crop'].createFormatter()
                 
                 # Pre-processing (...)
-                INTERNAL_VideoProcessing.FFMPEGWrapper.Utils.preprocessPoint(modifier.topLeft)
-                INTERNAL_VideoProcessing.FFMPEGWrapper.Utils.preprocessPoint(modifier.bottomRight)
+                INTERNAL_VideoProcessing.FFMPEGWrapper.Utils.preprocessPoint(modifier.topLeft, generalInfo)
+                INTERNAL_VideoProcessing.FFMPEGWrapper.Utils.preprocessPoint(modifier.bottomRight, generalInfo)
                 
                 x = modifier.topLeft.x - 1
                 y = modifier.topLeft.y - 1
