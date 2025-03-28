@@ -80,7 +80,7 @@ class File:
         for f in resultList:
             pathObject = pathlib.Path(f.path)
             relativePath = pathObject.relative_to(selfPathObject)
-            relativeResultList.append(str(relativePath))
+            relativeResultList.append(str(File(str(relativePath))))
         return relativeResultList
 
     def traverseDirectory(self, *paths):
