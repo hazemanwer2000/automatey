@@ -263,9 +263,9 @@ class Widgets:
                 Widget.__init__(self, QtWidgets.QWidget())
                 
                 # ? Setting element.
-                layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
-                layout.setWidget(widget, 0, 0, 1, 1)
-                self.qWidget.setLayout(layout.qLayout)
+                self.layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
+                self.layout.setWidget(widget, 0, 0, 1, 1)
+                self.qWidget.setLayout(self.layout.qLayout)
 
         class Outline(Widget):
             '''
@@ -280,9 +280,9 @@ class Widgets:
                 self.qWidget.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
                 
                 # ? Setting element.
-                layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
-                layout.setWidget(widget, 0, 0, 1, 1)
-                self.qWidget.setLayout(layout.qLayout)
+                self.layout = Layouts.GridLayout(1, 1, elementMargin=elementMargin, elementSpacing=0)
+                self.layout.setWidget(widget, 0, 0, 1, 1)
+                self.qWidget.setLayout(self.layout.qLayout)
 
         class ScrollArea(Widget):
             '''
@@ -293,9 +293,12 @@ class Widgets:
                 self.qWidget = QtWidgets.QScrollArea()
                 Widget.__init__(self, self.qWidget)
                 
+                # ? Apply decorator(s).
+                self.marginDecorator = Widgets.Decorators.Margin(widget, elementMargin=elementMargin)
+
                 # ? Set element.
                 self.qWidget.setWidgetResizable(True)
-                self.qWidget.setWidget(Widgets.Decorators.Margin(widget, elementMargin=elementMargin).qWidget)
+                self.qWidget.setWidget(self.marginDecorator.qWidget)
                 
                 # ? Specify if vertical/horizontal scrolling is always on.
                 
@@ -329,24 +332,24 @@ class Widgets:
                          isOuterOutline:bool=False,
                          elementMargin:AbstractGraphics.Margin=AbstractGraphics.SymmetricMargin(5),
                          elementSpacing:int=5):
-                self.layout = Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), elementSpacing)
-                self.labelTitle = Widgets.Basics.Label(title)
+                layout = Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), elementSpacing)
+                labelTitle = Widgets.Basics.Label(title)
                 
                 # ? (...)
                 innerWidget = widget
                 if isInnerOutline:
                     innerWidget = Widgets.Decorators.Outline(innerWidget, elementMargin)
                 
-                self.layout.setWidget(self.labelTitle, 0, 0)
-                self.layout.setWidget(innerWidget, 1, 0)
-                layoutsWidget = Widget.fromLayout(self.layout)
+                layout.setWidget(labelTitle, 0, 0)
+                layout.setWidget(innerWidget, 1, 0)
+                layoutsWidget = Widget.fromLayout(layout)
                 
                 # ? (...)
-                outerWidget = layoutsWidget
+                self.outerWidget = layoutsWidget
                 if isOuterOutline:
-                    outerWidget = Widgets.Decorators.Outline(outerWidget, elementMargin)
+                    self.outerWidget = Widgets.Decorators.Outline(self.outerWidget, elementMargin)
                 
-                Widget.__init__(self, outerWidget.qWidget)
+                Widget.__init__(self, self.outerWidget.qWidget)
 
         class LineEditEraser(Widget):
             '''
