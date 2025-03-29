@@ -135,13 +135,26 @@ class XML:
         '''
         self.root.text = text
 
+    def getChildren(self) -> typing.List["XML"]:
+        '''
+        Get list of children.
+        '''
+        return [XML(x) for x in self.root.iterchildren()]
+
+    def getParent(self) -> "XML":
+        '''
+        Get parent. If not applicable, `None` is returned.
+        '''
+        return XML(self.root.getparent())
+
     # Formatting-specific operation(s)
     
     def removeElement(self, xml:"XML"):
         '''
         Remove child element.
         '''
-        self.root.remove(xml.root)
+        if xml.root in self.root.iterchildren():
+            self.root.remove(xml.root)
 
     def removeElementByIndex(self, idx:int):
         '''
