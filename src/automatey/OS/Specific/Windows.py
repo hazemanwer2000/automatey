@@ -76,7 +76,7 @@ class Registry:
         '''
         Sets the Auto-Run batch file (i.e., `.bat` file that executes automatically with every CMD opened).
         '''
-        targetPath = Utils.File2Path(f_batch, isQuoted=True)
+        targetPath = Utils.File2Path(f_batch, isDoubleQuoted=True)
         entryKeyPath = fr"Software\Microsoft\Command Processor"
 
         # ? Setting key.
