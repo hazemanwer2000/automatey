@@ -3,6 +3,8 @@ import automatey.Utils.ColorUtils as ColorUtils
 import automatey.Utils.TimeUtils as TimeUtils
 import automatey.Utils.RandomUtils as RandomUtils
 import automatey.Abstract.Graphics as Graphics
+import automatey.Utils.Validation as Validation
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 
 import click
 
@@ -188,3 +190,34 @@ class VocalTimer:
     def issueCommand(self, command):
         self.commandQueue.put(command)
         self.notifyQueue.get()
+
+class Input:
+    '''
+    Queries and manages input from user.
+    '''
+
+    @staticmethod
+    def getString(msg:str):
+        return input(msg).strip()
+    
+    @staticmethod
+    def getFloat(msg:str):
+        return Validation.asFloat(Input.getString())
+
+    @staticmethod
+    def getInt(msg:str):
+        return Validation.asInt(Input.getString())
+
+    @staticmethod
+    def getBool(msg:str):
+        return Validation.asBool(Input.getString())
+
+    @staticmethod
+    def getOption(msg:str, opts):
+        print(msg)
+        for idx, opt in enumerate(opts):
+            print(f"{idx}: " + str(opt))
+        selectedOpt = input('>>>')
+        if selectedOpt not in opts:
+            raise ExceptionUtils.ValidationError('Selected option is not a valid option.')
+        return selectedOpt
