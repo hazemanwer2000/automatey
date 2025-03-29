@@ -1,6 +1,7 @@
 
 # Standard libraries
 import re
+import shlex
 
 class Indent:
     '''
@@ -126,11 +127,26 @@ class EmptyLine:
 
 class Split:
     
+    @staticmethod
     def atWords(text:str):
         '''
         Given a concatenated string of words (e.g., `GIFForExample`), returns a list of words (e.g., `['GIF', 'For', 'Example']`).
         '''
         return Regex.findAll(r'[A-Z]+(?=[A-Z][a-z]|$)|[A-Z][a-z]*', text)
+
+    @staticmethod
+    def asCommand(*args):
+        '''
+        Split a command, quote-sensitive.
+        '''
+        # ? Joining all at space(s).
+        command = ' '.join(args)
+        # ? Splitting into argument(s), quote-sensitive.
+        # (!) Preserve (i.e., escape) some characters, before calling 'shlex.split'.
+        command = command.replace("\\", "\\\\")
+        command = command.replace(r"'", r"\'")
+        command = shlex.split(command)
+        return command
 
 class Case:
 

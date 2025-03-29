@@ -239,14 +239,7 @@ class Process:
     '''
     
     def __init__(self, *args):
-        # ? Joining all at space(s).
-        self.command = ' '.join(args)
-        # ? Splitting into argument(s), quote-sensitive.
-        # (!) Preserve (i.e., escape) some characters, before calling 'shlex.split'.
-        self.command = self.command.replace("\\", "\\\\")
-        self.command = self.command.replace(r"'", r"\'")
-        self.command = shlex.split(self.command)
-
+        self.command = StringUtils.Split.asCommand(args)
         self.stdout = None
         self.stderr = None
     
