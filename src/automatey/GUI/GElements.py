@@ -67,12 +67,17 @@ class Layouts:
                 self.qLayout.setRowStretch(i, 1)
             for i in range(colCount):
                 self.qLayout.setColumnStretch(i, 1)
-        
+    
+            # ? Maintain widget list.
+            self.widgetList = []
+
         def setWidget(self, widget, rowIdx, colIdx, rowSpan=1, colSpan=1):
             '''
             Set an element in a specific location within the grid.
             '''
             self.qLayout.addWidget(widget.qWidget, rowIdx, colIdx, rowSpan, colSpan)
+
+            self.widgetList.append(widget)
         
         def setRowMinimumSize(self, rowIdx, size):
             '''
