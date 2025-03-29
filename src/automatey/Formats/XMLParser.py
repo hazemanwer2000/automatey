@@ -44,7 +44,7 @@ class XML:
         '''
         return XML(lxml.etree.Element(tag))
     
-    def saveAs(self, f:FileUtils.File, indent:str='\t'):
+    def saveAs(self, f:FileUtils.File, indent:str='  '):
         '''
         Save as XML file.
         '''
@@ -54,7 +54,7 @@ class XML:
         with f.openFile('wt') as handler:
             handler.writeAny(self.toString(indent=indent))
     
-    def toString(self, indent:str='\t'):
+    def toString(self, indent:str='  '):
         text = lxml.etree.tostring(self.root, pretty_print=True, encoding='unicode')
         dom = xml.dom.minidom.parseString(text)
         return StringUtils.EmptyLine.removeEmptyLines(dom.toprettyxml(indent=indent))
