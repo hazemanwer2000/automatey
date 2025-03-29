@@ -381,6 +381,9 @@ class Widgets:
                     self.qWidget.addWidget(widget.qWidget)
                 
                 self.qWidget.setCurrentWidget(initWidget.qWidget)
+
+                # ? Maintain widget list.
+                self.widgets = widgets
                     
             def setCurrentWidget(self, widget):
                 '''
@@ -449,6 +452,9 @@ class Widgets:
                 self.qTabWidget = QtWidgets.QTabWidget()
                 Widget.__init__(self, self.qTabWidget)
                 INTERNAL.EventManager.__init__(self)
+
+                # ? Maintain widget list.
+                self.widgets = widgets
                                 
                 # ? Adding tab(s) in-order.
                 for tabName, widget in zip(tabNames, widgets):
