@@ -301,8 +301,7 @@ class Widgets:
             def __init__(self, widget):
                 self.layout = Layouts.GridLayout(3, 3, AbstractGraphics.SymmetricMargin(0), 0)
                 self.layout.setWidget(widget, 1, 1)
-                layoutsWidget = Widget.fromLayout(self.layout)
-                Widget.__init__(self, layoutsWidget.qWidget)
+                Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
 
         class Titled(Widget):
             
@@ -346,8 +345,7 @@ class Widgets:
                 self.layout.setWidget(self.eraseButton, 0, 0)
                 self.layout.setWidget(lineEdit, 0, 1)
                 self.layout.setColumnMinimumSize(0, 0)
-                layoutsWidget = Widget.fromLayout(self.layout)
-                Widget.__init__(self, layoutsWidget.qWidget)
+                Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
 
     class Containers:
         
