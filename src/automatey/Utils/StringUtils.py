@@ -72,6 +72,9 @@ class EmptyLine:
     
     @staticmethod
     def lstripLines(text:str):
+        '''
+        Remove all line(s) at the beginning that are empty, or with white-space character(s) only.
+        '''
         textLines = text.split('\n')
         
         # ? Remove lines at the beginning.
@@ -85,6 +88,9 @@ class EmptyLine:
     
     @staticmethod
     def rstripLines(text:str):
+        '''
+        Remove all line(s) at the end that are empty, or with white-space character(s) only.
+        '''
         textLines = text.split('\n')
         
         # ? Remove lines at the end.
@@ -98,6 +104,9 @@ class EmptyLine:
 
     @staticmethod
     def stripLines(text:str):
+        '''
+        Combines both `lstripLines` and `rstripLines`.
+        '''
         return EmptyLine.rstripLines(EmptyLine.lstripLines(text))
     
     @staticmethod
@@ -200,3 +209,16 @@ class Writer:
     
     def __repr__(self):
         return str(self)
+
+class Verbose:
+    '''
+    Operation(s) that are simple, but are better verbalized.
+    '''
+
+    @staticmethod
+    def quote(text:str):
+        return f"'{text}'"
+
+    @staticmethod
+    def doubleQuote(text:str):
+        return f'"{text}"'

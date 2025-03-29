@@ -1,6 +1,7 @@
 
 # ? Internal Libraries
 import automatey.OS.FileUtils as FileUtils
+import automatey.Utils.StringUtils as StringUtils
 
 # ? Standard Libraries
 import winreg
@@ -79,14 +80,14 @@ class Registry:
             with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, entryKeyPath) as entryKey:
                 winreg.SetValue(entryKey, "", winreg.REG_SZ, name)
                 winreg.SetValue(entryKey, "command", winreg.REG_SZ, command)
-                winreg.SetValueEx(entryKey, "Icon", 0, winreg.REG_SZ, INTERNAL.fileAsPath(f_icon))
+                winreg.SetValueEx(entryKey, "Icon", 0, winreg.REG_SZ, Utils.File2Path(f_icon))
     
     @staticmethod            
     def setAutoRun(f_batch:FileUtils.File):
         '''
         Sets the Auto-Run batch file (i.e., `.bat` file that executes automatically with every CMD opened).
         '''
-        targetPath = INTERNAL.fileAsPath(f_batch, isQuoted=True)
+        targetPath = Utils.File2Path(f_batch, isQuoted=True)
         entryKeyPath = fr"Software\Microsoft\Command Processor"
 
         # ? Setting key.
@@ -100,8 +101,8 @@ class Shortcut:
         '''
         Create a shortcut, and place it in the `Start Menu`.
         '''
-        targetPath = INTERNAL.fileAsPath(f_exe)
-        iconPath = INTERNAL.fileAsPath(f_icon)
+        targetPath = Utils.File2Path(f_exe)
+        iconPath = Utils.File2Path(f_icon)
         start_menu_path = os.path.join(winshell.start_menu(), "Programs")
         shortcut_path = os.path.join(start_menu_path, f"{name}.lnk")
         
@@ -136,3 +137,12 @@ class Utils:
             kwargs['key'] = lambda x: natsort_key(key(x))
         iterable.sort(**kwargs)
     
+    @staticmethod
+    def File2Path(f:FileUtils.File, isQuoted:bool=False) -> str:
+        '''
+        Returns *Windows*-specific path of file.
+        '''
+        path = str(f).replace('/', '\\')
+        if isQuoted:
+            path = StringUtils.Verbose.doubleQuote(path)
+        return path
