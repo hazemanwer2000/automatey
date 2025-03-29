@@ -67,21 +67,45 @@ class XML:
     
     # General operation(s).
 
-    def XPath(self, query) -> typing.List["XML"]:
+    def XPath(self, query, namespaces=None) -> typing.List["XML"]:
         '''
         Returns a list, the result of the given XPath query.
         
         Note that,
         - XPath queries must always return an element.
         '''
-        result = self.root.xpath(query)
+        kwargs = {}
+        if namespaces is not None:
+            kwargs['namespaces'] = namespaces
+
+        result = self.root.xpath(query, **kwargs)
         return [XML(element) for element in result]
 
     def getTag(self) -> str:
         '''
         Get tag.
         '''
-        return self.root.tag
+        tag = self.root.tag
+
+        # ? Search for namespace.
+        result = StringUtils.Regex.findAll(r'\{.+\}(.+)', tag)
+        if len(result) > 0:
+            tag = result[0]
+            
+        return tag
+    
+    def getNamespace(self) -> str:
+        '''
+        Get namespace. If undefined, `None` is returned.
+        '''
+        ns = None
+
+        # ? Search for namespace.
+        result = StringUtils.Regex.findAll(r'\{(.+)\}.+', self.root.tag)
+        if len(result) > 0:
+            ns = result[0]
+            
+        return ns
     
     def setTag(self, tag:str):
         '''
