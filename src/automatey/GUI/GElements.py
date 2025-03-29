@@ -175,11 +175,17 @@ class Layouts:
                                     elementMargin.bottom)
             self.qLayout.setSpacing(elementSpacing)
 
+            # ? Maintain widget list.
+            self.widgetList = []
+
         def insertWidget(self, widget, idx=-1):
             '''
             Insert widget at index.
             '''
             self.qLayout.insertWidget(idx, widget.qWidget, alignment=QtCore.Qt.AlignmentFlag.AlignLeft)
+
+            # ? Update widget list.
+            self.widgetList.insert((idx if (idx != -1) else self.getCount()), widget)
 
         def removeWidgetAtIndex(self, idx=-1):
             '''
@@ -189,12 +195,18 @@ class Layouts:
                 idx = self.qLayout.count() - 1
             self.removeWidget(self.qLayout.itemAt(idx).widget())
 
+            # ? Update widget list.
+            self.widgetList.pop(idx)
+
         def removeWidget(self, widget):
             '''
             Remove widget.
             '''
             self.qLayout.removeWidget(widget)
             widget.setParent(None)
+
+            # ? Update widget list.
+            self.widgetList.remove(widget)
 
         def getCount(self):
             '''
