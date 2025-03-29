@@ -202,22 +202,33 @@ class Input:
     
     @staticmethod
     def getFloat(msg:str):
-        return Validation.asFloat(Input.getString())
+        return Validation.asFloat(Input.getString(msg))
 
     @staticmethod
     def getInt(msg:str):
-        return Validation.asInt(Input.getString())
+        return Validation.asInt(Input.getString(msg))
 
     @staticmethod
     def getBool(msg:str):
-        return Validation.asBool(Input.getString())
+        return Validation.asBool(Input.getString(msg))
 
     @staticmethod
     def getOption(msg:str, opts):
         print(msg)
         for idx, opt in enumerate(opts):
             print(f"{idx}: " + str(opt))
-        selectedOpt = input('>>>')
-        if selectedOpt not in opts:
+        selectedOpt = Input.getInt('>>> ')
+        if (selectedOpt < 0) or (selectedOpt >= len(opts)):
             raise ExceptionUtils.ValidationError('Selected option is not a valid option.')
         return selectedOpt
+
+    @staticmethod
+    def Repeater(getter)
+        '''
+        Wrapper around a getter, to make it repeat until a valid answer is received.
+        '''
+        try:
+            value = getter()
+        except:
+            echo(message='Invalid value. Please re-try.', textColor=Graphics.TextColor(ColorUtils.Colors.RED, None))
+        return value
