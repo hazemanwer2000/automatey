@@ -11,17 +11,6 @@ import os
 import winshell
 import natsort
 
-class INTERNAL:
-
-    def fileAsPath(f:FileUtils.File, isQuoted=False) -> str:
-        '''
-        Returns *Windows*-specific path of file.
-        '''
-        path = str(f).replace('/', '\\')
-        if isQuoted:
-            path = '"' + path + '"'
-        return path
-
 class Registry:
     
     class ContextMenu:
@@ -138,11 +127,11 @@ class Utils:
         iterable.sort(**kwargs)
     
     @staticmethod
-    def File2Path(f:FileUtils.File, isQuoted:bool=False) -> str:
+    def File2Path(f:FileUtils.File, isDoubleQuoted:bool=False) -> str:
         '''
         Returns *Windows*-specific path of file.
         '''
         path = str(f).replace('/', '\\')
-        if isQuoted:
+        if isDoubleQuoted:
             path = StringUtils.Verbose.doubleQuote(path)
         return path
