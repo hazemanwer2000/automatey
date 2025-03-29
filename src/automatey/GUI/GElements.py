@@ -232,12 +232,12 @@ class Widget:
         self.qWidget.deleteLater()
         
     @staticmethod
-    def fromLayout(layout):
+    def fromLayout(qLayout):
         '''
         Create widget from layout.
         '''
         qWidget = QtWidgets.QWidget()
-        qWidget.setLayout(layout.qLayout)
+        qWidget.setLayout(qLayout)
         widget = Widget(qWidget)
         return widget
 
@@ -321,7 +321,7 @@ class Widgets:
             def __init__(self, widget):
                 self.layout = Layouts.GridLayout(3, 3, AbstractGraphics.SymmetricMargin(0), 0)
                 self.layout.setWidget(widget, 1, 1)
-                Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
+                Widget.__init__(self, Widget.fromLayout(self.layout.qLayout).qWidget)
 
         class Titled(Widget):
             
@@ -332,7 +332,7 @@ class Widgets:
                          isOuterOutline:bool=False,
                          elementMargin:AbstractGraphics.Margin=AbstractGraphics.SymmetricMargin(5),
                          elementSpacing:int=5):
-                layout = Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), elementSpacing)
+                self.layout = Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), elementSpacing)
                 labelTitle = Widgets.Basics.Label(title)
                 
                 # ? (...)
@@ -340,9 +340,9 @@ class Widgets:
                 if isInnerOutline:
                     innerWidget = Widgets.Decorators.Outline(innerWidget, elementMargin)
                 
-                layout.setWidget(labelTitle, 0, 0)
-                layout.setWidget(innerWidget, 1, 0)
-                layoutsWidget = Widget.fromLayout(layout)
+                self.layout.setWidget(labelTitle, 0, 0)
+                self.layout.setWidget(innerWidget, 1, 0)
+                layoutsWidget = Widget.fromLayout(self.layout.qLayout)
                 
                 # ? (...)
                 self.outerWidget = layoutsWidget
@@ -365,7 +365,7 @@ class Widgets:
                 self.layout.setWidget(self.eraseButton, 0, 0)
                 self.layout.setWidget(lineEdit, 0, 1)
                 self.layout.setColumnMinimumSize(0, 0)
-                Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
+                Widget.__init__(self, Widget.fromLayout(self.layout.qLayout).qWidget)
 
     class Containers:
         
@@ -412,7 +412,7 @@ class Widgets:
                 
                 # ? Setting up vertical layout.
                 self.verticalLayout = Layouts.VerticalLayout(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=elementSpacing)
-                self.gridLayout.setWidget(Widget.fromLayout(self.verticalLayout), 0, 0)
+                self.gridLayout.setWidget(Widget.fromLayout(self.verticalLayout.qLayout), 0, 0)
 
             def getLayout(self) -> Layouts.VerticalLayout:
                 '''
@@ -435,7 +435,7 @@ class Widgets:
                 
                 # ? Setting up vertical layout.
                 self.horizontalLayout = Layouts.HorizontalLayout(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=elementSpacing)
-                self.gridLayout.setWidget(Widget.fromLayout(self.horizontalLayout), 0, 0)
+                self.gridLayout.setWidget(Widget.fromLayout(self.horizontalLayout.qLayout), 0, 0)
 
             def getLayout(self) -> Layouts.HorizontalLayout:
                 '''
@@ -943,7 +943,7 @@ class Widgets:
             
             def __init__(self, header:list):
                 self.layout = Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
-                Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
+                Widget.__init__(self, Widget.fromLayout(self.layout.qLayout).qWidget)
                 
                 # ? Create table.
                 self.qTableWidget = QtWidgets.QTableWidget(1, len(header))
@@ -1464,7 +1464,7 @@ class Widgets:
             def __init__(self):
                 # ? Setting up root (...)
                 self.rootLayout = Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), 5)
-                Widget.__init__(self, Widget.fromLayout(self.rootLayout).qWidget)
+                Widget.__init__(self, Widget.fromLayout(self.rootLayout.qLayout).qWidget)
                 
                 # ? Setting-up video-renderer.
                 self.renderer = Widgets.Basics.VideoRenderer()
@@ -1477,7 +1477,7 @@ class Widgets:
                 panelWorkingIdx = 0
                 # ? ? Setting up panel's root (...)
                 self.panelLayout = Layouts.GridLayout(1, 6, AbstractGraphics.SymmetricMargin(0), 5)
-                self.rootLayout.setWidget(Widget.fromLayout(self.panelLayout), 1, 0)
+                self.rootLayout.setWidget(Widget.fromLayout(self.panelLayout.qLayout), 1, 0)
                 self.rootLayout.setRowMinimumSize(1, 0)
                 # ? ? Only the seekbar's containing column shall be stretchable. 
                 for idx in range(panelWidgetCount):
@@ -1732,7 +1732,7 @@ class Widgets:
                 rootLayout.setWidget(self.buttonContainer, 0, 0, rowSpan=2)
                 rootLayout.setRowMinimumSize(0, 0)
                 rootLayout.setColumnMinimumSize(0, 0)
-                Widget.__init__(self, Widget.fromLayout(rootLayout).qWidget)
+                Widget.__init__(self, Widget.fromLayout(rootLayout.qLayout).qWidget)
 
                 # ? Track currently selected filter-option.
                 self.selectedFilterOptDec = None
@@ -1899,7 +1899,7 @@ class Widgets:
                     self.layout.setWidget(self.colorBlock, 0, 0)
                     self.layout.setWidget(self.filterOption, 0, 1)
                     self.layout.setColumnMinimumSize(0, 10)
-                    Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
+                    Widget.__init__(self, Widget.fromLayout(self.layout.qLayout).qWidget)
                     
                     # ? Setup event-handler(s).
                     self.colorBlock.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_colorBlock_onClick))
@@ -2141,11 +2141,14 @@ class Window:
     
     def __init__(self, title:str, rootLayout:Layout, minimumSize, isSizeFixed=False, isEnableStatusBar=False):
         super().__init__()
+
+        # ? Save reference to root layout.
+        self.rootLayout = rootLayout
         
         self.qWindow = QtWidgets.QMainWindow()
         
         # ? Setting root layout.
-        self.qWindow.setCentralWidget(Widget.fromLayout(rootLayout).qWidget)
+        self.qWindow.setCentralWidget(Widget.fromLayout(rootLayout.qLayout).qWidget)
         
         # ? All other settings.
         if (isSizeFixed):
