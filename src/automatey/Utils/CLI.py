@@ -223,12 +223,14 @@ class Input:
         return selectedOpt
 
     @staticmethod
-    def Repeater(getter)
+    def Repeater(getter):
         '''
         Wrapper around a getter, to make it repeat until a valid answer is received.
         '''
-        try:
-            value = getter()
-        except:
-            echo(message='Invalid value. Please re-try.', textColor=Graphics.TextColor(ColorUtils.Colors.RED, None))
+        while (True):
+            try:
+                value = getter()
+                break
+            except:
+                echo(message='Invalid value. Please re-try.\n', textColor=Graphics.TextColor(ColorUtils.Colors.RED, ColorUtils.Colors.BLACK))
         return value
