@@ -226,7 +226,7 @@ class Writer:
     def __repr__(self):
         return str(self)
 
-class Verbose:
+class Simply:
     '''
     Operation(s) that are simple, but are better verbalized.
     '''

@@ -133,5 +133,5 @@ class Utils:
         '''
         path = str(f).replace('/', '\\')
         if isDoubleQuoted:
-            path = StringUtils.Verbose.doubleQuote(path)
+            path = StringUtils.Simply.doubleQuote(path)
         return path

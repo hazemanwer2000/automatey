@@ -239,7 +239,7 @@ class Process:
     '''
     
     def __init__(self, *args):
-        self.command = StringUtils.Split.asCommand(args)
+        self.command = StringUtils.Split.asCommand(*args)
         self.stdout = None
         self.stderr = None
     
