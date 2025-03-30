@@ -169,7 +169,7 @@ class XML:
         descendants = self.XPath(query='./descendant::*')
         for descendant in descendants:
             if conditional(descendant):
-                self.removeElement(descendant)
+                descendant.getParent().removeElement(descendant)
 
     def removeElement(self, xml:"XML"):
         '''
