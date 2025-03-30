@@ -224,7 +224,7 @@ class Widget:
     def __init__(self, qWidget:QtWidgets.QWidget):
         
         self.qWidget = qWidget
-        self.layout = None
+        self.fromLayoutRef = None
 
     def discard(self):
         '''
@@ -240,7 +240,7 @@ class Widget:
         qWidget = QtWidgets.QWidget()
         qWidget.setLayout(layout.qLayout)
         widget = Widget(qWidget)
-        widget.layout = layout
+        widget.fromLayoutRef = layout
         return widget
 
 class CustomWidget(Widget):
