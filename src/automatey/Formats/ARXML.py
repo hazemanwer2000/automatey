@@ -23,18 +23,11 @@ class Element:
     def __init__(self, xmlElement:XMLParser.XML):
 
         # ? XML element clean-up.
-        # ? ? Remove 'UUID' attribute.
-        xmlElementsWithUUID = xmlElement.XPath('./descendant-or-self::*[@UUID]')
-        for xmlElementWithUUID in xmlElementsWithUUID:
-            del xmlElementWithUUID.getAttributes()['UUID']
-        # ? ? Remove 'ADMIN-DATA' element.
-        xmlAllElements = xmlElement.XPath('./descendant-or-self::*')
-        for xmlWorkingElement in xmlAllElements:
-            xmlAdminDataSearchResult = xmlWorkingElement.XPath('./ADMIN-DATA')
-            if len(xmlAdminDataSearchResult) == 1:
-                xmlAdminData = xmlAdminDataSearchResult[0]
-                xmlWorkingElement.removeElement(xmlAdminData)
         self.xmlElement = xmlElement
+        # ? ? Remove (useless) attribute(s).
+        self.xmlElement.removeAllAttributes(conditional=lambda e, a: a in ['UUID'])
+        # ? ? Remove (useless) element(s).
+        self.xmlElement.removeAllElements(conditional=lambda e: e.getTag() in ['ADMIN-DATA', 'DESC', 'LONG-NAME'])
         
         # ? Trace package path.
         xmlWorkingElement = self.xmlElement
