@@ -145,10 +145,32 @@ class XML:
         '''
         Get parent. If not applicable, `None` is returned.
         '''
-        return XML(self.root.getparent())
+        parentNode = self.root.getparent()
+        return XML(parentNode) if (parentNode is not None) else None
 
     # Formatting-specific operation(s)
+
+    def removeAllAttributes(self, conditional):
+        '''
+        Remove all attributes that satisfy a conditional.
+
+        Conditional must accept `element, attribute-name`.
+        '''
+        descendantsOrSelf = self.XPath(query='./descendant-or-self::*')
+        for element in descendantsOrSelf:
+            for attrib_name in element.getAttributes():
+                if conditional(element, attrib_name):
+                    del element.getAttributes()[attrib_name]
     
+    def removeAllElements(self, conditional):
+        '''
+        Remove all descendant element(s) that satisfy a conditional.
+        '''
+        descendants = self.XPath(query='./descendant::*')
+        for descendant in descendants:
+            if conditional(descendant):
+                self.removeElement(descendant)
+
     def removeElement(self, xml:"XML"):
         '''
         Remove child element.
