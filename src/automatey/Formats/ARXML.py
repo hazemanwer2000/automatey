@@ -28,7 +28,9 @@ class Element:
         self.xmlElement.removeAllAttributes(conditional=lambda e, a: a in ['UUID'])
         # ? ? Remove (useless) element(s).
         self.xmlElement.removeAllElements(conditional=lambda e: e.getTag() in ['ADMIN-DATA', 'DESC', 'LONG-NAME'])
-        
+        # ? ? Remove all comment(s).
+        self.xmlElement.removeAllComments()
+
         # ? Trace package path.
         xmlWorkingElement = self.xmlElement
         packagePathList = []

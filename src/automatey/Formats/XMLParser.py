@@ -162,6 +162,14 @@ class XML:
                 if conditional(element, attrib_name):
                     del element.getAttributes()[attrib_name]
     
+    def removeAllComments(self):
+        '''
+        Remove all comment(s).
+        '''
+        comments = self.XPath(query='./descendant::comment()')
+        for comment in comments:
+            comment.getParent().removeElement(comment)
+    
     def removeAllElements(self, conditional):
         '''
         Remove all descendant element(s) that satisfy a conditional.
