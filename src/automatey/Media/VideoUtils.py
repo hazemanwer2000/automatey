@@ -153,6 +153,7 @@ class Modifiers:
             Note that:
             * `(1, 1)` specifies the pixel at the top-left corner.
             * `-1` specifies the maximum value along the given axis.
+            * Negative values measure from the opposite end, in the reverse direction.
             '''
             def __init__(self, topLeft:AbstractGraphics.Point, bottomRight:AbstractGraphics.Point):
                 self.topLeft = topLeft
@@ -251,8 +252,10 @@ class INTERNAL_VideoProcessing:
                 '''
                 Performs pre-processing of a (on-screen) point.
                 '''
-                if p.x == -1: p.x = generalInfo['width']
-                if p.y == -1: p.y = generalInfo['height']
+                if p.x < 0:
+                    p.x = p.x + generalInfo['width'] + 1
+                if p.y < 0:
+                    p.y = p.y + generalInfo['height'] + 1
         
         CommandTemplates = {
             'VideoTrimNearestKeyframe' : ProcessUtils.CommandTemplate(
