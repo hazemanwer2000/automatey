@@ -5,9 +5,27 @@ import plotly.graph_objects
 import pandas as pd
 
 class Plot:
-    pass
+    
+    def __init__(self):
+        pass
 
-class GanttChart(Plot):
+    def view(self):
+        pass
+
+class INTERNAL:
+
+    class Implementation:
+
+        class plotly(Plot):
+
+            def __init__(self, figure):
+                super().__init__()
+                self.figure = figure
+
+            def view(self):
+                self.figure.show()
+
+class GanttChart(INTERNAL.Implementation.plotly):
     '''
     Plot a Gantt-Chart, of task(s) against time.
 
@@ -18,7 +36,10 @@ class GanttChart(Plot):
     '''
 
     def __init__(self, title:str, xaxis_title:str, resolution:float, entries:pd.DataFrame, tasks:pd.DataFrame, hover_fields:list):
-        super().__init__()
+        
+        # ? Create (blank) figure.
+        figure = plotly.graph_objects.Figure()
+        super().__init__(figure)
 
         # ? Merge 'tasks' into 'entries'.
         entries = pd.merge(entries, tasks, on='task')
@@ -30,9 +51,6 @@ class GanttChart(Plot):
             category: colorPalette[i % len(colorPalette)]
             for i, category in enumerate(categories)
         }
-
-        # ? Create (blank) figure.
-        fig = plotly.graph_objects.Figure()
 
         # ? Process each entry.
         for idx, entry in entries.iterrows():
@@ -49,7 +67,7 @@ class GanttChart(Plot):
             for hover_field in hover_fields:
                 customdata.append(entry[hover_field])
 
-            fig.add_trace(plotly.graph_objects.Bar(
+            figure.add_trace(plotly.graph_objects.Bar(
                 x=[entry['duration']],
                 y=[entry['task']],
                 base=[entry['start']],
@@ -62,12 +80,10 @@ class GanttChart(Plot):
             ))
 
         # ? Customize figure.
-        fig.update_layout(
+        figure.update_layout(
             title=title,
             xaxis_title=xaxis_title,
             barmode='stack',
             xaxis=dict(dtick=resolution, showgrid=True),
             yaxis=dict(dtick=1, showgrid=True, autorange="reversed"),
         )
-
-        fig.show()
