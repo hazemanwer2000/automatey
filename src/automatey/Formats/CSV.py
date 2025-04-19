@@ -43,7 +43,7 @@ class Format:
                 writer.writeheader()
                 writer.writerows(data)
 
-def fromFile(f_src:FileUtils.File, format=Format.ListOfDictionaries, delimiter=','):
+def fromFile(f_src:FileUtils.File, delimiter=','):
     '''
     Read data from CSV file.
 
@@ -52,7 +52,7 @@ def fromFile(f_src:FileUtils.File, format=Format.ListOfDictionaries, delimiter='
     '''
     return Format.ListOfDictionaries.INTERNAL_fromFile(f_src, delimiter=delimiter)
 
-def saveAs(data, f_dst:FileUtils.File, format=Format.ListOfDictionaries, delimiter=','):
+def saveAs(data, f_dst:FileUtils.File, delimiter=','):
     '''
     Write data as CSV, to file.
     
