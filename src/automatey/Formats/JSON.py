@@ -14,7 +14,7 @@ def fromFile(f_src:FileUtils.File):
         data = json.load(json_file)
     return data
 
-def saveAs(data, f_dst:FileUtils.File, isMinified=False, indent:int=4):
+def saveAs(data, f_dst:FileUtils.File, isMinified=False, indent:int=4, isAddNewLine:bool=True):
     '''
     Write JSON data to file, from either `dict` or `list`.
     '''
@@ -28,7 +28,9 @@ def saveAs(data, f_dst:FileUtils.File, isMinified=False, indent:int=4):
             kwargs['separators'] = (',', ':')
         else:
             kwargs['indent'] = indent
-        json.dump(data, json_file, **kwargs)
+        json.dump(data, json_file, ensure_ascii=False, **kwargs)
+        if isAddNewLine:
+            json_file.write('\n')
 
 def toString(data, isMinified=False, indent:int=4):
     '''
@@ -40,4 +42,4 @@ def toString(data, isMinified=False, indent:int=4):
         kwargs['separators'] = (',', ':')
     else:
         kwargs['indent'] = indent
-    return json.dumps(data, **kwargs)
+    return json.dumps(data, ensure_ascii=False, **kwargs)
