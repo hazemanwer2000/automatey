@@ -1,4 +1,6 @@
 
+import automatey.Utils.StringUtils as StringUtils
+
 import plotly.graph_objects
 import pandas as pd
 
@@ -10,11 +12,12 @@ class GanttChart(Plot):
     Plot a Gantt-Chart, of task(s) against time.
 
     Note that,
-    - Entries shall specify `task`, `start`, `end`, and `duration`.
-    - Tasks shall specify `task`, and `category`.
+    - `entries` shall specify `task`, `start`, `duration`, and optionally, more custom field(s).
+    - `tasks` shall specify `task`, `category` (used for coloring), and optionally, more custom field(s).
+    - `hover_fields` shall specify field(s) to display upon hover.
     '''
 
-    def __init__(self, title:str, xaxis_title:str, resolution:float, entries:pd.DataFrame, tasks:pd.DataFrame):
+    def __init__(self, title:str, xaxis_title:str, resolution:float, entries:pd.DataFrame, tasks:pd.DataFrame, hover_fields:list):
         super().__init__()
 
         # ? Merge 'tasks' into 'entries'.
@@ -33,21 +36,29 @@ class GanttChart(Plot):
 
         # ? Process each entry.
         for idx, entry in entries.iterrows():
+
+            # ? ? Construct 'hovertemplate'.
+            hovertemplate_list = []
+            for idx, hover_field in enumerate(hover_fields):
+                hovertemplate_item = StringUtils.Normalize.asTitle(hover_field) + ": %{customdata[" + f"{idx}" "]}"
+                hovertemplate_list.append(hovertemplate_item)
+            hovertemplate = "<br>".join(hovertemplate_list) + "<extra></extra>"
+
+            # ? ? Construct 'customdata'.
+            customdata = []
+            for hover_field in hover_fields:
+                customdata.append(entry[hover_field])
+
             fig.add_trace(plotly.graph_objects.Bar(
                 x=[entry['duration']],
                 y=[entry['task']],
                 base=[entry['start']],
                 orientation='h',
-                name=entry['category'],
-                customdata=[[entry['start'], entry['end'], entry['duration']]],
-                hovertemplate=(
-                    "Start: %{customdata[0]}<br>"
-                    "End: %{customdata[1]}<br>"
-                    "Duration: %{customdata[2]}"
-                ),
+                customdata=[customdata],
+                hovertemplate=hovertemplate,
                 marker=dict(color=categoryColorMap[entry['category']]),
                 showlegend=False,
-                width=0.4
+                width=0.6
             ))
 
         # ? Customize figure.

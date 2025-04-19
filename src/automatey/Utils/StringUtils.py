@@ -49,6 +49,15 @@ class Normalize:
         return normalizedText
 
     @staticmethod
+    def asTitle(text:str):
+        '''
+        Applies `asSentence`, and capitalizes each word.
+        '''
+        text = Normalize.asSentence(text)
+        text = ' '.join([x.capitalize() for x in text.split(' ')])
+        return text
+
+    @staticmethod
     def asParagraph(text:str, INTERNAL_newLine:str='\n'):
         '''
         Remove all lines that are empty, or with white-space character(s) only, then normalize each line as sentence.
