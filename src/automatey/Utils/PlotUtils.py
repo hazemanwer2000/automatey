@@ -1,7 +1,10 @@
 
 import automatey.Utils.StringUtils as StringUtils
+import automatey.OS.FileUtils as FileUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 
 import plotly.graph_objects
+import plotly.io
 import pandas as pd
 
 class Plot:
@@ -12,18 +15,34 @@ class Plot:
     def view(self):
         pass
 
+class Formats:
+
+    class HTML: pass
+
 class INTERNAL:
 
     class Implementation:
 
         class plotly(Plot):
 
+            config = {
+                'modeBarButtonsToRemove': ['select2d', 'lasso2d', 'autoScale2d'],
+                'displaylogo': False
+            }
+
             def __init__(self, figure):
                 super().__init__()
                 self.figure = figure
 
             def view(self):
-                self.figure.show()
+                self.figure.show(config=INTERNAL.Implementation.plotly.config)
+            
+            def saveAs(self, f:FileUtils.File, format=Formats.HTML):
+                if f.isExists():
+                    raise ExceptionUtils.ValidationError("Destination file already exists.")
+                plotly.io.write_html(self.figure, str(f),
+                                     full_html=True, include_plotlyjs='embed',
+                                     config=INTERNAL.Implementation.plotly.config)
 
 class GanttChart(INTERNAL.Implementation.plotly):
     '''
@@ -85,5 +104,8 @@ class GanttChart(INTERNAL.Implementation.plotly):
             xaxis_title=xaxis_title,
             barmode='stack',
             xaxis=dict(dtick=resolution, showgrid=True),
-            yaxis=dict(dtick=1, showgrid=True, autorange="reversed"),
+            yaxis=dict(dtick=1, showgrid=True,
+                       autorange="reversed",
+                       categoryorder='array',
+                       categoryarray=tasks['task']),
         )
