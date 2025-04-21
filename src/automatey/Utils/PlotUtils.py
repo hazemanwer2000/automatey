@@ -112,18 +112,18 @@ class Tracing:
                         categoryarray=tasks['task']),
             )
 
-        def addMarkers(self, markers:pd.DataFrame):
+        def addMarkers(self, markers:pd.DataFrame, display_fields:list):
             '''
             Add markers at specific instants, along each task.
 
             Note that,
-            - `markers` shall specify `task`, `time`, and other display field(s).
+            - `markers` shall specify `task`, `time`, and optionally, more custom field(s).
+            - `display_fields` shall specify field(s) to display upon hover.
             '''
             # ? Process each entry.
             for idx, marker in markers.iterrows():
 
                 # ? ? Construct 'hovertemplate'.
-                display_fields = [column for column in markers.columns if (column not in ['task', 'time'])]
                 hovertemplate_list = []
                 for idx, display_field in enumerate(display_fields):
                     hovertemplate_item = StringUtils.Normalize.asTitle(display_field) + ": %{customdata[" + f"{idx}" "]}"
@@ -139,7 +139,7 @@ class Tracing:
                     x=[marker['time']],
                     y=[marker['task']],
                     mode='markers',
-                    marker=dict(symbol='circle', size=10, color='black'),
+                    marker=dict(symbol='square', size=10, color='black'),
                     customdata=[customdata],
                     hovertemplate=hovertemplate,
                     showlegend=False
