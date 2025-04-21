@@ -42,30 +42,39 @@ class Generation:
 class Selection:
 
     @staticmethod
-    def selectNUnique(iteratorLength:int, n:int):
+    def Selector(iterator, indices):
         '''
-        Selects random and unique index(es) into an iterator.
-        
-        Returns a list of unique index(es).
+        Given an iterator, and a list of indices, returns a new list (...)
         '''
-        selectedIndexes = list()
-        selectionPool = list(range(iteratorLength))
-        while len(selectedIndexes) < n:
-            newSelectionPoolIndex = Generation.Integer(0, len(selectionPool)-1)
-            newIndex = selectionPool[newSelectionPoolIndex]
-            del selectionPool[newSelectionPoolIndex]
-            selectedIndexes.append(newIndex)
-        return selectedIndexes
+        return [iterator[idx] for idx in indices]    
 
-    @staticmethod
-    def selectNRepeat(iteratorLength:int, n:int):
-        '''
-        Selects random and unique index(es) into an iterator.
-        
-        Returns a list of unique index(es).
-        '''
-        selectedIndexes = list()
-        while len(selectedIndexes) < n:
-            newIndex = Generation.Integer(0, iteratorLength-1)
-            selectedIndexes.append(newIndex)
-        return selectedIndexes
+    class Indices:
+
+        @staticmethod
+        def NUnique(iteratorLength:int, n:int):
+            '''
+            Selects random and unique indices into an iterator.
+            
+            Returns a list of unique indices.
+            '''
+            selectedIndexes = list()
+            selectionPool = list(range(iteratorLength))
+            while len(selectedIndexes) < n:
+                newSelectionPoolIndex = Generation.Integer(0, len(selectionPool)-1)
+                newIndex = selectionPool[newSelectionPoolIndex]
+                del selectionPool[newSelectionPoolIndex]
+                selectedIndexes.append(newIndex)
+            return selectedIndexes
+
+        @staticmethod
+        def NRepeat(iteratorLength:int, n:int):
+            '''
+            Generates random and unique indices into an iterator.
+            
+            Returns a list of unique indices.
+            '''
+            selectedIndexes = list()
+            while len(selectedIndexes) < n:
+                newIndex = Generation.Integer(0, iteratorLength-1)
+                selectedIndexes.append(newIndex)
+            return selectedIndexes
