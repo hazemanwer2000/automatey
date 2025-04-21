@@ -37,11 +37,12 @@ class INTERNAL:
             def view(self):
                 self.figure.show(config=INTERNAL.Implementation.plotly.config)
             
-            def saveAs(self, f:FileUtils.File, format=Formats.HTML):
+            def saveAs(self, f:FileUtils.File, isSmallerSize:bool=True, format=Formats.HTML):
                 if f.isExists():
                     raise ExceptionUtils.ValidationError("Destination file already exists.")
+                include_plotlyjs = 'cdn' if isSmallerSize else 'embed'
                 plotly.io.write_html(self.figure, str(f),
-                                     full_html=True, include_plotlyjs='embed',
+                                     full_html=True, include_plotlyjs=include_plotlyjs,
                                      config=INTERNAL.Implementation.plotly.config)
 
 class Tracing:
