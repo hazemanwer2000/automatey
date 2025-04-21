@@ -30,7 +30,7 @@ class INTERNAL:
                 'displaylogo': False
             }
 
-            def __init__(self, figure):
+            def __init__(self, figure:plotly.graph_objects.Figure):
                 super().__init__()
                 self.figure = figure
 
@@ -54,10 +54,9 @@ class Tracing:
         - `entries` shall specify `task`, `start`, `duration`, and optionally, more custom field(s).
         - `tasks` shall specify `task` (unique), `category` (used for coloring), and optionally, more custom field(s).
         - `display_fields` shall specify field(s) to display upon hover.
-        - `markers` (optional) shall specify `task`, `time`.
         '''
 
-        def __init__(self, title:str, xaxis_title:str, resolution:float, entries:pd.DataFrame, tasks:pd.DataFrame, display_fields:list, markers:pd.DataFrame=None):
+        def __init__(self, title:str, xaxis_title:str, resolution:float, entries:pd.DataFrame, tasks:pd.DataFrame, display_fields:list):
             
             # ? Create (blank) figure.
             figure = plotly.graph_objects.Figure()
@@ -79,15 +78,15 @@ class Tracing:
 
                 # ? ? Construct 'hovertemplate'.
                 hovertemplate_list = []
-                for idx, hover_field in enumerate(display_fields):
-                    hovertemplate_item = StringUtils.Normalize.asTitle(hover_field) + ": %{customdata[" + f"{idx}" "]}"
+                for idx, display_field in enumerate(display_fields):
+                    hovertemplate_item = StringUtils.Normalize.asTitle(display_field) + ": %{customdata[" + f"{idx}" "]}"
                     hovertemplate_list.append(hovertemplate_item)
                 hovertemplate = "<br>".join(hovertemplate_list) + "<extra></extra>"
 
                 # ? ? Construct 'customdata'.
                 customdata = []
-                for hover_field in display_fields:
-                    customdata.append(entry[hover_field])
+                for display_field in display_fields:
+                    customdata.append(entry[display_field])
 
                 figure.add_trace(plotly.graph_objects.Bar(
                     x=[entry['duration']],
@@ -112,3 +111,38 @@ class Tracing:
                         categoryorder='array',
                         categoryarray=tasks['task']),
             )
+
+        def addMarkers(self, markers:pd.DataFrame):
+            '''
+            Add markers at specific instants, along each task.
+
+            Note that,
+            - `markers` shall specify `task`, `time`, and other display field(s).
+            '''
+            # ? Process each entry.
+            for idx, marker in markers.iterrows():
+
+                # ? ? Construct 'hovertemplate'.
+                display_fields = [column for column in markers.columns if (column not in ['task', 'time'])]
+                hovertemplate_list = []
+                for idx, display_field in enumerate(display_fields):
+                    hovertemplate_item = StringUtils.Normalize.asTitle(display_field) + ": %{customdata[" + f"{idx}" "]}"
+                    hovertemplate_list.append(hovertemplate_item)
+                hovertemplate = "<br>".join(hovertemplate_list) + "<extra></extra>"
+
+                # ? ? Construct 'customdata'.
+                customdata = []
+                for display_field in display_fields:
+                    customdata.append(marker[display_field])
+
+                scatter = plotly.graph_objects.Scatter(
+                    x=[marker['time']],
+                    y=[marker['task']],
+                    mode='markers',
+                    marker=dict(symbol='circle', size=10, color='black'),
+                    customdata=[customdata],
+                    hovertemplate=hovertemplate,
+                    showlegend=False
+                )
+
+                self.figure.add_trace(scatter)
