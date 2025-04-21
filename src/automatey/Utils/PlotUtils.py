@@ -44,68 +44,71 @@ class INTERNAL:
                                      full_html=True, include_plotlyjs='embed',
                                      config=INTERNAL.Implementation.plotly.config)
 
-class GanttChart(INTERNAL.Implementation.plotly):
-    '''
-    Plot a Gantt-Chart, of task(s) against time.
+class Tracing:
 
-    Note that,
-    - `entries` shall specify `task`, `start`, `duration`, and optionally, more custom field(s).
-    - `tasks` shall specify `task`, `category` (used for coloring), and optionally, more custom field(s).
-    - `hover_fields` shall specify field(s) to display upon hover.
-    '''
+    class Timeline(INTERNAL.Implementation.plotly):
+        '''
+        Plot a timeline, of task(s) against time.
 
-    def __init__(self, title:str, xaxis_title:str, resolution:float, entries:pd.DataFrame, tasks:pd.DataFrame, hover_fields:list):
-        
-        # ? Create (blank) figure.
-        figure = plotly.graph_objects.Figure()
-        super().__init__(figure)
+        Note that,
+        - `entries` shall specify `task`, `start`, `duration`, and optionally, more custom field(s).
+        - `tasks` shall specify `task` (unique), `category` (used for coloring), and optionally, more custom field(s).
+        - `display_fields` shall specify field(s) to display upon hover.
+        - `markers` (optional) shall specify `task`, `time`.
+        '''
 
-        # ? Merge 'tasks' into 'entries'.
-        entries = pd.merge(entries, tasks, on='task')
+        def __init__(self, title:str, xaxis_title:str, resolution:float, entries:pd.DataFrame, tasks:pd.DataFrame, display_fields:list, markers:pd.DataFrame=None):
+            
+            # ? Create (blank) figure.
+            figure = plotly.graph_objects.Figure()
+            super().__init__(figure)
 
-        # ? Assign a unique color per category.
-        categories = tasks['category']
-        colorPalette = plotly.colors.qualitative.Plotly
-        categoryColorMap = {
-            category: colorPalette[i % len(colorPalette)]
-            for i, category in enumerate(categories)
-        }
+            # ? Merge 'tasks' into 'entries'.
+            entries = pd.merge(entries, tasks, on='task')
 
-        # ? Process each entry.
-        for idx, entry in entries.iterrows():
+            # ? Assign a unique color per category.
+            categories = tasks['category']
+            colorPalette = plotly.colors.qualitative.Plotly
+            categoryColorMap = {
+                category: colorPalette[i % len(colorPalette)]
+                for i, category in enumerate(categories)
+            }
 
-            # ? ? Construct 'hovertemplate'.
-            hovertemplate_list = []
-            for idx, hover_field in enumerate(hover_fields):
-                hovertemplate_item = StringUtils.Normalize.asTitle(hover_field) + ": %{customdata[" + f"{idx}" "]}"
-                hovertemplate_list.append(hovertemplate_item)
-            hovertemplate = "<br>".join(hovertemplate_list) + "<extra></extra>"
+            # ? Process each entry.
+            for idx, entry in entries.iterrows():
 
-            # ? ? Construct 'customdata'.
-            customdata = []
-            for hover_field in hover_fields:
-                customdata.append(entry[hover_field])
+                # ? ? Construct 'hovertemplate'.
+                hovertemplate_list = []
+                for idx, hover_field in enumerate(display_fields):
+                    hovertemplate_item = StringUtils.Normalize.asTitle(hover_field) + ": %{customdata[" + f"{idx}" "]}"
+                    hovertemplate_list.append(hovertemplate_item)
+                hovertemplate = "<br>".join(hovertemplate_list) + "<extra></extra>"
 
-            figure.add_trace(plotly.graph_objects.Bar(
-                x=[entry['duration']],
-                y=[entry['task']],
-                base=[entry['start']],
-                orientation='h',
-                customdata=[customdata],
-                hovertemplate=hovertemplate,
-                marker=dict(color=categoryColorMap[entry['category']]),
-                showlegend=False,
-                width=0.6
-            ))
+                # ? ? Construct 'customdata'.
+                customdata = []
+                for hover_field in display_fields:
+                    customdata.append(entry[hover_field])
 
-        # ? Customize figure.
-        figure.update_layout(
-            title=title,
-            xaxis_title=xaxis_title,
-            barmode='stack',
-            xaxis=dict(dtick=resolution, showgrid=True),
-            yaxis=dict(dtick=1, showgrid=True,
-                       autorange="reversed",
-                       categoryorder='array',
-                       categoryarray=tasks['task']),
-        )
+                figure.add_trace(plotly.graph_objects.Bar(
+                    x=[entry['duration']],
+                    y=[entry['task']],
+                    base=[entry['start']],
+                    orientation='h',
+                    customdata=[customdata],
+                    hovertemplate=hovertemplate,
+                    marker=dict(color=categoryColorMap[entry['category']]),
+                    showlegend=False,
+                    width=0.6
+                ))
+
+            # ? Customize figure.
+            figure.update_layout(
+                title=title,
+                xaxis_title=xaxis_title,
+                barmode='stack',
+                xaxis=dict(dtick=resolution, showgrid=True),
+                yaxis=dict(dtick=1, showgrid=True,
+                        autorange="reversed",
+                        categoryorder='array',
+                        categoryarray=tasks['task']),
+            )
