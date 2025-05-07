@@ -330,10 +330,40 @@ class File:
             '''
             Remove all the empty sub-directories, recursive.
             '''
-            emptyDirs = dir.listDirectory(isRecursive=True, conditional=lambda f: f.isEmptyDirectory())
-            for emptyDir in emptyDirs:
-                os.rmdir(str(emptyDir))
+            dirs = dir.listDirectory(isRecursive=True, conditional=lambda f: f.isDirectory())
+            dirs.sort(key=lambda x: str(x), reverse=True)
+            for dir in dirs:
+                if dir.isEmptyDirectory():
+                    os.rmdir(str(dir))
         
+        @staticmethod
+        def transformDirectory(srcDir:"File", dstDir:"File", transformFcn):
+            '''
+            Process each file in a source directory, and transform it into another file in a destination directory.
+
+            For each file, `transformFcn` is invoked and passed as arguments,
+            * The source (existing) file.
+            * The destination (non-existing) file.
+
+            Note that,
+            * `dstDir` must either not exist, or exist and be empty. 
+            '''
+            if dstDir.isExists():
+                if not dstDir.isEmptyDirectory():
+                    raise ExceptionUtils.ValidationError("Destination directory must either not exist, or exist and be empty.")
+            else:
+                dstDir.makeDirectory()
+ 
+            File.Utils.replicateDirectoryStructure(srcDir, dstDir)
+
+            relDirListing = srcDir.listDirectoryRelatively(isRecursive=True)
+            f_srcDirListing = [srcDir.traverseDirectory(x) for x in relDirListing]
+            f_dstDirListing = [dstDir.traverseDirectory(x) for x in relDirListing]
+            for f_src, f_dst in zip(f_srcDirListing, f_dstDirListing):
+                transformFcn(f_src, f_dst)
+
+            File.Utils.removeEmptySubDirectories(dstDir)
+            
         class Path:
             
             @staticmethod
