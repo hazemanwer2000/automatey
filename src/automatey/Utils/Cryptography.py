@@ -46,6 +46,9 @@ class Feed:
         '''
         pass
 
+    def feedAll(self):
+        pass
+
 class Feeds:
     
     class FileFeed(Feed):
@@ -66,6 +69,11 @@ class Feeds:
             if len(readBytes) == 0:
                 readBytes = None
                 self.f.closeFile()
+            return readBytes
+        
+        def feedAll(self):
+            readBytes = self.f.readAny()
+            self.f.closeFile()
             return readBytes
     
     class BytesFeed(Feed):
@@ -88,6 +96,9 @@ class Feeds:
                 readBytes = self.data[self.idx:endIdx]
                 self.idx = endIdx
             return readBytes
+        
+        def feedAll(self):
+            return self.data
 
 class Hash:
     
@@ -144,13 +155,13 @@ class ECC:
     class Signature:
         
         @staticmethod
-        def generate(curve, privateKey:bytes, message:bytes, hashAlgorithm) -> bytes:
+        def generate(curve, privateKey:bytes, message:Feed, hashAlgorithm) -> bytes:
             hashFcn = Hash.INTERNAL_Algorithm2HashObject[hashAlgorithm]
             ecdsa_privateKey = ecdsa.SigningKey.from_string(privateKey, curve=curve.INTERNAL_ecdsa_curve, hashfunc=hashFcn)
-            return ecdsa_privateKey.sign(message)
+            return ecdsa_privateKey.sign(message.feedAll())
         
         @staticmethod
-        def verify(curve, publicKey:bytes, message:bytes, signature:bytes, hashAlgorithm) -> bool:
+        def verify(curve, publicKey:bytes, message:Feed, signature:bytes, hashAlgorithm) -> bool:
             '''
             Returns `True` if verification succeeds, `False` otherwise.
             '''
@@ -158,7 +169,7 @@ class ECC:
             ecdsa_publicKey = ecdsa.VerifyingKey.from_string(publicKey, curve=curve.INTERNAL_ecdsa_curve, hashfunc=hashFcn)
             isVerified = True
             try:
-                ecdsa_publicKey.verify(signature, message)
+                ecdsa_publicKey.verify(signature, message.feedAll())
             except:
                 isVerified = False
             return isVerified
