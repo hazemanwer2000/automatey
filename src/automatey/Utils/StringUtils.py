@@ -157,6 +157,15 @@ class Split:
         command = shlex.split(command)
         return command
 
+    @staticmethod
+    def everyN(iterator, N:int):
+        '''
+        Break down a string into a list of strings,
+        * each being N-length, except,
+        * the last being 1 to N in length.
+        '''
+        return [iterator[idx:idx+N] for idx in range(0, len(iterator), N)]
+
 class Case:
 
     @staticmethod
