@@ -15,6 +15,9 @@ class Plot:
     def view(self):
         pass
 
+    def saveAs(self, f:FileUtils.File, format):
+        pass
+
 class Formats:
 
     class HTML: pass
@@ -37,10 +40,10 @@ class INTERNAL:
             def view(self):
                 self.figure.show(config=INTERNAL.Implementation.plotly.config)
             
-            def saveAs(self, f:FileUtils.File, isSmallerSize:bool=True, format=Formats.HTML):
+            def saveAs(self, f:FileUtils.File, format=Formats.HTML, isOptimizeFileSize:bool=True,):
                 if f.isExists():
                     raise ExceptionUtils.ValidationError("Destination file already exists.")
-                include_plotlyjs = 'cdn' if isSmallerSize else 'embed'
+                include_plotlyjs = 'cdn' if isOptimizeFileSize else 'embed'
                 plotly.io.write_html(self.figure, str(f),
                                      full_html=True, include_plotlyjs=include_plotlyjs,
                                      config=INTERNAL.Implementation.plotly.config)
@@ -53,8 +56,9 @@ class Tracing:
 
         Note that,
         - `entries` shall specify `task`, `start`, `duration`, and optionally, more custom field(s).
-        - `tasks` shall specify `task` (unique), `category` (used for coloring), and optionally, more custom field(s).
+        - `tasks` shall specify `task` (unique), and optionally, more custom field(s).
         - `display_fields` shall specify field(s) to display upon hover.
+        - `category` (used for coloring) may be part of either `tasks` or `entries`.
         '''
 
         def __init__(self, title:str, xaxis_title:str, resolution:float, entries:pd.DataFrame, tasks:pd.DataFrame, display_fields:list):
@@ -67,7 +71,7 @@ class Tracing:
             entries = pd.merge(entries, tasks, on='task')
 
             # ? Assign a unique color per category.
-            categories = tasks['category']
+            categories = entries['category'].unique()
             colorPalette = plotly.colors.qualitative.Plotly
             categoryColorMap = {
                 category: colorPalette[i % len(colorPalette)]
