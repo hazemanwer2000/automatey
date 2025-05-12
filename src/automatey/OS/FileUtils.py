@@ -337,7 +337,7 @@ class File:
                     os.rmdir(str(dir))
         
         @staticmethod
-        def transformDirectory(srcDir:"File", dstDir:"File", transformFcn):
+        def mapDirectoryFiles(srcDir:"File", dstDir:"File", mappingFcn):
             '''
             Process each file in a source directory, and transform it into another file in a destination directory.
 
@@ -356,11 +356,11 @@ class File:
  
             File.Utils.replicateDirectoryStructure(srcDir, dstDir)
 
-            relDirListing = srcDir.listDirectoryRelatively(isRecursive=True)
+            relDirListing = srcDir.listDirectoryRelatively(isRecursive=True, conditional=lambda x: x.isFile())
             f_srcDirListing = [srcDir.traverseDirectory(x) for x in relDirListing]
             f_dstDirListing = [dstDir.traverseDirectory(x) for x in relDirListing]
             for f_src, f_dst in zip(f_srcDirListing, f_dstDirListing):
-                transformFcn(f_src, f_dst)
+                mappingFcn(f_src, f_dst)
 
             File.Utils.removeEmptySubDirectories(dstDir)
             
