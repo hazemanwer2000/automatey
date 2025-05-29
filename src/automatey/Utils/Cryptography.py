@@ -106,11 +106,13 @@ class Hash:
         
         SHA1 = 0
         SHA256 = 1
-        SHA512 = 2
+        SHA384 = 2
+        SHA512 = 3
     
     INTERNAL_Algorithm2HashObject = {
         Algorithms.SHA1: hashlib.sha1,
         Algorithms.SHA256: hashlib.sha256,
+        Algorithms.SHA384: hashlib.sha384,
         Algorithms.SHA512: hashlib.sha512,
     }
     
