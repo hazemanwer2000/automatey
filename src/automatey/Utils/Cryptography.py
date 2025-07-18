@@ -7,6 +7,7 @@ import cryptography.hazmat.primitives.asymmetric.ec
 import automatey.OS.FileUtils as FileUtils
 
 import hashlib
+import hmac
 import ecdsa
 import cryptography
 
@@ -175,3 +176,10 @@ class ECC:
             except:
                 isVerified = False
             return isVerified
+
+class HMAC:
+
+    def generate(key:bytes, message:Feed, hashAlgorithm) -> bytes:
+        hashFcn = Hash.INTERNAL_Algorithm2HashObject[hashAlgorithm]
+        hmacObj = hmac.new(key, message.feedAll(), hashFcn)
+        return hmacObj.digest()
