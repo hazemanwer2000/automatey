@@ -20,10 +20,10 @@ class Subtitle:
                  text:str):
         self.startTime = startTime
         self.endTime = endTime
-        self.text = self.text
+        self.text = text
 
     def __str__(self):
-        return self.text
+        return f'Subtitle({self.startTime}, {self.endTime}, "{self.text}")'
     
     def __repr__(self):
         return str(self)
@@ -36,6 +36,9 @@ class Subtitle:
 
     def getDuration(self) -> TimeUtils.Time:
         return (self.endTime - self.startTime)
+    
+    def getText(self) -> str:
+        return self.text
 
 class Parser:
 
@@ -50,7 +53,11 @@ class Parser:
         '''
         Returns a list of 'Subtitle' objects.
         '''
+        subtitles = []
         for pysrt_subtitle in self.pysrt_subtitles:
-            text = pysrt_subtitle.text
             startTime = TimeUtils.Time.createFromMilliseconds(pysrt_subtitle.start.ordinal)
-            print(startTime)
+            endTime = TimeUtils.Time.createFromMilliseconds(pysrt_subtitle.end.ordinal)
+            text = pysrt_subtitle.text
+            subtitle = Subtitle(startTime, endTime, text)
+            subtitles.append(subtitle)
+        return subtitles
