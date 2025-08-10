@@ -25,6 +25,7 @@ cryptography = "^44.0.2"
 plotly = "^6.0.1"
 pandas = "^2.2.3"
 numpy = "^2.2.4"
+pysrt = "^1.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
