@@ -14,34 +14,31 @@ class Subtitle:
     Specifies a single entry (i.e., start-time, end-time, and associated text).
     '''
 
-    def __init__(self,
-                 startTime:TimeUtils.Time,
-                 endTime:TimeUtils.Time,
-                 text:str):
-        self.startTime = startTime
-        self.endTime = endTime
-        self.text = text
+    def __init__(self, pysrt_subtitle):
+        self.pysrt_subtitle = pysrt_subtitle
 
     def __str__(self):
-        return f'Subtitle({self.startTime}, {self.endTime}, "{self.text}")'
+        return f'Subtitle({self.getStartTime()}, {self.getEndTime()}, "{self.getText()}")'
     
     def __repr__(self):
         return str(self)
     
     def getStartTime(self) -> TimeUtils.Time:
-        return self.startTime
+        return TimeUtils.Time.createFromMilliseconds(self.pysrt_subtitle.start.ordinal)
     
     def getEndTime(self) -> TimeUtils.Time:
-        return self.endTime
+        return TimeUtils.Time.createFromMilliseconds(self.pysrt_subtitle.end.ordinal)
 
     def getDuration(self) -> TimeUtils.Time:
-        return (self.endTime - self.startTime)
+        return (self.getEndTime() - self.getStartTime())
     
     def getText(self) -> str:
-        return self.text
+        return self.pysrt_subtitle.text
+
+    def setText(self, text) -> str:
+        self.pysrt_subtitle.text = text
 
 class Parser:
-
     '''
     SRT representation.
     '''
@@ -53,11 +50,14 @@ class Parser:
         '''
         Returns a list of 'Subtitle' objects.
         '''
-        subtitles = []
-        for pysrt_subtitle in self.pysrt_subtitles:
-            startTime = TimeUtils.Time.createFromMilliseconds(pysrt_subtitle.start.ordinal)
-            endTime = TimeUtils.Time.createFromMilliseconds(pysrt_subtitle.end.ordinal)
-            text = pysrt_subtitle.text
-            subtitle = Subtitle(startTime, endTime, text)
-            subtitles.append(subtitle)
-        return subtitles
+        return [Subtitle(x) for x in self.pysrt_subtitles]
+    
+    def shift(self, offset:TimeUtils.Time):
+        '''
+        Shift all timestamps by an offset.
+        '''
+        self.pysrt_subtitles.shift(milliseconds=int(offset.toMilliseconds()))
+    
+    def saveAs(self, f:FileUtils.File):
+        self.pysrt_subtitles.sort()
+        self.pysrt_subtitles.save(str(f), encoding='utf-8')
