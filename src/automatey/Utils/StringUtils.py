@@ -10,11 +10,7 @@ class Indent:
     
     @staticmethod
     def prepend(text:str, indentation:str):
-        return indentation + text.replace('\n', indentation + '\n')
-
-    @staticmethod
-    def append(text:str, indentation:str):
-        return text.replace('\n', '\n' + indentation) + indentation
+        return indentation + text.replace('\n', '\n' + indentation)
 
 class Regex:
 
