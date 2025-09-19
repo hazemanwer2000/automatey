@@ -337,13 +337,14 @@ class File:
                     os.rmdir(str(dir))
         
         @staticmethod
-        def mapDirectoryFiles(srcDir:"File", dstDir:"File", mappingFcn):
+        def mapDirectoryFiles(srcDir:"File", dstDir:"File", mappingFcn, kwargs:dict=dict()):
             '''
             Process each file in a source directory, and transform it into another file in a destination directory.
 
             For each file, `transformFcn` is invoked and passed as arguments,
             * The source (existing) file.
             * The destination (non-existing) file.
+            * `kwargs`, expanded.
 
             Note that,
             * `dstDir` must either not exist, or exist and be empty. 
@@ -360,7 +361,7 @@ class File:
             f_srcDirListing = [srcDir.traverseDirectory(x) for x in relDirListing]
             f_dstDirListing = [dstDir.traverseDirectory(x) for x in relDirListing]
             for f_src, f_dst in zip(f_srcDirListing, f_dstDirListing):
-                mappingFcn(f_src, f_dst)
+                mappingFcn(f_src, f_dst, **kwargs)
 
             File.Utils.removeEmptySubDirectories(dstDir)
             
