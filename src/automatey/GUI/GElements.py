@@ -924,7 +924,7 @@ class Widgets:
 
         class TextEdit(Widget, INTERNAL.EventManager):
             
-            def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False, isWrapText=False):
+            def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False, isWrapText=False, isVerticalScrollBar:bool=True, isHorizontalScrollBar:bool=True):
                 self.qWidget = PyQt6Wrapper.QPlainTextEdit()
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
@@ -946,6 +946,12 @@ class Widgets:
                     font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
                     self.qWidget.setFont(font)
                 
+                # ? By default, Scroll-Bar is displayed.
+                if not isVerticalScrollBar:
+                    self.qWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+                if not isHorizontalScrollBar:
+                    self.qWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
                 # ? Set editable-mode.
                 self.setEditable(isEditable)
             
