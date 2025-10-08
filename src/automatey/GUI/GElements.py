@@ -207,8 +207,8 @@ class Layouts:
             '''
             Remove widget.
             '''
-            self.qLayout.removeWidget(widget)
-            widget.setParent(None)
+            self.qLayout.removeWidget(widget.qWidget)
+            widget.qWidget.setParent(None)
 
             # ? Update widget list.
             self.widgetList.remove(widget)
@@ -255,8 +255,8 @@ class Layouts:
             '''
             Remove widget.
             '''
-            self.qLayout.removeWidget(widget)
-            widget.setParent(None)
+            self.qLayout.removeWidget(widget.qWidget)
+            widget.qWidget.setParent(None)
 
         def getCount(self):
             '''
