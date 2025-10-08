@@ -1482,6 +1482,40 @@ class Widgets:
                 '''
                 self.label.qWidget.setPixmap(QtGui.QPixmap.fromImage(GUtils.Image(f).qImage))
 
+        class Tree(Widget):
+
+            def __init__(self, rootNode:"Widgets.Basics.Tree.Node", headers:typing.List[str]):
+
+                self.qWidget = QtWidgets.QTreeWidget()
+                super().__init__(self.qWidget)
+
+                self.qWidget.setColumnCount(len(headers))
+                self.qWidget.setHeaderLabels(headers)
+
+                self.qWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+                self.qWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+
+                self.INTERNAL__constructTree(self.qWidget, rootNode)
+
+            @staticmethod
+            def INTERNAL__constructTree(parentWidget, node:"Widgets.Basics.Tree.Node"):
+
+                treeWidgetItem = QtWidgets.QTreeWidgetItem(parentWidget, node.getAttributes())
+
+                for childNode in node.getChildren():
+                    Widgets.Basics.Tree.INTERNAL__constructTree(treeWidgetItem, childNode)
+
+            class Node:
+
+                def __init__(self):
+                    pass
+
+                def getChildren(self) -> typing.List["Widgets.Basics.Tree.Node"]:
+                    pass
+
+                def getAttributes(self) -> typing.List[str]:
+                    pass
+
     class Complex:
 
         class ColorSelector(Widget):
