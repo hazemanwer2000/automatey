@@ -1484,6 +1484,14 @@ class Widgets:
 
         class Tree(Widget):
 
+            '''
+            An expandable tree display of (information-)node(s).
+
+            Notes:
+            - `rootNode` must satisfy the specified `Node` interface.
+            - `header` must specify the column name(s), as a list of string(s).
+            '''
+
             def __init__(self, rootNode:"Widgets.Basics.Tree.Node", header:typing.List[str]):
 
                 self.qWidget = QtWidgets.QTreeWidget()
@@ -1538,7 +1546,9 @@ class Widgets:
 
             @staticmethod
             def INTERNAL__constructTree(qParentWidget, node:"Widgets.Basics.Tree.Node"):
-
+                '''
+                Recursively, constructs the GUI tree based on an (information-)node.
+                '''
                 qTreeWidgetItem = QtWidgets.QTreeWidgetItem(qParentWidget, node.getAttributes())
                 qTreeWidgetItem.INTERNAL_node = node
 
@@ -1551,9 +1561,15 @@ class Widgets:
                     pass
 
                 def getChildren(self) -> typing.List["Widgets.Basics.Tree.Node"]:
+                    '''
+                    Must return a list of a (sub-)node(s).
+                    '''
                     pass
 
                 def getAttributes(self) -> typing.List[str]:
+                    '''
+                    Must return the column value(s), as a list of string(s).
+                    '''
                     pass
 
     class Complex:
