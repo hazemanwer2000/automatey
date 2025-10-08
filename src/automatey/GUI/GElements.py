@@ -1497,6 +1497,16 @@ class Widgets:
 
                 self.INTERNAL__constructTree(self.qWidget, rootNode)
 
+            def expandAll(self):
+                self.qWidget.expandAll()
+
+            def collapseAll(self):
+                self.qWidget.collapseAll()
+
+            def resizeColumnsToContents(self):
+                for idx in range(self.qWidget.columnCount()):
+                    self.qWidget.resizeColumnToContents(idx)
+
             @staticmethod
             def INTERNAL__constructTree(parentWidget, node:"Widgets.Basics.Tree.Node"):
 
