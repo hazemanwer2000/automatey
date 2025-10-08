@@ -219,6 +219,51 @@ class Layouts:
             '''
             return self.qLayout.count()
 
+    class FlowLayout(Layout):
+        '''
+        A flow layout.
+        '''
+        def __init__(self, elementMargin:AbstractGraphics.Margin, elementSpacing:int):
+            self.qLayout = PyQt6Wrapper.QFlowLayout()
+            Layout.__init__(self, self.qLayout)
+
+            # ? Other setting(s).
+            self.qLayout.setContentsMargins(elementMargin.left,
+                                    elementMargin.top,
+                                    elementMargin.right,
+                                    elementMargin.bottom)
+            self.qLayout.setSpacing(elementSpacing)
+
+        def insertWidget(self, widget, idx=-1):
+            '''
+            Insert widget at index.
+            '''
+            if idx == -1:
+                self.qLayout.addWidget(widget.qWidget)
+            else:
+                self.qLayout.insertWidget(idx, widget.qWidget)
+
+        def removeWidgetAtIndex(self, idx=-1):
+            '''
+            Remove widget at index.
+            '''
+            if idx == -1:
+                idx = self.qLayout.count() - 1
+            self.removeWidget(self.qLayout.itemAt(idx).widget())
+
+        def removeWidget(self, widget):
+            '''
+            Remove widget.
+            '''
+            self.qLayout.removeWidget(widget)
+            widget.setParent(None)
+
+        def getCount(self):
+            '''
+            Get number of widget(s).
+            '''
+            return self.qLayout.count()
+
 class Widget:
 
     def __init__(self, qWidget:QtWidgets.QWidget):
