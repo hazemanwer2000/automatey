@@ -176,10 +176,19 @@ class MakePretty:
     
     @staticmethod
     def Size(sizeInBytes:int):
-        for unit in ['', 'KB', 'MB', 'GB', 'TB', 'PB']:
-            if sizeInBytes < 1024:
-                return f"{sizeInBytes:.2f} {unit}"
-            sizeInBytes /= 1024
+
+        prettified = None
+
+        if sizeInBytes < 1024:
+            prettified = f"{sizeInBytes} B"
+        else:
+            for unit in ['KB', 'MB', 'GB', 'TB', 'PB']:
+                sizeInBytes /= 1024
+                if sizeInBytes < 1024:
+                    prettified = f"{sizeInBytes:.2f} {unit}"
+                    break
+
+        return prettified 
 
 class HexString:
     
