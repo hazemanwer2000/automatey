@@ -97,11 +97,16 @@ class QPlainTextEdit(QtWidgets.QPlainTextEdit):
     def __init__(self):
         QtWidgets.QPlainTextEdit.__init__(self)
         self.keyPressEventFcn = None
+        self.mousePressEventFcn = None
         
     def keyPressEvent(self, event):
         if self.keyPressEventFcn != None:
             if (self.keyPressEventFcn(event) != 0):
                 QtWidgets.QPlainTextEdit.keyPressEvent(self, event)
+
+    def mousePressEvent(self, event):
+        if self.mousePressEventFcn != None:
+            self.mousePressEventFcn(event)
 
 class QListWidget(QtWidgets.QListWidget):
 
@@ -117,7 +122,7 @@ class QListWidget(QtWidgets.QListWidget):
 class QWidget(QtWidgets.QWidget):
     
     def __init__(self):
-        QtWidgets.QPlainTextEdit.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         self.mousePressEventFcn = None
         
     def mousePressEvent(self, event):

@@ -935,6 +935,7 @@ class Widgets:
                 # ? Event-handler(s).
                 self.qWidget.textChanged.connect(self.INTERNAL_textChanged)
                 self.qWidget.keyPressEventFcn = self.INTERNAL_keyPressEvent
+                self.qWidget.mousePressEventFcn = self.INTERNAL_mousePressEvent
                 
                 # ? By default, text is not wrapped.
                 if not isWrapText:
@@ -985,6 +986,10 @@ class Widgets:
             def INTERNAL_textChanged(self):
                 if GUtils.EventHandlers.TextChangeEventHandler in self.eventHandlers:
                     self.eventHandlers[GUtils.EventHandlers.TextChangeEventHandler].fcn()
+
+            def INTERNAL_mousePressEvent(self, event):
+                if GUtils.EventHandlers.ClickEventHandler in self.eventHandlers:
+                    self.eventHandlers[GUtils.EventHandlers.ClickEventHandler].fcn()
 
             def __str__(self):
                 return self.getText()
