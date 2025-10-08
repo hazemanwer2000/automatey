@@ -178,17 +178,14 @@ class QFlowLayout(QtWidgets.QLayout):
         return self.minimumSize()
 
     def minimumSize(self):
-        size = QtCore.QSize()
-
-        for item in self.itemList:
-            size = size.expandedTo(item.minimumSize())
-
-        size += QtCore.QSize(2 * self.contentsMargins().top(), 2 * self.contentsMargins().top())
-        return size
+        return QtCore.QSize(0, 0)
 
     def __doLayout(self, rect, is_no_effect_mode:bool):
-        x = rect.x()
-        y = rect.y()
+        left, top, right, bottom = self.getContentsMargins()
+        effective_rect = rect.adjusted(left, top, -right, -bottom)
+
+        x = effective_rect.x()
+        y = effective_rect.y()
         line_height = 0
         spacing = self.spacing()
 
@@ -205,8 +202,8 @@ class QFlowLayout(QtWidgets.QLayout):
             space_x = spacing + layout_spacing_x
             space_y = spacing + layout_spacing_y
             next_x = x + item.sizeHint().width() + space_x
-            if next_x - space_x > rect.right() and line_height > 0:
-                x = rect.x()
+            if next_x - space_x > effective_rect.right() and line_height > 0:
+                x = effective_rect.x()
                 y = y + line_height + space_y
                 next_x = x + item.sizeHint().width() + space_x
                 line_height = 0
@@ -217,4 +214,5 @@ class QFlowLayout(QtWidgets.QLayout):
             x = next_x
             line_height = max(line_height, item.sizeHint().height())
 
-        return y + line_height - rect.y()
+        total_height = (y + line_height + bottom) - rect.y()
+        return total_height
