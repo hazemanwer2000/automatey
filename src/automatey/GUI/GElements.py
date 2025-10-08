@@ -824,6 +824,9 @@ class Widgets:
                 '''
                 return self.qWidget.value()
 
+            def setEditable(self, flag:bool):
+                self.qWidget.setEnabled(flag)
+
             def __int__(self):
                 return self.getValue()
 
