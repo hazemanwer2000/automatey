@@ -1484,13 +1484,13 @@ class Widgets:
 
         class Tree(Widget):
 
-            def __init__(self, rootNode:"Widgets.Basics.Tree.Node", headers:typing.List[str]):
+            def __init__(self, rootNode:"Widgets.Basics.Tree.Node", header:typing.List[str]):
 
                 self.qWidget = QtWidgets.QTreeWidget()
                 super().__init__(self.qWidget)
 
-                self.qWidget.setColumnCount(len(headers))
-                self.qWidget.setHeaderLabels(headers)
+                self.qWidget.setColumnCount(len(header))
+                self.qWidget.setHeaderLabels(header)
 
                 self.qWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
                 self.qWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
