@@ -1495,6 +1495,12 @@ class Widgets:
                 self.qWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
                 self.qWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
 
+                self.qWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+                self.qWidget.customContextMenuRequested.connect(self.INTERNAL_onContextMenu)
+                self.contextInfo = {
+                    'node' : None
+                }
+
                 self.INTERNAL__constructTree(self.qWidget, rootNode)
 
             def expandAll(self):
@@ -1507,13 +1513,37 @@ class Widgets:
                 for idx in range(self.qWidget.columnCount()):
                     self.qWidget.resizeColumnToContents(idx)
 
-            @staticmethod
-            def INTERNAL__constructTree(parentWidget, node:"Widgets.Basics.Tree.Node"):
+            def setContextMenu(self, menu:GUtils.Menu):
+                '''
+                Set context menu.
+                '''
+                self.qContextMenu = QtWidgets.QMenu()
+                menu.INTERNAL_instantiate(self.qContextMenu, self.qWidget)
 
-                treeWidgetItem = QtWidgets.QTreeWidgetItem(parentWidget, node.getAttributes())
+            def getContextInfo(self) -> "Widgets.Basics.Tree.Node":
+                '''
+                Context-Info is meant to be fetched by the user, within a context-menu handler. 
+                
+                Returns the currently selected node.
+                '''
+                return self.contextInfo['node']
+
+            def INTERNAL_onContextMenu(self, pos:QtCore.QPoint):
+
+                if self.qContextMenu is not None:
+                    qCurrentItem = self.qWidget.currentItem()
+                    if qCurrentItem is not None:
+                        self.contextInfo['node'] = qCurrentItem.INTERNAL_node
+                        self.qContextMenu.exec(self.qWidget.viewport().mapToGlobal(pos))
+
+            @staticmethod
+            def INTERNAL__constructTree(qParentWidget, node:"Widgets.Basics.Tree.Node"):
+
+                qTreeWidgetItem = QtWidgets.QTreeWidgetItem(qParentWidget, node.getAttributes())
+                qTreeWidgetItem.INTERNAL_node = node
 
                 for childNode in node.getChildren():
-                    Widgets.Basics.Tree.INTERNAL__constructTree(treeWidgetItem, childNode)
+                    Widgets.Basics.Tree.INTERNAL__constructTree(qTreeWidgetItem, childNode)
 
             class Node:
 
