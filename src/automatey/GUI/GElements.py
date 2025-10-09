@@ -1503,6 +1503,7 @@ class Widgets:
                 self.qWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
                 self.qWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
 
+                # ? Setup context menu.
                 self.qWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
                 self.qWidget.customContextMenuRequested.connect(self.INTERNAL_onContextMenu)
                 self.contextInfo = {
@@ -1543,6 +1544,13 @@ class Widgets:
                     if qCurrentItem is not None:
                         self.contextInfo['node'] = qCurrentItem.INTERNAL_node
                         self.qContextMenu.exec(self.qWidget.viewport().mapToGlobal(pos))
+
+            def construct(self, rootNode:"Widgets.Basics.Tree.Node"):
+                '''
+                (Re-)construct tree.
+                '''
+                self.qWidget.clear()
+                self.INTERNAL__constructTree(self.qWidget, rootNode)
 
             @staticmethod
             def INTERNAL__constructTree(qParentWidget, node:"Widgets.Basics.Tree.Node"):
