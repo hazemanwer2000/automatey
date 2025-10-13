@@ -389,6 +389,7 @@ class Widgets:
                 
                 self.layout.setWidget(labelTitle, 0, 0)
                 self.layout.setWidget(innerWidget, 1, 0)
+                self.layout.setRowMinimumSize(0, 0)
                 layoutsWidget = Widget.fromLayout(self.layout)
                 
                 # ? (...)
@@ -927,7 +928,7 @@ class Widgets:
 
         class TextEdit(Widget, INTERNAL.EventManager):
             
-            def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False, isWrapText=False, isVerticalScrollBar:bool=True, isHorizontalScrollBar:bool=True):
+            def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False, isWrapText=False, isVerticalScrollBar:bool=True, isHorizontalScrollBar:bool=True, height:int=0):
                 self.qWidget = PyQt6Wrapper.QPlainTextEdit()
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
@@ -955,6 +956,10 @@ class Widgets:
                     self.qWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
                 if not isHorizontalScrollBar:
                     self.qWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+                # ? Set height, if specified.
+                if height != 0:
+                    self.qWidget.setFixedHeight(height)
 
                 # ? Set editable-mode.
                 self.setEditable(isEditable)
