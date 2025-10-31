@@ -1520,6 +1520,7 @@ class Widgets:
                 self.contextInfo = {
                     'node' : None
                 }
+                self.qContextMenu = None
 
                 self.INTERNAL__constructTree(self.qWidget, rootNode)
 
