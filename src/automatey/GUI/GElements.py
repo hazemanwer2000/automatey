@@ -234,14 +234,18 @@ class Layouts:
                                     elementMargin.bottom)
             self.qLayout.setSpacing(elementSpacing)
 
+            self.widgets = []
+
         def insertWidget(self, widget, idx=-1):
             '''
             Insert widget at index.
             '''
             if idx == -1:
                 self.qLayout.addWidget(widget.qWidget)
+                self.widgets.append(widget)
             else:
                 self.qLayout.insertWidget(idx, widget.qWidget)
+                self.widgets.insert(idx, widget)
 
         def removeWidgetAtIndex(self, idx=-1):
             '''
@@ -250,6 +254,7 @@ class Layouts:
             if idx == -1:
                 idx = self.qLayout.count() - 1
             self.removeWidget(self.qLayout.itemAt(idx).widget())
+            self.widgets.pop(idx)
 
         def removeWidget(self, widget):
             '''
@@ -257,6 +262,7 @@ class Layouts:
             '''
             self.qLayout.removeWidget(widget.qWidget)
             widget.qWidget.setParent(None)
+            self.widgets.remove(widget)
 
         def getCount(self):
             '''
