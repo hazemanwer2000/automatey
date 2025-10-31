@@ -1520,9 +1520,10 @@ class Widgets:
                 self.contextInfo = {
                     'node' : None
                 }
-                self.qContextMenu = None
+                self.contextMenuCallout = None
+                self.contextMenuPos = None
 
-                self.INTERNAL__constructTree(self.qWidget, rootNode)
+                self.INTERNAL_constructTree(self.qWidget, rootNode)
 
                 # ? Setup on-collapse handler.
                 self.qWidget.itemCollapsed.connect(self.INTERNAL_onItemCollapsed)
@@ -1558,12 +1559,21 @@ class Widgets:
                 for idx in range(self.qWidget.columnCount()):
                     self.qWidget.resizeColumnToContents(idx)
 
-            def setContextMenu(self, menu:GUtils.Menu):
+            def setContextMenuCallout(self, callout):
                 '''
-                Set context menu.
+                Set context menu callout, called whenever a context menu is requested.
                 '''
-                self.qContextMenu = QtWidgets.QMenu()
-                menu.INTERNAL_instantiate(self.qContextMenu, self.qWidget)
+                self.contextMenuCallout = callout
+
+            def showContextMenu(self, menu:GUtils.Menu):
+                '''
+                Called to show a context menu.
+
+                Note: Must be called within a context menu callout.
+                '''
+                qMenu = QtWidgets.QMenu()
+                menu.INTERNAL_instantiate(qMenu, self.qWidget)
+                qMenu.exec(self.qWidget.viewport().mapToGlobal(self.contextMenuPos))
 
             def getContextInfo(self) -> "Widgets.Basics.Tree.Node":
                 '''
@@ -1575,21 +1585,22 @@ class Widgets:
 
             def INTERNAL_onContextMenu(self, pos:QtCore.QPoint):
 
-                if self.qContextMenu is not None:
+                if self.contextMenuCallout is not None:
                     qCurrentItem = self.qWidget.currentItem()
                     if qCurrentItem is not None:
                         self.contextInfo['node'] = qCurrentItem.INJECTED_node
-                        self.qContextMenu.exec(self.qWidget.viewport().mapToGlobal(pos))
+                        self.contextMenuPos = pos
+                        self.contextMenuCallout()
 
             def construct(self, rootNode:"Widgets.Basics.Tree.Node"):
                 '''
                 (Re-)construct tree.
                 '''
                 self.qWidget.clear()
-                self.INTERNAL__constructTree(self.qWidget, rootNode)
+                self.INTERNAL_constructTree(self.qWidget, rootNode)
 
             @staticmethod
-            def INTERNAL__constructTree(qParentWidget, node:"Widgets.Basics.Tree.Node"):
+            def INTERNAL_constructTree(qParentWidget, node:"Widgets.Basics.Tree.Node"):
                 '''
                 Recursively, constructs the GUI tree based on an (information-)node.
                 '''
@@ -1598,7 +1609,7 @@ class Widgets:
                 node.INJECTED_qItem = qTreeWidgetItem
 
                 for childNode in node.getChildren():
-                    Widgets.Basics.Tree.INTERNAL__constructTree(qTreeWidgetItem, childNode)
+                    Widgets.Basics.Tree.INTERNAL_constructTree(qTreeWidgetItem, childNode)
 
             class Node:
 
