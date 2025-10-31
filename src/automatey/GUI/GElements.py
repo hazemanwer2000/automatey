@@ -1524,6 +1524,9 @@ class Widgets:
 
                 self.INTERNAL__constructTree(self.qWidget, rootNode)
 
+                # ? Setup on-collapse handler.
+                self.qWidget.itemCollapsed.connect(self.INTERNAL_onItemCollapsed)
+
             def expandAll(self):
                 self.qWidget.expandAll()
 
@@ -1548,6 +1551,11 @@ class Widgets:
                 Returns the currently selected node.
                 '''
                 return self.contextInfo['node']
+
+            def INTERNAL_onItemCollapsed(self, qItem:QtWidgets.QTreeWidgetItem):
+                for i in range(qItem.childCount()):
+                    qChildItem = qItem.child(i)
+                    self.qWidget.collapseItem(qChildItem)
 
             def INTERNAL_onContextMenu(self, pos:QtCore.QPoint):
 
