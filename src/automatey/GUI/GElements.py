@@ -1527,11 +1527,32 @@ class Widgets:
                 # ? Setup on-collapse handler.
                 self.qWidget.itemCollapsed.connect(self.INTERNAL_onItemCollapsed)
 
-            def expandAll(self):
-                self.qWidget.expandAll()
+            def expandAll(self, node:"Widgets.Basics.Tree.Node"=None):
+                if node is None:
+                    self.qWidget.expandAll()
+                else:
+                    self.INTERNAL_expandRecursive(node.INJECTED_qItem)
 
-            def collapseAll(self):
-                self.qWidget.collapseAll()
+            def INTERNAL_expandRecursive(self, qItem:QtWidgets.QTreeWidgetItem):
+                for idx in range(qItem.childCount()):
+                    qChildItem = qItem.child(idx)
+                    self.qWidget.expandItem(qChildItem)
+                    self.INTERNAL_expandRecursive(qChildItem)
+
+            def collapseAll(self, node:"Widgets.Basics.Tree.Node"=None):
+                if node is None:
+                    self.qWidget.collapseAll()
+                else:
+                    self.INTERNAL_collapseRecursive(node.INJECTED_qItem)
+
+            def INTERNAL_collapseRecursive(self, qItem:QtWidgets.QTreeWidgetItem):
+                for idx in range(qItem.childCount()):
+                    qChildItem = qItem.child(idx)
+                    self.qWidget.collapseItem(qChildItem)
+                    self.INTERNAL_collapseRecursive(qChildItem)
+
+            def INTERNAL_onItemCollapsed(self, qItem:QtWidgets.QTreeWidgetItem):
+                self.INTERNAL_collapseRecursive(qItem)
 
             def resizeColumnsToContents(self):
                 for idx in range(self.qWidget.columnCount()):
@@ -1552,17 +1573,12 @@ class Widgets:
                 '''
                 return self.contextInfo['node']
 
-            def INTERNAL_onItemCollapsed(self, qItem:QtWidgets.QTreeWidgetItem):
-                for i in range(qItem.childCount()):
-                    qChildItem = qItem.child(i)
-                    self.qWidget.collapseItem(qChildItem)
-
             def INTERNAL_onContextMenu(self, pos:QtCore.QPoint):
 
                 if self.qContextMenu is not None:
                     qCurrentItem = self.qWidget.currentItem()
                     if qCurrentItem is not None:
-                        self.contextInfo['node'] = qCurrentItem.INTERNAL_node
+                        self.contextInfo['node'] = qCurrentItem.INJECTED_node
                         self.qContextMenu.exec(self.qWidget.viewport().mapToGlobal(pos))
 
             def construct(self, rootNode:"Widgets.Basics.Tree.Node"):
@@ -1578,7 +1594,8 @@ class Widgets:
                 Recursively, constructs the GUI tree based on an (information-)node.
                 '''
                 qTreeWidgetItem = QtWidgets.QTreeWidgetItem(qParentWidget, node.getAttributes())
-                qTreeWidgetItem.INTERNAL_node = node
+                qTreeWidgetItem.INJECTED_node = node
+                node.INJECTED_qItem = qTreeWidgetItem
 
                 for childNode in node.getChildren():
                     Widgets.Basics.Tree.INTERNAL__constructTree(qTreeWidgetItem, childNode)
@@ -1590,13 +1607,13 @@ class Widgets:
 
                 def getChildren(self) -> typing.List["Widgets.Basics.Tree.Node"]:
                     '''
-                    Must return a list of a (sub-)node(s).
+                    (Interface) Must return a list of a (sub-)node(s).
                     '''
                     pass
 
                 def getAttributes(self) -> typing.List[str]:
                     '''
-                    Must return the column value(s), as a list of string(s).
+                    (Interface) Must return the column value(s), as a list of string(s).
                     '''
                     pass
 
