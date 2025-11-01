@@ -630,6 +630,9 @@ class Widgets:
 
             def isChecked(self) -> bool:
                 return self.qButton.isChecked()
+            
+            def setChecked(self, flag:bool):
+                self.qButton.setChecked(flag)
 
         class Label:
             '''
