@@ -221,3 +221,22 @@ class QFlowLayout(QtWidgets.QLayout):
 
         total_height = (y + line_height + bottom) - rect.y()
         return total_height
+
+class QStatusBarEventFilter(QtCore.QObject):
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.Type.StatusTip:
+            return True
+        return super().eventFilter(obj, event)
+
+class QStatusBar(QtWidgets.QStatusBar):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+class QApplication(QtWidgets.QApplication):
+    
+    def __init__(self, argv):
+        super().__init__(argv)
+
+        self.INTERNAL_qStatusBarEventFilter = QStatusBarEventFilter()
+        self.installEventFilter(self.INTERNAL_qStatusBarEventFilter)

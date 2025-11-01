@@ -2155,7 +2155,7 @@ class Application:
     
     def __init__(self):
         
-        self.qApplication = QtWidgets.QApplication([])
+        self.qApplication = PyQt6Wrapper.QApplication([])
         
         # PyQt6: A cross-platform style called 'Fusion'.
         self.qApplication.setStyle('Fusion')
@@ -2388,14 +2388,14 @@ class Window:
         
         # ? Enable status-bar (optional).
         if isEnableStatusBar:
-            self.qStatusBar = QtWidgets.QStatusBar()
+            self.qStatusBar = PyQt6Wrapper.QStatusBar()
             self.qWindow.setStatusBar(self.qStatusBar)
 
     def setStatus(self, text:str):
         '''
         Update status-bar.
         '''
-        self.qStatusBar.showMessage(text, ((1 << 31) - 1))
+        self.qStatusBar.showMessage(text)
 
     def setTitle(self, title):
         '''
