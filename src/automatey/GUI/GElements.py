@@ -1555,9 +1555,10 @@ class Widgets:
             def INTERNAL_onItemCollapsed(self, qItem:QtWidgets.QTreeWidgetItem):
                 self.INTERNAL_collapseRecursive(qItem)
 
-            def resizeColumnsToContents(self):
+            def resizeColumnsToContents(self, offset=0):
                 for idx in range(self.qWidget.columnCount()):
                     self.qWidget.resizeColumnToContents(idx)
+                    self.qWidget.setColumnWidth(idx, self.qWidget.columnWidth(idx) + offset)
 
             def setContextMenuCallout(self, callout):
                 '''
