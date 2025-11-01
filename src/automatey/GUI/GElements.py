@@ -1614,6 +1614,21 @@ class Widgets:
 
                 for childNode in node.getChildren():
                     Widgets.Basics.Tree.INTERNAL_constructTree(qTreeWidgetItem, childNode)
+            
+            def refresh(self, node:"Widgets.Basics.Tree.Node", isRecursive:bool=False):
+                '''
+                Refresh attributes of node (and optinally, sub-node(s)).
+                '''
+                # ? Refresh node.
+                qTreeWidgetItem = node.INJECTED_qItem
+                attributes = node.getAttributes()
+                for idx in range(self.qWidget.columnCount()):
+                    qTreeWidgetItem.setText(idx, attributes[idx])
+
+                # ? Invoke on sub-node(s), if specified.
+                if isRecursive:
+                    for subNode in node.getChildren():
+                        self.refresh(subNode, isRecursive)
 
             class Node:
 
