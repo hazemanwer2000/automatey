@@ -941,7 +941,7 @@ class Widgets:
                 self.qWidget = PyQt6Wrapper.QPlainTextEdit()
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
-                
+
                 if placeholder != None:
                     self.qWidget.setPlaceholderText(placeholder)
                     
@@ -960,11 +960,13 @@ class Widgets:
                     font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
                     self.qWidget.setFont(font)
                 
-                # ? By default, Scroll-Bar is displayed.
-                if not isVerticalScrollBar:
-                    self.qWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-                if not isHorizontalScrollBar:
-                    self.qWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+                # ? Set scroll-bar policy.
+                
+                verticalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isVerticalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+                horizontalScrollBarPolicy = (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn) if isHorizontalScrollBar else (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+                self.qWidget.setVerticalScrollBarPolicy(verticalScrollBarPolicy)
+                self.qWidget.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy)
 
                 # ? Set height, if specified.
                 if height != 0:
