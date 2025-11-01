@@ -2388,14 +2388,14 @@ class Window:
         
         # ? Enable status-bar (optional).
         if isEnableStatusBar:
-            self.statusBar = QtWidgets.QStatusBar()
-            self.qWindow.setStatusBar(self.statusBar)
+            self.qStatusBar = QtWidgets.QStatusBar()
+            self.qWindow.setStatusBar(self.qStatusBar)
 
     def setStatus(self, text:str):
         '''
         Update status-bar.
         '''
-        self.statusBar.showMessage(text)
+        self.qStatusBar.showMessage(text, ((1 << 31) - 1))
 
     def setTitle(self, title):
         '''
