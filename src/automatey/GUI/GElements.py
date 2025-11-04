@@ -634,6 +634,12 @@ class Widgets:
             def setChecked(self, flag:bool):
                 self.qButton.setChecked(flag)
 
+            def setEnabled(self, flag:bool):
+                self.qButton.setEnabled(flag)
+
+            def isEnabled(self):
+                return self.qButton.isEnabled()
+
         class Label:
             '''
             Can handle an image, GIF, and text.
