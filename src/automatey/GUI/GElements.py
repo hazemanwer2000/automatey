@@ -943,7 +943,7 @@ class Widgets:
 
         class TextEdit(Widget, INTERNAL.EventManager):
             
-            def __init__(self, placeholder:str=None, isEditable=True, isMonospaced=False, isWrapText=False, isVerticalScrollBar:bool=True, isHorizontalScrollBar:bool=True, height:int=0):
+            def __init__(self, placeholder:str=None, isEditable=True, isTextSelectable=True, isMonospaced=False, isWrapText=False, isVerticalScrollBar:bool=True, isHorizontalScrollBar:bool=True, height:int=0):
                 self.qWidget = PyQt6Wrapper.QPlainTextEdit()
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
@@ -981,6 +981,11 @@ class Widgets:
                 # ? Set editable-mode.
                 self.setEditable(isEditable)
             
+                if not isTextSelectable:
+                    self.qWidget.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.NoTextInteraction)
+                    self.qWidget.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
+                    self.qWidget.viewport().setCursor(QtCore.Qt.CursorShape.ArrowCursor)
+
             def setEditable(self, flag:bool):
                 '''
                 Set editable-mode.
