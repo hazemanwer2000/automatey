@@ -4,7 +4,12 @@ import cryptography.hazmat.backends
 import cryptography.hazmat.primitives
 import cryptography.hazmat.primitives.asymmetric
 import cryptography.hazmat.primitives.asymmetric.ec
+import cryptography.hazmat.primitives.ciphers
+import cryptography.hazmat.primitives.ciphers.algorithms
+import cryptography.hazmat.primitives.ciphers.modes
+
 import automatey.OS.FileUtils as FileUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 
 import hashlib
 import hmac
@@ -50,6 +55,9 @@ class Feed:
     def feedAll(self):
         pass
 
+    def getTotalLength(self) -> int:
+        pass
+
 class Feeds:
     
     class FileFeed(Feed):
@@ -77,6 +85,9 @@ class Feeds:
             self.f.closeFile()
             return readBytes
     
+        def getTotalLength(self) -> int:
+            return self.f.getSize()
+    
     class BytesFeed(Feed):
         '''
         Encapsulates bytes.
@@ -100,6 +111,9 @@ class Feeds:
         
         def feedAll(self):
             return self.data
+        
+        def getTotalLength(self) -> int:
+            return self.dataLength
 
 class Hash:
     
@@ -183,3 +197,32 @@ class HMAC:
         hashFcn = Hash.INTERNAL_Algorithm2HashObject[hashAlgorithm]
         hmacObj = hmac.new(key, message.feedAll(), hashFcn)
         return hmacObj.digest()
+
+class AES:
+
+    class CBC:
+
+        def INTERNAL_handler(key:bytes, inputText:Feed, IV:bytes, isEncrypt:bool) -> bytes:
+
+            cipher = cryptography.hazmat.primitives.ciphers.Cipher(
+                cryptography.hazmat.primitives.ciphers.algorithms.AES(key),
+                cryptography.hazmat.primitives.ciphers.modes.CBC(IV)
+            )
+
+            processor = cipher.encryptor() if isEncrypt else cipher.decryptor()
+
+            outputText = processor.update(inputText.feedAll()) + processor.finalize()
+
+            return outputText
+
+        def encrypt(key:bytes, plainText:Feed, IV:bytes):
+
+            if (plainText.getTotalLength() % 16) != 0:
+                raise ExceptionUtils.ValidationError("Plain text length must be a multiple of the AES block size.")
+
+            return AES.CBC.INTERNAL_handler(key, plainText, IV, isEncrypt=True)
+        
+        def decrypt(key:bytes, cipherText:Feed, IV:bytes):
+
+            return AES.CBC.INTERNAL_handler(key, cipherText, IV, isEncrypt=False)
+
