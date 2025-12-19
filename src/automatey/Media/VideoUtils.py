@@ -381,7 +381,7 @@ class INTERNAL_VideoProcessing:
             
             # Execute.
             proc = ProcessUtils.Process(str(command_QueryInfo))
-            proc.run()
+            proc.wait()
             
             return proc.STDOUT()
         
@@ -479,7 +479,7 @@ class INTERNAL_VideoProcessing:
             INTERNAL_VideoProcessing.FFMPEGWrapper.formatThumbnailTimestampAttributes(command_GenerateThumbnail, timestampAttribs)
             
             proc = ProcessUtils.Process(str(command_GenerateThumbnail))
-            proc.run()
+            proc.wait()
 
         @staticmethod
         def generateThumbnails(f_src:FileUtils.File, f_dstDir:FileUtils.File, N:int, timestampAttribs:ThumbnailTimestampAttributes, generalInfo:dict):
@@ -497,7 +497,7 @@ class INTERNAL_VideoProcessing:
             INTERNAL_VideoProcessing.FFMPEGWrapper.formatThumbnailTimestampAttributes(command_GenerateThumbnails, timestampAttribs)
             
             proc = ProcessUtils.Process(str(command_GenerateThumbnails))
-            proc.run()
+            proc.wait()
 
         class VideoFilterConstructors:
             
@@ -903,7 +903,7 @@ class INTERNAL_VideoProcessing:
         def executeCommands(commandList):
             for command in commandList:
                 proc = ProcessUtils.Process(str(command))
-                if (proc.run() != 0):
+                if (proc.wait() != 0):
                     raise ExceptionUtils.BackendError(proc.STDERR())
 
 # Deals in 'Action'(s) and General-Info

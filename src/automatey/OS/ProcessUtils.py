@@ -235,27 +235,39 @@ class CommandTemplate:
 
 class Process:
     '''
-    Representation of a (sub-)process.
+    Creates and manages a process.
     '''
     
     def __init__(self, *args):
-        self.command = StringUtils.Split.asCommand(*args)
+        command = StringUtils.Split.asCommand(*args)
+        self.process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
         self.stdout = None
         self.stderr = None
-    
-    def run(self, STDOUT2DEVNULL=False, STDERR2DEVNULL=False) -> int:
+        self.status = None
+
+    def wait(self) -> int:
         '''
-        Executes command, synchronously.
+        Waits for process to complete, and returns status.
         '''
-        stdoutRedirection = subprocess.DEVNULL if STDOUT2DEVNULL else subprocess.PIPE
-        stderrRedirection = subprocess.DEVNULL if STDERR2DEVNULL else subprocess.PIPE
-        
-        proc = subprocess.Popen(self.command, stdout=stdoutRedirection, stderr=stderrRedirection, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-        self.stdout, self.stderr = proc.communicate()
-        return proc.returncode
+        if self.status is None:
+            self.status = self.process.wait()
+            self.stdout, self.stderr = self.process.communicate()
+        return self.status
     
-    def STDOUT(self):
+    def poll(self) -> int:
+        '''
+        Polls process for status.
+
+        Note: If process is not complete (yet), it returns `None`.
+        '''
+        if self.status is not None:
+            self.status = self.process.poll()
+            if self.status is not None:
+                self.stdout, self.stderr = self.process.communicate()
+        return self.status
+
+    def STDOUT(self) -> str:
         return self.stdout
     
-    def STDERR(self):
+    def STDERR(self) -> str:
         return self.stderr

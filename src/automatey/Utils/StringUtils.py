@@ -166,10 +166,16 @@ class Case:
 
     @staticmethod
     def Pascal2Snake(text:str, character:str='-'):
+        '''
+        Converts *PascalCase* to *snake-case*.
+        '''
         return character.join([x.lower() for x in Split.atWords(text)])
 
     @staticmethod
     def Snake2Pascal(text:str, character:str='-'):
+        '''
+        Converts *snake-case* to *PascalCase*.
+        '''
         return ''.join([x.capitalize() for x in text.split(character)])
 
 class MakePretty:
