@@ -191,27 +191,40 @@ class MakePretty:
         return prettified 
 
 class HexString:
-    
-    @staticmethod
-    def fromBytes(_bytes:bytes) -> str:
-        return _bytes.hex()
 
     @staticmethod
-    def toBytes(hexStr:bytes) -> bytes:
-        return bytes.fromhex(hexStr)
+    def normalize(input:str) -> str:
+        '''
+        Normalizes a hex-string, by,
+        - Removing any '0x' at the beginning.
+        - Using lower-case characters.
+        '''
+        if input.startswith('0x'):
+            input = input[2:]
+        return input.lower()
     
     @staticmethod
-    def fromCArray(text:str) -> str:
-        hexBytesList = Regex.findAll(r'0[xX]([a-fA-F0-9]{1,2})', text)
+    def fromBytes(input:bytes) -> str:
+        return HexString.normalize(input.hex())
+
+    @staticmethod
+    def toBytes(input:str) -> bytes:
+        input = HexString.normalize(input)
+        return bytes.fromhex(input)
+    
+    @staticmethod
+    def fromCArray(input:str) -> str:
+        hexBytesList = Regex.findAll(r'0[xX]([a-fA-F0-9]{1,2})', input)
         for idx, hexByte in enumerate(hexBytesList):
             if len(hexByte) == 1:
                 hexBytesList[idx] = '0' + hexBytesList[idx]
-        return ''.join(hexBytesList).lower()
+        return HexString.normalize(''.join(hexBytesList))
     
     @staticmethod
-    def toCArray(text:str, bytesPerLine:int=8) -> str:
-        text = text.lower()
-        hexBytesList = [('0x' + text[i:i+2]) for i in range(0, len(text), 2)]
+    def toCArray(input:str, bytesPerLine:int=8) -> str:
+        input = HexString.normalize(input)
+        hexBytesList = Split.everyN(input, 2)
+        hexBytesList = [('0x' + t) for t in hexBytesList]
         chunks = []
         for i in range(0, len(hexBytesList), bytesPerLine):
             chunkList = hexBytesList[i:i+bytesPerLine]

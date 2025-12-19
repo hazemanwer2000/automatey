@@ -7,6 +7,7 @@ import cryptography.hazmat.primitives.asymmetric.ec
 import cryptography.hazmat.primitives.ciphers
 import cryptography.hazmat.primitives.ciphers.algorithms
 import cryptography.hazmat.primitives.ciphers.modes
+import cryptography.hazmat.primitives.ciphers.aead
 
 import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.ExceptionUtils as ExceptionUtils
@@ -213,16 +214,55 @@ class AES:
 
             outputText = processor.update(inputText.feedAll()) + processor.finalize()
 
-            return outputText
+            return Feeds.BytesFeed(outputText)
 
-        def encrypt(key:bytes, plainText:Feed, IV:bytes):
+        def encrypt(key:bytes, plainText:Feed, IV:bytes) -> Feed:
 
             if (plainText.getTotalLength() % 16) != 0:
                 raise ExceptionUtils.ValidationError("Plain text length must be a multiple of the AES block size.")
 
             return AES.CBC.INTERNAL_handler(key, plainText, IV, isEncrypt=True)
         
-        def decrypt(key:bytes, cipherText:Feed, IV:bytes):
+        def decrypt(key:bytes, cipherText:Feed, IV:bytes) -> Feed:
 
             return AES.CBC.INTERNAL_handler(key, cipherText, IV, isEncrypt=False)
 
+    class GCM:
+
+        def encrypt(key:bytes, plainText:Feed, associatedData:Feed, IV:bytes) -> dict:
+            '''
+            Returns a dictionary of,
+            - `Tag` : Message authentication code, in bytes.
+            - `Text` : Feed of cipher-text.
+            '''
+            cipher = cryptography.hazmat.primitives.ciphers.aead.AESGCM(key)
+            bytes_inputText = plainText.feedAll() if (plainText is not None) else None
+            bytes_associatedData = associatedData.feedAll() if (associatedData is not None) else None
+            bytes_result = cipher.encrypt(IV, bytes_inputText, bytes_associatedData)
+            return {
+                'Tag' : bytes_result[-16:],
+                'Text' : Feeds.BytesFeed(bytes_result[:-16])
+            }
+        
+        def decrypt(key:bytes, cipherText:Feed, associatedData:Feed, IV:bytes, tag:bytes) -> dict:
+            '''
+            Returns a dictionary of,
+            - `IsValidTag` : Boolean, denoting if the tag is valid.
+            - `Text` : Feed of plain-text (relevant only if `IsValidTag` is `True`).
+            '''
+            cipher = cryptography.hazmat.primitives.ciphers.aead.AESGCM(key)
+            bytes_cipherText = cipherText.feedAll() if (cipherText is not None) else None
+            bytes_associatedData = associatedData.feedAll() if (associatedData is not None) else None
+
+            try:
+                bytes_result = cipher.decrypt(IV, bytes_cipherText + tag, bytes_associatedData)
+                plainText:Feed = Feeds.BytesFeed(bytes_result)
+                isValidTag = True
+            except cryptography.exceptions.InvalidTag as e:
+                plainText:Feed = None
+                isValidTag = False
+
+            return {
+                'IsValidTag' : isValidTag,
+                'Text' : plainText
+            }
