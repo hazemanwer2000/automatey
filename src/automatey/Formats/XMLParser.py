@@ -55,7 +55,7 @@ class XML:
             handler.writeAny(self.toString(indent=indent))
     
     def toString(self, indent:str='  '):
-        text = lxml.etree.tostring(self.root, pretty_print=True, encoding='unicode')
+        text = lxml.etree.tostring(self.root, pretty_print=True, encoding="utf-8", xml_declaration=True)
         dom = xml.dom.minidom.parseString(text)
         return StringUtils.EmptyLine.removeEmptyLines(dom.toprettyxml(indent=indent))
     
