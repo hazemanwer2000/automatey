@@ -262,28 +262,32 @@ class AES:
 
             yield processor.tag
         
-        def decrypt(key:bytes, cipherText:Feed, associatedData:Feed, IV:bytes, tag:bytes) -> dict:
+        def decrypt(key:bytes, cipherText:Feed, associatedData:Feed, IV:bytes, tag:bytes):
             '''
-            Returns a dictionary of,
-            - `IsValidTag` : Boolean, denoting if the tag is valid.
-            - `Text` : Feed of plain-text (relevant only if `IsValidTag` is `True`).
-            '''
-            cipher = cryptography.hazmat.primitives.ciphers.aead.AESGCM(key)
-            bytes_cipherText = cipherText.feedAll() if (cipherText is not None) else None
-            bytes_associatedData = associatedData.feedAll() if (associatedData is not None) else None
+            Returns a *generator* object, which yields (variable-sized) chunks of plain-text.
 
+            If the tag is invalid, raises `VerificationError`.
+            '''
+
+            cipher = cryptography.hazmat.primitives.ciphers.Cipher(
+                cryptography.hazmat.primitives.ciphers.algorithms.AES(key),
+                cryptography.hazmat.primitives.ciphers.modes.GCM(IV, tag)
+            )
+
+            processor = cipher.decryptor()
+
+            if associatedData is not None:
+                while (feedBytes := associatedData.feed()):
+                    processor.authenticate_additional_data(feedBytes)
+            
+            if cipherText is not None:
+                while (feedBytes := cipherText.feed()):
+                    yield processor.update(feedBytes)
+            
             try:
-                bytes_result = cipher.decrypt(IV, bytes_cipherText + tag, bytes_associatedData)
-                plainText:Feed = Feeds.BytesFeed(bytes_result)
-                isValidTag = True
+                yield processor.finalize()
             except cryptography.exceptions.InvalidTag as e:
-                plainText:Feed = None
-                isValidTag = False
-
-            return {
-                'IsValidTag' : isValidTag,
-                'Text' : plainText
-            }
+                raise ExceptionUtils.VerificationError("Invalid tag.")
 
     class CMAC:
 

@@ -22,3 +22,9 @@ class ImplementationError(Error):
     To be raised when the implementation is itself faulty.
     '''
     pass
+
+class VerificationError(Error):
+    '''
+    To be raised when verification of something fails.
+    '''
+    pass
