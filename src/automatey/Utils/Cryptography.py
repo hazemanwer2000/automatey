@@ -174,13 +174,13 @@ class ECC:
     class Signature:
         
         @staticmethod
-        def generate(curve, privateKey:bytes, message:Feed, hashAlgorithm) -> bytes:
+        def generate(curve, privateKey:bytes, hash:bytes, hashAlgorithm) -> bytes:
             hashFcn = Hash.INTERNAL_Algorithm2HashObject[hashAlgorithm]
             ecdsa_privateKey = ecdsa.SigningKey.from_string(privateKey, curve=curve.INTERNAL_ecdsa_curve, hashfunc=hashFcn)
-            return ecdsa_privateKey.sign(message.feedAll())
-        
+            return ecdsa_privateKey.sign_digest(hash)
+
         @staticmethod
-        def verify(curve, publicKey:bytes, message:Feed, signature:bytes, hashAlgorithm) -> bool:
+        def verify(curve, publicKey:bytes, hash:bytes, signature:bytes, hashAlgorithm) -> bool:
             '''
             Returns `True` if verification succeeds, `False` otherwise.
             '''
@@ -188,7 +188,7 @@ class ECC:
             ecdsa_publicKey = ecdsa.VerifyingKey.from_string(publicKey, curve=curve.INTERNAL_ecdsa_curve, hashfunc=hashFcn)
             isVerified = True
             try:
-                ecdsa_publicKey.verify(signature, message.feedAll())
+                ecdsa_publicKey.verify_digest(signature, hash)
             except:
                 isVerified = False
             return isVerified
