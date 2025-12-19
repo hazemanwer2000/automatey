@@ -197,7 +197,9 @@ class HMAC:
 
     def generate(key:bytes, message:Feed, hashAlgorithm) -> bytes:
         hashFcn = Hash.INTERNAL_Algorithm2HashObject[hashAlgorithm]
-        hmacObj = hmac.new(key, message.feedAll(), hashFcn)
+        hmacObj = hmac.new(key, None, hashFcn)
+        while (feedBytes := message.feed()):
+            hmacObj.update(feedBytes)
         return hmacObj.digest()
 
 class AES:
