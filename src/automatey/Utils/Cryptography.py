@@ -206,7 +206,7 @@ class AES:
 
     class CBC:
 
-        def INTERNAL_handler(key:bytes, inputText:Feed, IV:bytes, isEncrypt:bool) -> bytes:
+        def INTERNAL_handler(key:bytes, inputText:Feed, IV:bytes, isEncrypt:bool):
 
             cipher = cryptography.hazmat.primitives.ciphers.Cipher(
                 cryptography.hazmat.primitives.ciphers.algorithms.AES(key),
@@ -220,7 +220,7 @@ class AES:
 
             yield processor.finalize()
 
-        def encrypt(key:bytes, plainText:Feed, IV:bytes) -> bytes:
+        def encrypt(key:bytes, plainText:Feed, IV:bytes):
             '''
             Returns a *generator* object, which yields (variable-sized) chunks of cipher-text bytes.
             '''
@@ -230,7 +230,7 @@ class AES:
 
             return AES.CBC.INTERNAL_handler(key, plainText, IV, isEncrypt=True)
         
-        def decrypt(key:bytes, cipherText:Feed, IV:bytes) -> bytes:
+        def decrypt(key:bytes, cipherText:Feed, IV:bytes):
             '''
             Returns a *generator* object, which yields (variable-sized) chunks of plain-text bytes.
             '''
@@ -239,20 +239,28 @@ class AES:
         
     class GCM:
 
-        def encrypt(key:bytes, plainText:Feed, associatedData:Feed, IV:bytes) -> dict:
+        def encrypt(key:bytes, plainText:Feed, associatedData:Feed, IV:bytes):
             '''
-            Returns a dictionary of,
-            - `Tag` : Message authentication code, in bytes.
-            - `Text` : Feed of cipher-text.
+            Returns a *generator* object, which yields (variable-sized) chunks of cipher-text, followed by the authentication tag, in bytes.
             '''
-            cipher = cryptography.hazmat.primitives.ciphers.aead.AESGCM(key)
-            bytes_inputText = plainText.feedAll() if (plainText is not None) else None
-            bytes_associatedData = associatedData.feedAll() if (associatedData is not None) else None
-            bytes_result = cipher.encrypt(IV, bytes_inputText, bytes_associatedData)
-            return {
-                'Tag' : bytes_result[-16:],
-                'Text' : Feeds.BytesFeed(bytes_result[:-16])
-            }
+            cipher = cryptography.hazmat.primitives.ciphers.Cipher(
+                cryptography.hazmat.primitives.ciphers.algorithms.AES(key),
+                cryptography.hazmat.primitives.ciphers.modes.GCM(IV)
+            )
+
+            processor = cipher.encryptor()
+
+            if associatedData is not None:
+                while (feedBytes := associatedData.feed()):
+                    processor.authenticate_additional_data(feedBytes)
+            
+            if plainText is not None:
+                while (feedBytes := plainText.feed()):
+                    yield processor.update(feedBytes)
+            
+            yield processor.finalize()
+
+            yield processor.tag
         
         def decrypt(key:bytes, cipherText:Feed, associatedData:Feed, IV:bytes, tag:bytes) -> dict:
             '''
