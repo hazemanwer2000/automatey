@@ -2,6 +2,7 @@
 import cryptography.hazmat
 import cryptography.hazmat.backends
 import cryptography.hazmat.primitives
+import cryptography.hazmat.primitives.cmac
 import cryptography.hazmat.primitives.asymmetric
 import cryptography.hazmat.primitives.asymmetric.ec
 import cryptography.hazmat.primitives.ciphers
@@ -133,12 +134,12 @@ class Hash:
     }
     
     @staticmethod
-    def generate(feed:Feed, algorithm=Algorithms.SHA256) -> bytes:
+    def generate(message:Feed, algorithm=Algorithms.SHA256) -> bytes:
         '''
         Generate a hash, based on a feed.
         '''
         hashObject = Hash.INTERNAL_Algorithm2HashObject[algorithm]()
-        while (feedBytes := feed.feed()):
+        while (feedBytes := message.feed()):
             hashObject.update(feedBytes)
         return bytes.fromhex(hashObject.hexdigest())
 
@@ -266,3 +267,11 @@ class AES:
                 'IsValidTag' : isValidTag,
                 'Text' : plainText
             }
+
+    class CMAC:
+
+        def generate(key:bytes, message:Feed) -> bytes:
+            cmacObj = cryptography.hazmat.primitives.cmac.CMAC(cryptography.hazmat.primitives.ciphers.algorithms.AES(key))
+            while (feedBytes := message.feed()):
+                cmacObj.update(feedBytes)
+            return cmacObj.finalize()
