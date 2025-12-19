@@ -215,21 +215,28 @@ class AES:
 
             processor = cipher.encryptor() if isEncrypt else cipher.decryptor()
 
-            outputText = processor.update(inputText.feedAll()) + processor.finalize()
+            while (feedBytes := inputText.feed()):
+                yield processor.update(feedBytes)
 
-            return Feeds.BytesFeed(outputText)
+            yield processor.finalize()
 
-        def encrypt(key:bytes, plainText:Feed, IV:bytes) -> Feed:
+        def encrypt(key:bytes, plainText:Feed, IV:bytes) -> bytes:
+            '''
+            Returns a *generator* object, which yields (variable-sized) chunks of cipher-text bytes.
+            '''
 
             if (plainText.getTotalLength() % 16) != 0:
                 raise ExceptionUtils.ValidationError("Plain text length must be a multiple of the AES block size.")
 
             return AES.CBC.INTERNAL_handler(key, plainText, IV, isEncrypt=True)
         
-        def decrypt(key:bytes, cipherText:Feed, IV:bytes) -> Feed:
+        def decrypt(key:bytes, cipherText:Feed, IV:bytes) -> bytes:
+            '''
+            Returns a *generator* object, which yields (variable-sized) chunks of plain-text bytes.
+            '''
 
             return AES.CBC.INTERNAL_handler(key, cipherText, IV, isEncrypt=False)
-
+        
     class GCM:
 
         def encrypt(key:bytes, plainText:Feed, associatedData:Feed, IV:bytes) -> dict:
