@@ -138,11 +138,22 @@ class Process:
 
         Note: If process is not complete (yet), it returns `None`.
         '''
-        if self.status is not None:
+        if self.status is None:
             self.status = self.process.poll()
             if self.status is not None:
                 self.stdout, self.stderr = self.process.communicate()
         return self.status
+    
+    def terminate(self, SIGKILL:bool=False):
+        '''
+        Requests process termination, and waits for it to complete.
+
+        Note: This allows for graceful termination.
+        '''
+        if self.status is None:
+            handler = self.process.kill if SIGKILL else self.process.terminate
+            handler()
+            self.process.wait()
 
     def STDOUT(self) -> str:
         return self.stdout
