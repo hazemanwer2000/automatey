@@ -52,11 +52,11 @@ class Parser:
         '''
         return [Subtitle(x) for x in self.pysrt_subtitles]
     
-    def shift(self, offset:TimeUtils.Time):
+    def shift(self, offset:TimeUtils.Time, sign:int=1):
         '''
         Shift all timestamps by an offset.
         '''
-        self.pysrt_subtitles.shift(milliseconds=int(offset.toMilliseconds()))
+        self.pysrt_subtitles.shift(milliseconds=int(offset.toMilliseconds()) * sign)
     
     def saveAs(self, f:FileUtils.File):
         self.pysrt_subtitles.sort()
