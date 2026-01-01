@@ -7,6 +7,7 @@ import automatey.Utils.ExceptionUtils as ExceptionUtils
 # Standard libraries
 import subprocess
 import shlex
+import threading
 
 class CommandTemplate:
     '''
@@ -117,11 +118,25 @@ class Process:
     '''
     
     def __init__(self, *args):
+
         command = StringUtils.Split.asCommand(*args)
         self.process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        
+        self.STDOUT_lines = []
+        self.STDERR_lines = []
         self.stdout = None
         self.stderr = None
-        self.status = None
+        
+        self.STDOUT_thread = threading.Thread(target=Process.INTERNAL_runnable_PIPEReader, args=(self.process.stdout, self.STDOUT_lines), daemon=True)
+        self.STDERR_thread = threading.Thread(target=Process.INTERNAL_runnable_PIPEReader, args=(self.process.stderr, self.STDERR_lines), daemon=True)
+        self.STDOUT_thread.start()
+        self.STDERR_thread.start()
+
+    @staticmethod
+    def INTERNAL_runnable_PIPEReader(pipe, lines):
+        for line in iter(pipe.readline, ''):
+            lines.append(line)
+        pipe.close()
 
     def wait(self) -> int:
         '''
@@ -129,7 +144,6 @@ class Process:
         '''
         if self.status is None:
             self.status = self.process.wait()
-            self.stdout, self.stderr = self.process.communicate()
         return self.status
     
     def poll(self) -> int:
@@ -140,8 +154,6 @@ class Process:
         '''
         if self.status is None:
             self.status = self.process.poll()
-            if self.status is not None:
-                self.stdout, self.stderr = self.process.communicate()
         return self.status
     
     def terminate(self, SIGKILL:bool=False):
@@ -156,7 +168,13 @@ class Process:
             self.process.wait()
 
     def STDOUT(self) -> str:
+        if self.stdout is None:
+            self.stdout = ''.join(self.STDOUT_lines)
+            self.STDOUT_lines = None
         return self.stdout
     
     def STDERR(self) -> str:
+        if self.stderr is None:
+            self.stderr = ''.join(self.STDERR_lines)
+            self.STDERR_lines = None
         return self.stderr
