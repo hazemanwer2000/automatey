@@ -122,6 +122,8 @@ class Process:
         command = StringUtils.Split.asCommand(*args)
         self.process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
         
+        self.status = None
+
         self.STDOUT_lines = []
         self.STDERR_lines = []
         self.stdout = None
