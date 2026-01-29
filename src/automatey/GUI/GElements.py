@@ -2447,3 +2447,30 @@ class Window:
         Hide window.
         '''
         self.qWindow.hide()
+
+class SplashScreen:
+    '''
+    A splash-screen, used to display a loading screen, plus information, during application start-up.
+    '''
+    
+    def __init__(self, img:GUtils.Image):
+        self.qSplashScreen = QtWidgets.QSplashScreen(QtGui.QPixmap.fromImage(img.qImage))
+    
+    def render(self, app:Application):
+        '''
+        Render splash-screen.
+
+        Note:
+        - It is recommended to call this method just after creating the `Application` instance.
+        '''
+        self.qSplashScreen.show()
+        app.qApplication.processEvents()
+
+    def derender(self, window:Window):
+        '''
+        Derender splash-screen.
+
+        Note:
+        - De-rendering occurs only after `window` is rendered.
+        '''
+        self.qSplashScreen.finish(window.qWindow)
