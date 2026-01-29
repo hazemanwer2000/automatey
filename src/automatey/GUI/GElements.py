@@ -373,6 +373,8 @@ class Widgets:
             '''
             def __init__(self, widget):
                 self.layout = Layouts.GridLayout(3, 3, AbstractGraphics.SymmetricMargin(0), 0)
+                self.layout.setRowMinimumSize(1, 0)
+                self.layout.setColumnMinimumSize(1, 0)
                 self.layout.setWidget(widget, 1, 1)
                 Widget.__init__(self, Widget.fromLayout(self.layout).qWidget)
 
@@ -1225,7 +1227,7 @@ class Widgets:
                 self.qContextMenu:QtWidgets.QMenu = None
                 self.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseMoveEvent
                 self.qWidget.setMouseTracking(True)
-                self.lastMousePosition = (0, 0)
+                self.lastMousePosition = (1, 1)
                 self.qWidget.wheelEventFcn = self.INTERNAL_wheelEvent
             
             def setContextMenu(self, menu:GUtils.Menu):
@@ -1418,7 +1420,7 @@ class Widgets:
             GIF renderer.
             '''
 
-            def __init__(self, ):
+            def __init__(self):
                 self.label = Widget(PyQt6Wrapper.QLabel())
                 self.decorator = Widgets.Decorators.Central(self.label)
                 Widget.__init__(self, self.decorator.qWidget)
@@ -1429,12 +1431,14 @@ class Widgets:
                 # ? Initialize event-handler(s).
                 self.label.qWidget.contextMenuEventFcn = self.INTERNAL_contextMenuEvent
                 self.qContextMenu:QtWidgets.QMenu = None
-                self.lastMousePosition = (0, 0)
+                self.lastMousePosition = (1, 1)
                 self.label.qWidget.mouseMoveEventFcn = self.INTERNAL_mouseMoveEvent
                 self.label.qWidget.setMouseTracking(True)
             
             def INTERNAL_mouseMoveEvent(self, event):
-                self.lastMousePosition = (event.pos().x(), event.pos().y())
+                x = event.pos().x() + 1
+                y = event.pos().y() + 1
+                self.lastMousePosition = (x, y)
             
             def INTERNAL_contextMenuEvent(self, event:QtGui.QContextMenuEvent):
                 if self.qContextMenu != None:
