@@ -2,6 +2,7 @@
 import copy
 import bisect
 import collections
+import math
 
 def correlate(x, p1, p2):
     '''
@@ -102,8 +103,8 @@ class MediaSpecific:
             xFactor = referenceActualPosition[0] / referenceActualSize[0]
             yFactor = referenceActualPosition[1] / referenceActualSize[1]
             position = [
-                int(xFactor * size[0]),
-                int(yFactor * size[1]),
+                math.ceil(xFactor * size[0]),
+                math.ceil(yFactor * size[1]),
             ]
             
             # ? Check if position lie with-in frame.
