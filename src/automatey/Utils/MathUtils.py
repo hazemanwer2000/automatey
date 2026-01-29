@@ -77,6 +77,7 @@ class MediaSpecific:
             - It is assumed that frame is
                 - centered, and,
                 - scaled to fit.
+            - The minimum position is `[1, 1]`.
             '''
             # ? (Width-to-Height) Factor(s).
             referenceFactor = referenceSize[0] / referenceSize[1]
@@ -109,6 +110,11 @@ class MediaSpecific:
             t_isWithin = lambda t_position, t_size: (t_position >= 0) and (t_position <= t_size)
             if not (t_isWithin(position[0], size[0]) and t_isWithin(position[1], size[1])):
                 position = None
+
+            # ? Ensure minimum position.
+            if position is not None:
+                position[0] = max(1, position[0])
+                position[1] = max(1, position[1])
             
             return position
 
