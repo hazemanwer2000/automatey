@@ -72,7 +72,9 @@ class XML:
         Returns a list, the result of the given XPath query.
         
         Note that,
-        - XPath queries must always return an element.
+        - XPath queries the search for non-elements are prohibited.
+        - `namespaces` is a `dict`, mapping prefix to namespace URI.
+            - For example, `{'ns':'http://example.com/ns'}`.
         '''
         kwargs = {}
         if namespaces is not None:
