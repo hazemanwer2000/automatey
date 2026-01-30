@@ -89,7 +89,7 @@ class File:
         
         For example, '..' returns the parent directory of this file/directory. 
         '''
-        return File(os.path.join(self.path, *paths))
+        return File(self.path, *paths)
     
     def getExtension(self) -> str:
         '''
@@ -372,8 +372,15 @@ class File:
                 '''
                 Concatenates multiple path(s).
                 '''
-                return os.path.abspath(os.path.join(*paths))
+                return os.path.normpath(os.path.join(*paths))
             
+            @staticmethod
+            def getAbsolute(path):
+                '''
+                Get absolute path.
+                '''
+                return os.path.abspath(path)
+
             @staticmethod
             def modifyName(path, name=None, suffix=None, extension=None):
                 '''
