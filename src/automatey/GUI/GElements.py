@@ -1513,7 +1513,7 @@ class Widgets:
                 '''
                 self.label.qWidget.setPixmap(QtGui.QPixmap.fromImage(GUtils.Image(f).qImage))
 
-        class Tree(Widget):
+        class Tree(Widget, INTERNAL.EventManager):
 
             '''
             An expandable tree display of (information-)node(s).
@@ -1521,12 +1521,16 @@ class Widgets:
             Notes:
             - `rootNode` must satisfy the specified `Node` interface.
             - `header` must specify the column name(s), as a list of string(s).
+
+            On Event-Handlers:
+            - ClickEventHandler: Invoked when an item is clicked. The clicked node is passed as an argument.
             '''
 
             def __init__(self, rootNode:"Widgets.Basics.Tree.Node", header:typing.List[str]):
 
                 self.qWidget = QtWidgets.QTreeWidget()
                 super().__init__(self.qWidget)
+                INTERNAL.EventManager.__init__(self)
 
                 self.qWidget.setColumnCount(len(header))
                 self.qWidget.setHeaderLabels(header)
@@ -1547,6 +1551,14 @@ class Widgets:
 
                 # ? Setup on-collapse handler.
                 self.qWidget.itemCollapsed.connect(self.INTERNAL_onItemCollapsed)
+
+                # ? Event-handlers.
+                self.qWidget.clicked.connect(self.INTERNAL_onClicked)  
+
+            def INTERNAL_onClicked(self, qModelIndex:QtCore.QModelIndex):
+                if GUtils.EventHandlers.ClickEventHandler in self.eventHandlers:
+                    qItem = self.qWidget.itemFromIndex(qModelIndex)
+                    self.eventHandlers[GUtils.EventHandlers.ClickEventHandler].fcn(qItem.INJECTED_node)
 
             def expandAll(self, node:"Widgets.Basics.Tree.Node"=None):
                 if node is None:
@@ -2450,7 +2462,7 @@ class Window:
 
 class SplashScreen:
     '''
-    A splash-screen, used to display a loading screen, plus information, during application start-up.
+    A splash-screen, used to display a loading screen during application start-up.
     '''
     
     def __init__(self, img:GUtils.Image):
