@@ -2468,9 +2468,9 @@ class SplashScreen:
 
     def derender(self, window:Window):
         '''
-        Derender splash-screen.
+        De-render splash-screen, after `window` is rendered.
 
         Note:
-        - De-rendering occurs only after `window` is rendered.
+        - It must be invoked after `window.show()`.
         '''
         self.qSplashScreen.finish(window.qWindow)
