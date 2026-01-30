@@ -1554,11 +1554,18 @@ class Widgets:
 
                 # ? Event-handlers.
                 self.qWidget.clicked.connect(self.INTERNAL_onClicked)  
+                self.qWidget.itemSelectionChanged.connect(self.INTERNAL_onSelectedNodeChanged)
 
             def INTERNAL_onClicked(self, qModelIndex:QtCore.QModelIndex):
                 if GUtils.EventHandlers.ClickEventHandler in self.eventHandlers:
                     qItem = self.qWidget.itemFromIndex(qModelIndex)
                     self.eventHandlers[GUtils.EventHandlers.ClickEventHandler].fcn(qItem.INJECTED_node)
+
+            def INTERNAL_onSelectedNodeChanged(self):
+                if GUtils.EventHandlers.SelectionChangeEventHandler in self.eventHandlers:
+                    qItem = self.qWidget.currentItem()
+                    if qItem is not None:
+                        self.eventHandlers[GUtils.EventHandlers.SelectionChangeEventHandler].fcn(qItem.INJECTED_node)
 
             def expandAll(self, node:"Widgets.Basics.Tree.Node"=None):
                 if node is None:
