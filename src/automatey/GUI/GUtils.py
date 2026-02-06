@@ -122,6 +122,9 @@ class EventHandlers:
     class ClickEventHandler(EventHandler):
         pass
 
+    class DoubleClickEventHandler(EventHandler):
+        pass
+
     class SelectionChangeEventHandler(EventHandler):
         pass
 
