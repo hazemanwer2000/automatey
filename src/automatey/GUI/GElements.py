@@ -1194,29 +1194,33 @@ class Widgets:
         class Table(Widget):
             '''
             A table to view and sort data.
+
+            Note that,
+            - A comparator has the signature `COMPARATOR(left:str, right:str)`.
+            - A comparator returns `True` if left is less than right.
             '''
 
             class INTERNAL_QSortFilterProxyModel(QtCore.QSortFilterProxyModel):
 
-                def __init__(self, sortingFcns:list):
+                def __init__(self, comparators:list):
                     super().__init__()
-                    self.sortingFcns = sortingFcns
+                    self.comparators = comparators
 
                 def lessThan(self, left, right):
 
-                    sortingFcn = self.sortingFcns[left.column()]
+                    comparator = self.comparators[left.column()]
                     
-                    if sortingFcn is not None:
+                    if comparator is not None:
                         leftData = self.sourceModel().data(left, QtCore.Qt.ItemDataRole.DisplayRole)
                         rightData = self.sourceModel().data(right, QtCore.Qt.ItemDataRole.DisplayRole)
 
-                        result = sortingFcn(leftData, rightData)
+                        result = comparator(leftData, rightData)
                     else:
                         result = super().lessThan(left, right)
 
                     return result
             
-            def __init__(self, header:list, sortingFcns:list=None):
+            def __init__(self, header:list, comparators:list=None):
                 self.qWidget = QtWidgets.QTableView()
                 super().__init__(self.qWidget)
 
@@ -1225,8 +1229,8 @@ class Widgets:
                 self.qModel = QtGui.QStandardItemModel()
                 self.qModel.setHorizontalHeaderLabels(header)
 
-                if sortingFcns is not None:
-                    qProxy = Widgets.Basics.Table.INTERNAL_QSortFilterProxyModel(sortingFcns)
+                if comparators is not None:
+                    qProxy = Widgets.Basics.Table.INTERNAL_QSortFilterProxyModel(comparators)
                     qProxy.setSourceModel(self.qModel)
                 else:
                     qProxy = self.qModel
