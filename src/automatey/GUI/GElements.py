@@ -1708,6 +1708,18 @@ class Widgets:
                 '''
                 self.qWidget.addHighlight(color, addressRanges)
 
+            def clearHighlights(self):
+                '''
+                Clears all highlights.
+                '''
+                self.qWidget.clearHighlights()
+
+            def updateDisplayData(self, dataBytes:bytes, startAddress:int):
+                '''
+                Update the data(-bytes) displayed.
+                '''
+                self.qWidget.updateDisplayData(dataBytes, startAddress)
+
     class Complex:
 
         class ColorSelector(Widget):

@@ -270,14 +270,11 @@ class Custom:
             if not MathUtils.isPowerOfTwo(bytesPerAddress):
                 raise ExceptionUtils.ValidationError("Bytes-Per-Address must be a power of 2.")
 
-            self.dataBytes = dataBytes
             self.bytesPerLine = bytesPerLine
             self.bytesPerAddress = bytesPerAddress
-            self.offsetBytesCount = (startAddress % bytesPerLine)
-            self.startAddress = startAddress
-            self.endAddress = self.startAddress + len(self.dataBytes)
-            self.initialAddress = startAddress - self.offsetBytesCount
             self.headerBytes = range(self.bytesPerLine)
+
+            self.INTERNAL_updateData(dataBytes, startAddress)
 
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -293,6 +290,20 @@ class Custom:
             self.setFixedWidth(self.INTERNAL_calculateFixedWidth())
 
             self.highlights = []
+
+        def INTERNAL_updateData(self, dataBytes:bytes, startAddress:int):
+            self.dataBytes = dataBytes
+            self.offsetBytesCount = (startAddress % self.bytesPerLine)
+            self.startAddress = startAddress
+            self.endAddress = self.startAddress + len(self.dataBytes)
+            self.initialAddress = startAddress - self.offsetBytesCount
+
+        def INTERNAL_calculateFixedWidth(self):
+
+            marginCharacterCount = self.SPACES_BEFORE_ADDRESS + self.SPACES_AFTER_ADDRESS + self.SPACES_BETWEEN_DATA * (self.bytesPerLine - 1) + self.SPACES_AFTER_DATA
+            actualCharacterCount = 2 * (self.bytesPerAddress + self.bytesPerLine)
+
+            return self.characterWidth * (marginCharacterCount + actualCharacterCount)
 
         def addHighlight(self, color:ColorUtils.Color, addressRanges:list):
             '''
@@ -312,13 +323,6 @@ class Custom:
             '''
             self.highlights.clear()
 
-        def INTERNAL_calculateFixedWidth(self):
-
-            marginCharacterCount = self.SPACES_BEFORE_ADDRESS + self.SPACES_AFTER_ADDRESS + self.SPACES_BETWEEN_DATA * (self.bytesPerLine - 1) + self.SPACES_AFTER_DATA
-            actualCharacterCount = 2 * (self.bytesPerAddress + self.bytesPerLine)
-
-            return self.characterWidth * (marginCharacterCount + actualCharacterCount)
-
         def INTERNAL_updateScrollbars(self):
             totalLines = (len(self.dataBytes) + self.offsetBytesCount + self.bytesPerLine - 1) // self.bytesPerLine
             pageLines = (self.viewport().height() // self.lineHeight) - self.NON_DATA_LINES
@@ -329,6 +333,14 @@ class Custom:
             super().resizeEvent(event)
             self.INTERNAL_updateScrollbars()
 
+        def updateDisplayData(self, dataBytes:bytes, startAddress:int):
+            '''
+            Update the data(-bytes) displayed.
+            '''
+            self.INTERNAL_updateData(dataBytes, startAddress)
+            self.INTERNAL_updateScrollbars()
+            self.viewport().update()
+
         def INTERNAL_getHighlightColor(self, address) -> QtGui.QColor:
 
             color = None
@@ -337,8 +349,6 @@ class Custom:
                 for addressRange in highlight['address-ranges']:
                     if (address >= addressRange[0]) and (address < addressRange[1]):
                         color = highlight['color']
-
-                        print("Hlel")
             
             return color
 
