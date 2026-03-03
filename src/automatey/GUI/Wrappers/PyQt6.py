@@ -372,10 +372,6 @@ class Custom:
             
             painter = QtGui.QPainter(self.viewport())
 
-            # (!) Painter may not be active.
-            if not painter.isActive():
-                return
-
             palette = self.palette()
             backgroundColor = palette.color(palette.ColorRole.Base)
             foregroundColor = palette.color(palette.ColorRole.Text)
