@@ -250,18 +250,13 @@ class Custom:
 
             self.data = data
             self.bytesPerLine = bytesPerLine
-            self.setFont(QtGui.QFont("Courier New", 10))
+            
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+            self.setFont(QtGui.QFont("Courier New", 10))
             self.lineHeight = self.fontMetrics().height()
             self.charWidth = self.fontMetrics().horizontalAdvance("9")
-
-            self.INTERNAL_updateScrollbars()
-            self.viewport().update()
-
-        # --------------------------------------------------
-        # Scrollbar handling
-        # --------------------------------------------------
 
         def INTERNAL_updateScrollbars(self):
             totalLines = (len(self.data) + self.bytesPerLine - 1) // self.bytesPerLine
@@ -273,13 +268,15 @@ class Custom:
             super().resizeEvent(event)
             self.INTERNAL_updateScrollbars()
 
-        # --------------------------------------------------
-        # Painting
-        # --------------------------------------------------
-
         def paintEvent(self, event):
+            
             painter = QtGui.QPainter(self.viewport())
-            painter.fillRect(event.rect(), QtGui.QColor(30, 30, 30))
+
+            palette = self.palette()
+            backgroundColor = palette.color(palette.ColorRole.Base)
+            foregroundColor = palette.color(palette.ColorRole.Text)
+
+            painter.fillRect(event.rect(), backgroundColor)
 
             scrollbar = self.verticalScrollBar()
             first_line = scrollbar.value()
@@ -305,7 +302,7 @@ class Custom:
 
                 line_text = f"{address}  {hex_part:<47}  |{ascii_part}|"
 
-                painter.setPen(QtGui.QColor(220, 220, 220))
+                painter.setPen(foregroundColor)
                 painter.drawText(10, y + self.lineHeight - 2, line_text)
 
                 y += self.lineHeight
