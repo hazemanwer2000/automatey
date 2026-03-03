@@ -251,6 +251,13 @@ class Custom:
         Display byte(s) at specific address(es).
         '''
 
+        SPACES_BEFORE_ADDRESS = 1
+        SPACES_AFTER_ADDRESS = 2
+        SPACES_BETWEEN_DATA = 1
+        SPACES_AFTER_DATA = 3
+
+        HEADER_OFFSET = 0.5
+
         def __init__(self, dataBytes:bytes, startAddress:int, bytesPerLine:int=8, bytesPerAddress:int=4, parent=None):
             super().__init__(parent)
 
@@ -266,24 +273,26 @@ class Custom:
             self.offsetBytesCount = (startAddress % bytesPerLine)
             self.initialAddress = startAddress - self.offsetBytesCount
             self.header = ' '.join([f"{x:02}" for x in range(self.bytesPerLine)])
-            
+
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
             self.setFont(QtGui.QFont("Courier New", 10))
             self.lineHeight = self.fontMetrics().height()
-            self.charWidth = self.fontMetrics().horizontalAdvance("0")
+            self.characterWidth = self.fontMetrics().horizontalAdvance("0")
 
-            self.setFixedWidth(self.INTERAL_calculateFixedWidth())
+            # ? Offset(s).
+            self.dataHorizontalOffset = self.characterWidth * (self.SPACES_BEFORE_ADDRESS + (2 * self.bytesPerAddress) + self.SPACES_AFTER_ADDRESS)
+            self.addressHorizontalOffset = self.characterWidth * (self.SPACES_BEFORE_ADDRESS)
 
-        def INTERAL_calculateFixedWidth(self):
+            self.setFixedWidth(self.INTERNAL_calculateFixedWidth())
 
-            # Note: '3' for spaces before and after address.
-            # Note: '2' extra spaces to offset away from the vertical scroll-bar.
-            marginChars = 3 + 2 + self.bytesPerLine
-            actualChars = 2 * (self.bytesPerAddress + self.bytesPerLine)
+        def INTERNAL_calculateFixedWidth(self):
 
-            return self.charWidth * (marginChars + actualChars)
+            marginCharacterCount = self.SPACES_BEFORE_ADDRESS + self.SPACES_AFTER_ADDRESS + self.SPACES_BETWEEN_DATA * (self.bytesPerLine - 1) + self.SPACES_AFTER_DATA
+            actualCharacterCount = 2 * (self.bytesPerAddress + self.bytesPerLine)
+
+            return self.characterWidth * (marginCharacterCount + actualCharacterCount)
 
         def INTERNAL_updateScrollbars(self):
             totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
@@ -304,6 +313,9 @@ class Custom:
             backgroundColor = palette.color(palette.ColorRole.Base)
             foregroundColor = palette.color(palette.ColorRole.Text)
 
+            boldFont = self.font()
+            boldFont.setBold(True)
+
             painter.fillRect(event.rect(), backgroundColor)
 
             scrollbar = self.verticalScrollBar()
@@ -313,23 +325,27 @@ class Custom:
             totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
             lastLine = min(firstLine + pageLines, totalLines)
 
-            y = 0
+            # ? Paint header.
 
-            for line in range(firstLine - 1, lastLine):
+            painter.setPen(foregroundColor)
+            painter.drawText(self.dataHorizontalOffset, self.lineHeight, self.header)
+
+            # ? Paint data.
+
+            y = int(self.lineHeight * (1 + self.HEADER_OFFSET))
+
+            for line in range(firstLine, lastLine):
 
                 dataOffset = line * self.bytesPerLine
                 chunk = self.dataBytes[dataOffset:dataOffset + self.bytesPerLine]
 
-                if line < firstLine:
-                    txt_lineAddress = (self.bytesPerAddress * 2) * ' '
-                    txt_lineData = self.header
-                else:
-                    txt_lineAddress = f"{dataOffset:0{self.bytesPerAddress * 2}X}"
-                    txt_lineData = " ".join(f"{b:02X}" for b in chunk)
-
-                txt_line = f" {txt_lineAddress}  {txt_lineData}"
+                txt_lineAddress = f"{dataOffset:0{self.bytesPerAddress * 2}X}"
+                txt_lineData = " ".join(f"{b:02X}" for b in chunk)
 
                 painter.setPen(foregroundColor)
-                painter.drawText(0, y + self.lineHeight, txt_line)
+                painter.drawText(self.addressHorizontalOffset, y + self.lineHeight, txt_lineAddress)
+
+                painter.setPen(foregroundColor)
+                painter.drawText(self.dataHorizontalOffset, y + self.lineHeight, txt_lineData)
 
                 y += self.lineHeight
