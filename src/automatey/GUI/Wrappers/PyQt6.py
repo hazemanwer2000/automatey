@@ -308,6 +308,11 @@ class Custom:
             super().resizeEvent(event)
             self.INTERNAL_updateScrollbars()
 
+        def INTERNAL_getHighlightColor(self, address) -> QtGui.QColor:
+            if address == self.startAddress:
+                return QtGui.QColor('#ff7b00')
+            return None
+
         def paintEvent(self, event):
             
             painter = QtGui.QPainter(self.viewport())
@@ -358,8 +363,6 @@ class Custom:
 
                 # ? Paint data.
 
-                painter.setFont(defaultFont)
-
                 horizontalOffset = self.dataHorizontalOffset
 
                 for i in range(self.bytesPerLine):
@@ -370,6 +373,13 @@ class Custom:
 
                         dataByte = self.dataBytes[byteAddress - self.startAddress]
 
+                        byteFillColor = self.INTERNAL_getHighlightColor(byteAddress)
+                        if byteFillColor is not None:
+                            painter.fillRect(horizontalOffset, y - painter.fontMetrics().ascent() + self.lineHeight, self.characterWidth * 2, self.lineHeight - 1, byteFillColor)
+                            painter.setFont(boldFont)
+                        else:
+                            painter.setFont(defaultFont)
+                        
                         painter.drawText(horizontalOffset, y + self.lineHeight, f"{dataByte:02X}")
                     
                     horizontalOffset += self.characterWidth * (self.SPACES_BETWEEN_DATA + 2)
