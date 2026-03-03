@@ -265,6 +265,7 @@ class Custom:
             self.bytesPerAddress = bytesPerAddress
             self.offsetBytesCount = (startAddress % bytesPerLine)
             self.initialAddress = startAddress - self.offsetBytesCount
+            self.header = ' '.join([f"{x:02}" for x in range(self.bytesPerLine)])
             
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -286,7 +287,8 @@ class Custom:
 
         def INTERNAL_updateScrollbars(self):
             totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
-            pageLines = (self.viewport().height() // self.lineHeight) - 1
+            # Note: '2' is '1' for extra visual space, and '1' for header.
+            pageLines = (self.viewport().height() // self.lineHeight) - 2
             self.verticalScrollBar().setRange(0, max(0, totalLines - pageLines))
             self.verticalScrollBar().setPageStep(pageLines)
 
@@ -307,19 +309,23 @@ class Custom:
             scrollbar = self.verticalScrollBar()
 
             firstLine = scrollbar.value()
-            pageLines = (self.viewport().height() // self.lineHeight) - 1
+            pageLines = (self.viewport().height() // self.lineHeight) - 2
             totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
             lastLine = min(firstLine + pageLines, totalLines)
 
             y = 0
 
-            for line in range(firstLine, lastLine):
+            for line in range(firstLine - 1, lastLine):
 
                 dataOffset = line * self.bytesPerLine
                 chunk = self.dataBytes[dataOffset:dataOffset + self.bytesPerLine]
 
-                txt_lineAddress = f"{dataOffset:0{self.bytesPerAddress * 2}X}"
-                txt_lineData = " ".join(f"{b:02X}" for b in chunk)
+                if line < firstLine:
+                    txt_lineAddress = (self.bytesPerAddress * 2) * ' '
+                    txt_lineData = self.header
+                else:
+                    txt_lineAddress = f"{dataOffset:0{self.bytesPerAddress * 2}X}"
+                    txt_lineData = " ".join(f"{b:02X}" for b in chunk)
 
                 txt_line = f" {txt_lineAddress}  {txt_lineData}"
 
