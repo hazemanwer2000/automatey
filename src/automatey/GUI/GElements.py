@@ -1230,12 +1230,12 @@ class Widgets:
                 self.qModel.setHorizontalHeaderLabels(header)
 
                 if comparators is not None:
-                    qProxy = Widgets.Basics.Table.INTERNAL_QSortFilterProxyModel(comparators)
-                    qProxy.setSourceModel(self.qModel)
+                    self.qProxy = Widgets.Basics.Table.INTERNAL_QSortFilterProxyModel(comparators)
+                    self.qProxy.setSourceModel(self.qModel)
                 else:
-                    qProxy = self.qModel
+                    self.qProxy = self.qModel
 
-                self.qWidget.setModel(qProxy)
+                self.qWidget.setModel(self.qProxy)
 
                 # ? Enable sorting.
                 self.qWidget.setSortingEnabled(True)
@@ -1248,6 +1248,13 @@ class Widgets:
 
             def removeAllRows(self):
                 self.qModel.clear()
+
+            def resizeToContents(self):
+                self.qWidget.resizeColumnsToContents()
+                self.qWidget.resizeRowsToContents()
+
+            def sort(self, columnIdx:int, isAscending:bool=True):
+                self.qProxy.sort(columnIdx, (QtCore.Qt.SortOrder.AscendingOrder if isAscending else QtCore.Qt.SortOrder.DescendingOrder))
 
         class VideoRenderer(Widget, INTERNAL.EventManager):
             '''
