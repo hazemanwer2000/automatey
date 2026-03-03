@@ -47,6 +47,9 @@ def findNearestValues(value, orderedValues):
         
     return (x, y)
 
+def isPowerOfTwo(n):
+    return (n != 0) and ((n & (n-1)) == 0)
+
 class MediaSpecific:
 
     @staticmethod

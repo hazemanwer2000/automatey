@@ -4,6 +4,9 @@ import PyQt6.QtWidgets as QtWidgets
 import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as QtCore
 
+import automatey.Utils.ExceptionUtils as ExceptionUtils
+import automatey.Utils.MathUtils as MathUtils
+
 class QThread(QtCore.QThread):
     
     notifySignal = QtCore.pyqtSignal(dict)
@@ -244,52 +247,45 @@ class QApplication(QtWidgets.QApplication):
 class Custom:
 
     class QHexViewer(QtWidgets.QAbstractScrollArea):
+        '''
+        Display byte(s) at specific address(es).
+        '''
 
-        def __init__(self, data:bytes, bytesPerLine:int=8, parent=None):
+        def __init__(self, dataBytes:bytes, startAddress:int, bytesPerLine:int=8, bytesPerAddress:int=4, parent=None):
             super().__init__(parent)
 
-            self.data = data
+            if not MathUtils.isPowerOfTwo(bytesPerLine):
+                raise ExceptionUtils.ValidationError("Bytes-Per-Line must be a power of 2.")
+            
+            if not MathUtils.isPowerOfTwo(bytesPerAddress):
+                raise ExceptionUtils.ValidationError("Bytes-Per-Address must be a power of 2.")
+
+            self.dataBytes = dataBytes
             self.bytesPerLine = bytesPerLine
+            self.bytesPerAddress = bytesPerAddress
+            self.offsetBytesCount = (startAddress % bytesPerLine)
+            self.initialAddress = startAddress - self.offsetBytesCount
             
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
             self.setFont(QtGui.QFont("Courier New", 10))
             self.lineHeight = self.fontMetrics().height()
-            self.charWidth = self.fontMetrics().horizontalAdvance("9")
+            self.charWidth = self.fontMetrics().horizontalAdvance("0")
 
-            self.setFixedWidth(self.calculateRequiredWidth())
+            self.setFixedWidth(self.INTERAL_calculateFixedWidth())
 
-        def calculateRequiredWidth(self):
-            metrics = self.fontMetrics()
-            char_width = metrics.horizontalAdvance("9")
+        def INTERAL_calculateFixedWidth(self):
 
-            address_chars = 8
-            spacing_after_address = 2
+            # Note: '3' for spaces before and after address.
+            # Note: '2' extra spaces to offset away from the vertical scroll-bar.
+            marginChars = 3 + 2 + self.bytesPerLine
+            actualChars = 2 * (self.bytesPerAddress + self.bytesPerLine)
 
-            hex_chars = self.bytesPerLine * 2
-            hex_spaces = self.bytesPerLine - 1
-
-            spacing_before_ascii = 2
-            ascii_chars = self.bytesPerLine
-            ascii_pipes = 2
-
-            total_chars = (
-                address_chars
-                + spacing_after_address
-                + hex_chars
-                + hex_spaces
-                + spacing_before_ascii
-                + ascii_chars
-                + ascii_pipes
-            )
-
-            margins = 20  # left + right
-
-            return total_chars * char_width + margins
+            return self.charWidth * (marginChars + actualChars)
 
         def INTERNAL_updateScrollbars(self):
-            totalLines = (len(self.data) + self.bytesPerLine - 1) // self.bytesPerLine
+            totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
             pageLines = self.viewport().height() // self.lineHeight
             self.verticalScrollBar().setRange(0, max(0, totalLines - pageLines))
             self.verticalScrollBar().setPageStep(pageLines)
@@ -309,30 +305,25 @@ class Custom:
             painter.fillRect(event.rect(), backgroundColor)
 
             scrollbar = self.verticalScrollBar()
-            first_line = scrollbar.value()
 
-            visible_lines = self.viewport().height() // self.lineHeight
-            last_line = min(
-                first_line + visible_lines,
-                (len(self.data) + self.bytesPerLine - 1) // self.bytesPerLine,
-            )
+            firstLine = scrollbar.value()
+            visibleLines = self.viewport().height() // self.lineHeight
+            totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
+            lastLine = min(firstLine + visibleLines, totalLines)
 
             y = 0
 
-            for line in range(first_line, last_line):
-                offset = line * self.bytesPerLine
-                chunk = self.data[offset:offset + self.bytesPerLine]
+            for line in range(firstLine, lastLine):
+                
+                dataOffset = line * self.bytesPerLine
+                chunk = self.dataBytes[dataOffset:dataOffset + self.bytesPerLine]
 
-                address = f"{offset:08X}"
-                hex_part = " ".join(f"{b:02X}" for b in chunk)
-                ascii_part = "".join(
-                    chr(b) if 32 <= b <= 126 else "."
-                    for b in chunk
-                )
+                txt_lineAddress = f"{dataOffset:0{self.bytesPerAddress * 2}X}"
+                txt_lineData = " ".join(f"{b:02X}" for b in chunk)
 
-                line_text = f"{address}  {hex_part:<47}  |{ascii_part}|"
+                txt_line = f" {txt_lineAddress}  {txt_lineData}"
 
                 painter.setPen(foregroundColor)
-                painter.drawText(10, y + self.lineHeight - 2, line_text)
+                painter.drawText(0, y + self.lineHeight, txt_line)
 
                 y += self.lineHeight
