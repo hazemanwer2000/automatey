@@ -341,6 +341,22 @@ class Custom:
             self.INTERNAL_updateScrollbars()
             self.viewport().update()
 
+        def seekAddress(self, address:int):
+            '''
+            Seek to a specific address.
+            '''
+
+            if (address < self.startAddress) or (address >= self.endAddress):
+                raise ExceptionUtils.ValidationError(f"Seek-Address is out-of-range: {hex(address)}")
+
+            lineAddress = address - (address % self.bytesPerLine)
+            line = (lineAddress - self.initialAddress) // self.bytesPerLine
+
+            scrollbar = self.verticalScrollBar()
+            scrollbar.setValue(line)
+
+            self.viewport().update()
+
         def INTERNAL_getHighlightColor(self, address) -> QtGui.QColor:
 
             color = None

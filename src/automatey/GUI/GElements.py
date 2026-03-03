@@ -1719,6 +1719,9 @@ class Widgets:
                 Update the data(-bytes) displayed.
                 '''
                 self.qWidget.updateDisplayData(dataBytes, startAddress)
+            
+            def seekAddress(self, address:int):
+                self.qWidget.seekAddress(address)
 
     class Complex:
 
