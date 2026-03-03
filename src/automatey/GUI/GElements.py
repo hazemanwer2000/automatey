@@ -1208,8 +1208,14 @@ class Widgets:
                 # ? Enable sorting.
                 self.qWidget.setSortingEnabled(True)
 
+                # ? Disable editing.
+                self.qWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+
             def addRow(self, row:list):
                 self.qModel.appendRow([QtGui.QStandardItem(element) for element in row])
+
+            def removeAllRows(self):
+                self.qModel.clear()
 
         class VideoRenderer(Widget, INTERNAL.EventManager):
             '''
