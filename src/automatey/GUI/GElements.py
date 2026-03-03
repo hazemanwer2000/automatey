@@ -1699,6 +1699,15 @@ class Widgets:
                 super().__init__(self.qWidget)
                 INTERNAL.EventManager.__init__(self)
 
+            def addHighlight(self, color:ColorUtils.Color, addressRanges:list):
+                '''
+                Specify a highlight color to apply on a number of address range(s).
+
+                Note that,
+                - Address-range(s) are start-inclusive, and end-exclusive.
+                '''
+                self.qWidget.addHighlight(color, addressRanges)
+
     class Complex:
 
         class ColorSelector(Widget):

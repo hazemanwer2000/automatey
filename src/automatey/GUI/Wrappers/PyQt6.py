@@ -6,6 +6,7 @@ import PyQt6.QtCore as QtCore
 
 import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Utils.MathUtils as MathUtils
+import automatey.Utils.ColorUtils as ColorUtils
 
 class QThread(QtCore.QThread):
     
@@ -291,6 +292,26 @@ class Custom:
 
             self.setFixedWidth(self.INTERNAL_calculateFixedWidth())
 
+            self.highlights = []
+
+        def addHighlight(self, color:ColorUtils.Color, addressRanges:list):
+            '''
+            Specify a highlight color to apply on a number of address range(s).
+
+            Note that,
+            - Address-range(s) are start-inclusive, and end-exclusive.
+            '''
+            self.highlights.append({
+                'color' : QtGui.QColor('#' + color.asHEX()),
+                'address-ranges' : addressRanges
+            })
+
+        def clearHighlights(self):
+            '''
+            Clears all highlights.
+            '''
+            self.highlights.clear()
+
         def INTERNAL_calculateFixedWidth(self):
 
             marginCharacterCount = self.SPACES_BEFORE_ADDRESS + self.SPACES_AFTER_ADDRESS + self.SPACES_BETWEEN_DATA * (self.bytesPerLine - 1) + self.SPACES_AFTER_DATA
@@ -309,9 +330,17 @@ class Custom:
             self.INTERNAL_updateScrollbars()
 
         def INTERNAL_getHighlightColor(self, address) -> QtGui.QColor:
-            if address == self.startAddress:
-                return QtGui.QColor('#ff7b00')
-            return None
+
+            color = None
+
+            for highlight in self.highlights:
+                for addressRange in highlight['address-ranges']:
+                    if (address >= addressRange[0]) and (address < addressRange[1]):
+                        color = highlight['color']
+
+                        print("Hlel")
+            
+            return color
 
         def paintEvent(self, event):
             
