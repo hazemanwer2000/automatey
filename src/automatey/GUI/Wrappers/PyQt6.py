@@ -286,7 +286,7 @@ class Custom:
 
         def INTERNAL_updateScrollbars(self):
             totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
-            pageLines = self.viewport().height() // self.lineHeight
+            pageLines = (self.viewport().height() // self.lineHeight) - 1
             self.verticalScrollBar().setRange(0, max(0, totalLines - pageLines))
             self.verticalScrollBar().setPageStep(pageLines)
 
@@ -307,14 +307,14 @@ class Custom:
             scrollbar = self.verticalScrollBar()
 
             firstLine = scrollbar.value()
-            visibleLines = self.viewport().height() // self.lineHeight
+            pageLines = (self.viewport().height() // self.lineHeight) - 1
             totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
-            lastLine = min(firstLine + visibleLines, totalLines)
+            lastLine = min(firstLine + pageLines, totalLines)
 
             y = 0
 
             for line in range(firstLine, lastLine):
-                
+
                 dataOffset = line * self.bytesPerLine
                 chunk = self.dataBytes[dataOffset:dataOffset + self.bytesPerLine]
 
