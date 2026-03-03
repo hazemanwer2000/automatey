@@ -1191,6 +1191,26 @@ class Widgets:
                 '''
                 return self.qTableWidget.rowCount()
 
+        class Table(Widget):
+            '''
+            A table to view and sort data.
+            '''
+            
+            def __init__(self, header:list):
+                self.qWidget = QtWidgets.QTableView()
+                super().__init__(self.qWidget)
+
+                # ? Create model.
+                self.qModel = QtGui.QStandardItemModel()
+                self.qModel.setHorizontalHeaderLabels(header)
+                self.qWidget.setModel(self.qModel)
+
+                # ? Enable sorting.
+                self.qWidget.setSortingEnabled(True)
+
+            def addRow(self, row:list):
+                self.qModel.appendRow([QtGui.QStandardItem(element) for element in row])
+
         class VideoRenderer(Widget, INTERNAL.EventManager):
             '''
             Renders a video.
