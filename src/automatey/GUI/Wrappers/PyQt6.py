@@ -299,7 +299,7 @@ class Custom:
             return self.characterWidth * (marginCharacterCount + actualCharacterCount)
 
         def INTERNAL_updateScrollbars(self):
-            totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
+            totalLines = (len(self.dataBytes) + self.offsetBytesCount + self.bytesPerLine - 1) // self.bytesPerLine
             pageLines = (self.viewport().height() // self.lineHeight) - self.NON_DATA_LINES
             self.verticalScrollBar().setRange(0, max(0, totalLines - pageLines))
             self.verticalScrollBar().setPageStep(pageLines)
@@ -324,10 +324,10 @@ class Custom:
 
             firstLine = scrollbar.value()
             pageLines = (self.viewport().height() // self.lineHeight) - self.NON_DATA_LINES
-            totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
+            totalLines = (len(self.dataBytes) + self.offsetBytesCount + self.bytesPerLine - 1) // self.bytesPerLine
             lastLine = min(firstLine + pageLines, totalLines)
 
-            # ? Paint.
+            # ? Paint fill.
 
             painter.fillRect(event.rect(), backgroundColor)
 
@@ -366,9 +366,9 @@ class Custom:
 
                     byteAddress = lineAddress + i
 
-                    if (byteAddress < self.endAddress):
+                    if (byteAddress < self.endAddress) and (byteAddress >= self.startAddress):
 
-                        dataByte = self.dataBytes[byteAddress - self.initialAddress]
+                        dataByte = self.dataBytes[byteAddress - self.startAddress]
 
                         painter.drawText(horizontalOffset, y + self.lineHeight, f"{dataByte:02X}")
                     
