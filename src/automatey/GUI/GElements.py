@@ -1689,6 +1689,16 @@ class Widgets:
                     '''
                     pass
 
+        class HexViewer(Widget, INTERNAL.EventManager):
+            '''
+            Display byte(s) at specific address(es).
+            '''
+
+            def __init__(self, data:bytes, bytesPerLine:int=8):
+                self.qWidget = PyQt6Wrapper.Custom.QHexViewer(data, bytesPerLine)
+                super().__init__(self.qWidget)
+                INTERNAL.EventManager.__init__(self)
+
     class Complex:
 
         class ColorSelector(Widget):

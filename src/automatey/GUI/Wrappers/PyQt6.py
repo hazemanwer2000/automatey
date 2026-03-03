@@ -240,3 +240,72 @@ class QApplication(QtWidgets.QApplication):
 
         self.INTERNAL_qStatusBarEventFilter = QStatusBarEventFilter()
         self.installEventFilter(self.INTERNAL_qStatusBarEventFilter)
+
+class Custom:
+
+    class QHexViewer(QtWidgets.QAbstractScrollArea):
+
+        def __init__(self, data:bytes, bytesPerLine:int=8, parent=None):
+            super().__init__(parent)
+
+            self.data = data
+            self.bytesPerLine = bytesPerLine
+            self.setFont(QtGui.QFont("Courier New", 10))
+            self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+            self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            self.lineHeight = self.fontMetrics().height()
+            self.charWidth = self.fontMetrics().horizontalAdvance("9")
+
+            self.INTERNAL_updateScrollbars()
+            self.viewport().update()
+
+        # --------------------------------------------------
+        # Scrollbar handling
+        # --------------------------------------------------
+
+        def INTERNAL_updateScrollbars(self):
+            totalLines = (len(self.data) + self.bytesPerLine - 1) // self.bytesPerLine
+            pageLines = self.viewport().height() // self.lineHeight
+            self.verticalScrollBar().setRange(0, max(0, totalLines - pageLines))
+            self.verticalScrollBar().setPageStep(pageLines)
+
+        def resizeEvent(self, event):
+            super().resizeEvent(event)
+            self.INTERNAL_updateScrollbars()
+
+        # --------------------------------------------------
+        # Painting
+        # --------------------------------------------------
+
+        def paintEvent(self, event):
+            painter = QtGui.QPainter(self.viewport())
+            painter.fillRect(event.rect(), QtGui.QColor(30, 30, 30))
+
+            scrollbar = self.verticalScrollBar()
+            first_line = scrollbar.value()
+
+            visible_lines = self.viewport().height() // self.lineHeight
+            last_line = min(
+                first_line + visible_lines,
+                (len(self.data) + self.bytesPerLine - 1) // self.bytesPerLine,
+            )
+
+            y = 0
+
+            for line in range(first_line, last_line):
+                offset = line * self.bytesPerLine
+                chunk = self.data[offset:offset + self.bytesPerLine]
+
+                address = f"{offset:08X}"
+                hex_part = " ".join(f"{b:02X}" for b in chunk)
+                ascii_part = "".join(
+                    chr(b) if 32 <= b <= 126 else "."
+                    for b in chunk
+                )
+
+                line_text = f"{address}  {hex_part:<47}  |{ascii_part}|"
+
+                painter.setPen(QtGui.QColor(220, 220, 220))
+                painter.drawText(10, y + self.lineHeight - 2, line_text)
+
+                y += self.lineHeight
