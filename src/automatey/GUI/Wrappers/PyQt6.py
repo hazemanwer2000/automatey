@@ -258,6 +258,36 @@ class Custom:
             self.lineHeight = self.fontMetrics().height()
             self.charWidth = self.fontMetrics().horizontalAdvance("9")
 
+            self.setFixedWidth(self.calculateRequiredWidth())
+
+        def calculateRequiredWidth(self):
+            metrics = self.fontMetrics()
+            char_width = metrics.horizontalAdvance("9")
+
+            address_chars = 8
+            spacing_after_address = 2
+
+            hex_chars = self.bytesPerLine * 2
+            hex_spaces = self.bytesPerLine - 1
+
+            spacing_before_ascii = 2
+            ascii_chars = self.bytesPerLine
+            ascii_pipes = 2
+
+            total_chars = (
+                address_chars
+                + spacing_after_address
+                + hex_chars
+                + hex_spaces
+                + spacing_before_ascii
+                + ascii_chars
+                + ascii_pipes
+            )
+
+            margins = 20  # left + right
+
+            return total_chars * char_width + margins
+
         def INTERNAL_updateScrollbars(self):
             totalLines = (len(self.data) + self.bytesPerLine - 1) // self.bytesPerLine
             pageLines = self.viewport().height() // self.lineHeight
