@@ -254,11 +254,13 @@ class Custom:
         SPACES_BEFORE_ADDRESS = 1
         SPACES_AFTER_ADDRESS = 2
         SPACES_BETWEEN_DATA = 1
-        SPACES_AFTER_DATA = 3
+        SPACES_AFTER_DATA = 4
 
         HEADER_OFFSET = 0.5
+        
+        NON_DATA_LINES = 2
 
-        def __init__(self, dataBytes:bytes, startAddress:int, bytesPerLine:int=8, bytesPerAddress:int=4, parent=None):
+        def __init__(self, dataBytes:bytes, startAddress:int, bytesPerLine:int, bytesPerAddress:int, parent=None):
             super().__init__(parent)
 
             if not MathUtils.isPowerOfTwo(bytesPerLine):
@@ -271,8 +273,10 @@ class Custom:
             self.bytesPerLine = bytesPerLine
             self.bytesPerAddress = bytesPerAddress
             self.offsetBytesCount = (startAddress % bytesPerLine)
+            self.startAddress = startAddress
+            self.endAddress = self.startAddress + len(self.dataBytes)
             self.initialAddress = startAddress - self.offsetBytesCount
-            self.header = ' '.join([f"{x:02}" for x in range(self.bytesPerLine)])
+            self.headerBytes = range(self.bytesPerLine)
 
             self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -296,8 +300,7 @@ class Custom:
 
         def INTERNAL_updateScrollbars(self):
             totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
-            # Note: '2' is '1' for extra visual space, and '1' for header.
-            pageLines = (self.viewport().height() // self.lineHeight) - 2
+            pageLines = (self.viewport().height() // self.lineHeight) - self.NON_DATA_LINES
             self.verticalScrollBar().setRange(0, max(0, totalLines - pageLines))
             self.verticalScrollBar().setPageStep(pageLines)
 
@@ -320,7 +323,7 @@ class Custom:
             scrollbar = self.verticalScrollBar()
 
             firstLine = scrollbar.value()
-            pageLines = (self.viewport().height() // self.lineHeight) - 2
+            pageLines = (self.viewport().height() // self.lineHeight) - self.NON_DATA_LINES
             totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
             lastLine = min(firstLine + pageLines, totalLines)
 
@@ -333,24 +336,42 @@ class Custom:
             # ? ? Paint header.
 
             painter.setFont(boldFont)
-            painter.drawText(self.dataHorizontalOffset, self.lineHeight, self.header)
 
-            # ? ? Paint data.
+            horizontalOffset = self.dataHorizontalOffset
+            for headerByte in self.headerBytes:
+                painter.drawText(horizontalOffset, self.lineHeight, f"{headerByte:02X}")
+                horizontalOffset += self.characterWidth * (self.SPACES_BETWEEN_DATA + 2)
+
+            # ? ? Paint lines.
 
             y = int(self.lineHeight * (1 + self.HEADER_OFFSET))
 
             for line in range(firstLine, lastLine):
 
-                dataOffset = line * self.bytesPerLine
-                chunk = self.dataBytes[dataOffset:dataOffset + self.bytesPerLine]
+                # ? Paint address.
 
-                textLineAddress = f"{dataOffset:0{self.bytesPerAddress * 2}X}"
-                textLineData = " ".join(f"{b:02X}" for b in chunk)
+                lineAddress = self.initialAddress + (line * self.bytesPerLine)
+                textLineAddress = f"{lineAddress:0{self.bytesPerAddress * 2}X}"
 
                 painter.setFont(boldFont)
                 painter.drawText(self.addressHorizontalOffset, y + self.lineHeight, textLineAddress)
 
+                # ? Paint data.
+
                 painter.setFont(defaultFont)
-                painter.drawText(self.dataHorizontalOffset, y + self.lineHeight, textLineData)
+
+                horizontalOffset = self.dataHorizontalOffset
+
+                for i in range(self.bytesPerLine):
+
+                    byteAddress = lineAddress + i
+
+                    if (byteAddress < self.endAddress):
+
+                        dataByte = self.dataBytes[byteAddress - self.initialAddress]
+
+                        painter.drawText(horizontalOffset, y + self.lineHeight, f"{dataByte:02X}")
+                    
+                    horizontalOffset += self.characterWidth * (self.SPACES_BETWEEN_DATA + 2)
 
                 y += self.lineHeight

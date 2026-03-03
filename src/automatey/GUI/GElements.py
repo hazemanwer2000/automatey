@@ -1694,8 +1694,8 @@ class Widgets:
             Display byte(s) at specific address(es).
             '''
 
-            def __init__(self, data:bytes, bytesPerLine:int=8):
-                self.qWidget = PyQt6Wrapper.Custom.QHexViewer(data, bytesPerLine)
+            def __init__(self, dataBytes:bytes, startAddress:int, bytesPerLine:int=8, bytesPerAddress:int=4):
+                self.qWidget = PyQt6Wrapper.Custom.QHexViewer(dataBytes, startAddress, bytesPerLine, bytesPerAddress)
                 super().__init__(self.qWidget)
                 INTERNAL.EventManager.__init__(self)
 
