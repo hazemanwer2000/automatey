@@ -313,10 +313,9 @@ class Custom:
             backgroundColor = palette.color(palette.ColorRole.Base)
             foregroundColor = palette.color(palette.ColorRole.Text)
 
+            defaultFont = self.font()
             boldFont = self.font()
             boldFont.setBold(True)
-
-            painter.fillRect(event.rect(), backgroundColor)
 
             scrollbar = self.verticalScrollBar()
 
@@ -325,12 +324,18 @@ class Custom:
             totalLines = (len(self.dataBytes) + self.bytesPerLine - 1) // self.bytesPerLine
             lastLine = min(firstLine + pageLines, totalLines)
 
-            # ? Paint header.
+            # ? Paint.
+
+            painter.fillRect(event.rect(), backgroundColor)
 
             painter.setPen(foregroundColor)
+
+            # ? ? Paint header.
+
+            painter.setFont(boldFont)
             painter.drawText(self.dataHorizontalOffset, self.lineHeight, self.header)
 
-            # ? Paint data.
+            # ? ? Paint data.
 
             y = int(self.lineHeight * (1 + self.HEADER_OFFSET))
 
@@ -339,13 +344,13 @@ class Custom:
                 dataOffset = line * self.bytesPerLine
                 chunk = self.dataBytes[dataOffset:dataOffset + self.bytesPerLine]
 
-                txt_lineAddress = f"{dataOffset:0{self.bytesPerAddress * 2}X}"
-                txt_lineData = " ".join(f"{b:02X}" for b in chunk)
+                textLineAddress = f"{dataOffset:0{self.bytesPerAddress * 2}X}"
+                textLineData = " ".join(f"{b:02X}" for b in chunk)
 
-                painter.setPen(foregroundColor)
-                painter.drawText(self.addressHorizontalOffset, y + self.lineHeight, txt_lineAddress)
+                painter.setFont(boldFont)
+                painter.drawText(self.addressHorizontalOffset, y + self.lineHeight, textLineAddress)
 
-                painter.setPen(foregroundColor)
-                painter.drawText(self.dataHorizontalOffset, y + self.lineHeight, txt_lineData)
+                painter.setFont(defaultFont)
+                painter.drawText(self.dataHorizontalOffset, y + self.lineHeight, textLineData)
 
                 y += self.lineHeight
