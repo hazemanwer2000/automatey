@@ -1286,9 +1286,7 @@ class Widgets:
                 '''
                 Get cell.
                 '''
-                qItem = self.qWidget.item(rowIdx, colIdx)
-                text = qItem.text().strip() if (qItem != None) else ''
-                return text
+                return self.qModel.data(self.qModel.index(rowIdx, colIdx), QtCore.Qt.ItemDataRole.DisplayRole)
 
             def addRow(self, row:list):
                 self.qModel.appendRow([QtGui.QStandardItem(element) for element in row])
