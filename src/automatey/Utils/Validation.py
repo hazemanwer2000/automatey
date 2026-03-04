@@ -15,6 +15,17 @@ def asInt(value) -> int:
         raise ExceptionUtils.ValidationError('Failed to convert to integer.')
     return result
 
+def asIntBase16(value:str) -> int:
+    
+    try:
+        if value[0:2].lower() != '0x':
+            raise Exception()
+        result = int(value, 16)
+    except:
+        raise ExceptionUtils.ValidationError('Failed to convert to integer (base-16).')
+    
+    return result
+
 def asBool(value) -> bool:
     '''
     Note,
