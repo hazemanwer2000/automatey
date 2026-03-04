@@ -2701,8 +2701,8 @@ class StandardDialog:
                 qMsgBox.setWindowTitle(title)
                 qMsgBox.setText(msg)
                 qMsgBox.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
-                qMsgBox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
                 qMsgBox.setIcon(qIcon)
+                qMsgBox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
                 qMsgBox.exec()
         
             def Error(msg:str):
@@ -2713,6 +2713,18 @@ class StandardDialog:
 
             def Information(msg:str):
                 StandardDialog.Message.Announce.INTERNAL_Announce('Info', msg, QtWidgets.QMessageBox.Icon.Question)
+
+        class Ask:
+
+            def Confirm(title:str, msg:str):
+                qMsgBox = QtWidgets.QMessageBox(None)
+                qMsgBox.setWindowTitle(title)
+                qMsgBox.setText(msg)
+                qMsgBox.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
+                qMsgBox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+                qMsgBox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No)
+                qMsgBox.setDefaultButton(QtWidgets.QMessageBox.StandardButton.No)
+                return qMsgBox.exec() == QtWidgets.QMessageBox.StandardButton.Yes
 
     class BackgroundActivity:
         '''
