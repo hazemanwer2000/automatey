@@ -1252,6 +1252,7 @@ class Widgets:
                     'row-index' : 0,
                     'column-index' : 0,
                 }
+                self.contextMenuConditional = None
 
                 # ? Disable 'row-index' column.
                 self.qWidget.verticalHeader().setVisible(False)
@@ -1264,7 +1265,8 @@ class Widgets:
                     if qIndex.isValid():
                         self.contextInfo['row-index'] = qIndex.row()
                         self.contextInfo['column-index'] = qIndex.column()
-                        self.qContextMenu.exec(self.qWidget.viewport().mapToGlobal(pos))
+                        if (self.contextMenuConditional is None) or self.contextMenuConditional():
+                            self.qContextMenu.exec(self.qWidget.viewport().mapToGlobal(pos))
 
             def getContextInfo(self) -> dict:
                 '''
@@ -1276,13 +1278,16 @@ class Widgets:
                 '''
                 return self.contextInfo
 
-            def setContextMenu(self, menu:GUtils.Menu):
+            def setContextMenu(self, menu:GUtils.Menu, conditional=None):
                 '''
                 Set context menu.
                 
-                Note that, it is shown only if on a cell, and cell is not empty.
+                Note that,
+                - it is shown only if on a cell, and cell is not empty.
+                - `conditional` is called (if not `None`) before menu is shown.
                 '''
                 self.qContextMenu = QtWidgets.QMenu()
+                self.contextMenuConditional = conditional
                 menu.INTERNAL_instantiate(self.qContextMenu, self.qWidget)
 
             def getCell(self, rowIdx:int, colIdx:int):
