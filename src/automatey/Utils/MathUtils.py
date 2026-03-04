@@ -47,8 +47,13 @@ def findNearestValues(value, orderedValues):
         
     return (x, y)
 
-def isPowerOfTwo(n):
-    return (n != 0) and ((n & (n-1)) == 0)
+class Integral:
+
+    def ceilToMultiple(value:int, multiple:int):
+        return ((value + multiple - 1) // multiple) * multiple
+    
+    def isPowerOfTwo(n:int):
+        return (n != 0) and ((n & (n-1)) == 0)
 
 class MediaSpecific:
 

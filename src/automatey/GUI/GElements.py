@@ -1858,10 +1858,10 @@ class Widgets:
                 def __init__(self, dataBytes:bytes, startAddress:int, bytesPerLine:int, bytesPerAddress:int, parent=None):
                     super().__init__(parent)
 
-                    if not MathUtils.isPowerOfTwo(bytesPerLine):
+                    if not MathUtils.Integral.isPowerOfTwo(bytesPerLine):
                         raise ExceptionUtils.ValidationError("Bytes-Per-Line must be a power of 2.")
                     
-                    if not MathUtils.isPowerOfTwo(bytesPerAddress):
+                    if not MathUtils.Integral.isPowerOfTwo(bytesPerAddress):
                         raise ExceptionUtils.ValidationError("Bytes-Per-Address must be a power of 2.")
 
                     self.bytesPerLine = bytesPerLine
