@@ -1130,11 +1130,11 @@ class Widgets:
             def INTERNAL_contextMenuEvent(self, pos:QtCore.QPoint):
 
                 if self.qContextMenu != None:
-                    item = self.qTableWidget.itemAt(pos)
+                    qItem = self.qTableWidget.itemAt(pos)
                     # ? If triggered on a non-empty cell. 
-                    if item != None:
-                        self.contextInfo['row-index'] = item.row()
-                        self.contextInfo['column-index'] = item.column()
+                    if qItem != None:
+                        self.contextInfo['row-index'] = qItem.row()
+                        self.contextInfo['column-index'] = qItem.column()
                         self.qContextMenu.exec(self.qTableWidget.viewport().mapToGlobal(pos))
 
             def getContextInfo(self) -> dict:
@@ -1142,8 +1142,8 @@ class Widgets:
                 Context-Info is meant to be fetched by the user, within a context-menu handler. 
                 
                 Returns,
-                - `row`: Row of relevant cell.
-                - `column`: Column of relevant cell.
+                - `row-index`: Row of relevant cell.
+                - `column-index`: Column of relevant cell.
                 '''
                 return self.contextInfo
 
@@ -1242,6 +1242,53 @@ class Widgets:
 
                 # ? Disable editing.
                 self.qWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+
+                # ? Setup context-menu.
+                self.qWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+                self.qWidget.customContextMenuRequested.connect(self.INTERNAL_contextMenuEvent)
+                self.qContextMenu:QtWidgets.QMenu = None
+                # ? ? Context-Info is meant to be fetched by the user, within a context-menu handler. 
+                self.contextInfo = {
+                    'row-index' : 0,
+                    'column-index' : 0,
+                }
+
+            def INTERNAL_contextMenuEvent(self, pos:QtCore.QPoint):
+
+                if self.qContextMenu != None:
+                    qIndex = self.qWidget.indexAt(pos)
+                    # ? If triggered on a non-empty cell. 
+                    if qIndex.isValid():
+                        self.contextInfo['row-index'] = qIndex.row()
+                        self.contextInfo['column-index'] = qIndex.column()
+                        self.qContextMenu.exec(self.qWidget.viewport().mapToGlobal(pos))
+
+            def getContextInfo(self) -> dict:
+                '''
+                Context-Info is meant to be fetched by the user, within a context-menu handler. 
+                
+                Returns,
+                - `row-index`: Row of relevant cell.
+                - `column-index`: Column of relevant cell.
+                '''
+                return self.contextInfo
+
+            def setContextMenu(self, menu:GUtils.Menu):
+                '''
+                Set context menu.
+                
+                Note that, it is shown only if on a cell, and cell is not empty.
+                '''
+                self.qContextMenu = QtWidgets.QMenu()
+                menu.INTERNAL_instantiate(self.qContextMenu, self.qWidget)
+
+            def getCell(self, rowIdx:int, colIdx:int):
+                '''
+                Get cell.
+                '''
+                qItem = self.qWidget.item(rowIdx, colIdx)
+                text = qItem.text().strip() if (qItem != None) else ''
+                return text
 
             def addRow(self, row:list):
                 self.qModel.appendRow([QtGui.QStandardItem(element) for element in row])
