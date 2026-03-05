@@ -1472,6 +1472,10 @@ class Widgets:
                 newPosition = self.getPosition() - skipTime
                 self.seekPosition(newPosition)
 
+            def skipToNextFrame(self):
+                if not self.isPlaying():
+                    self.player.next_frame()
+
             def adjustVolume(self, delta:int):
                 '''
                 Adjust volume (0-100). Value is clamped.
@@ -2144,6 +2148,8 @@ class Widgets:
                 self.renderer.setEventHandler(GUtils.EventHandlers.KeyPressEventHandler({
                     AbstractInput.Key.Space: self.togglePlay,
                     AbstractInput.Key.Letter_M: self.toggleMute,
+
+                    AbstractInput.Key.BackwardSlash: self.skipToNextFrame,
                     
                     AbstractInput.Key.Up: lambda: self.adjustVolume(Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
                     AbstractInput.Key.Down: lambda: self.adjustVolume(-1 * Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
@@ -2199,6 +2205,9 @@ class Widgets:
                 Load default video.
                 '''
                 self.load(Widgets.Complex.VideoPlayer.Constants['Load-Default'])
+
+            def skipToNextFrame(self):
+                self.renderer.skipToNextFrame()
 
             def seekForward(self, skipTime:TimeUtils.Time):
                 self.renderer.seekForward(skipTime)
