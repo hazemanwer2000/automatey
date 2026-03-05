@@ -1347,6 +1347,9 @@ class Widgets:
                 self.qWidget.setMouseTracking(True)
                 self.lastMousePosition = (1, 1)
                 self.qWidget.wheelEventFcn = self.INTERNAL_wheelEvent
+
+                # ? Currently loaded file.
+                self.f_video = None
             
             def setContextMenu(self, menu:GUtils.Menu):
                 '''
@@ -1400,6 +1403,21 @@ class Widgets:
                         if scrollEventHandler.scrollDownFcn != None:
                             scrollEventHandler.scrollDownFcn()
             
+            def takeSnapshot(self, f_img:FileUtils.File=None):
+                '''
+                Take snapshot of the current frame, and save to a PNG image file.
+
+                If `f_img` is `None`, image file is located within the parent directory of the video file.
+
+                If there is no currently loaded video, nothing occurs.
+                '''
+                if self.f_video is not None:
+
+                    if f_img is None:
+                        f_img = FileUtils.File(FileUtils.File.Utils.Path.iterateName(FileUtils.File.Utils.Path.modifyName(str(self.f_video), extension='png')))
+
+                    self.player.video_take_snapshot(0, str(f_img), 0, 0)
+
             def load(self, f:FileUtils.File):
                 '''
                 Load video.
@@ -1407,6 +1425,7 @@ class Widgets:
                 Note,
                 - Video auto-plays.
                 '''
+                self.f_video = f
                 media = self.VLCInstance.media_new(str(f))
                 self.player.set_media(media)
                 self.player.play()
@@ -2149,10 +2168,12 @@ class Widgets:
                     AbstractInput.Key.Space: self.togglePlay,
                     AbstractInput.Key.Letter_M: self.toggleMute,
 
-                    AbstractInput.Key.BackwardSlash: self.skipToNextFrame,
+                    AbstractInput.Key.Letter_S: self.takeSnapshot,
                     
                     AbstractInput.Key.Up: lambda: self.adjustVolume(Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
                     AbstractInput.Key.Down: lambda: self.adjustVolume(-1 * Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
+
+                    AbstractInput.Key.BackwardSlash: self.skipToNextFrame,
 
                     AbstractInput.Key.SquareBrackets_Left: lambda: self.seekBackward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L0']),
                     AbstractInput.Key.SquareBrackets_Right: lambda: self.seekForward(Widgets.Complex.VideoPlayer.Constants['Skip-Time']['L0']),                    
@@ -2175,6 +2196,9 @@ class Widgets:
                         GUtils.Menu.EndPoint('HH:MM:SS.xxx', self.INTERNAL_contextMenu_copyVideoPosition),
                     ]),
                 ]))
+
+                # ? Currently loaded file.
+                self.f_video = None
             
             def INTERNAL_timingEvent(self):
                 videoDuration = int(self.renderer.getDuration())
@@ -2197,6 +2221,7 @@ class Widgets:
                 Clipboard.copy(str(self.renderer.getPosition()))
 
             def load(self, f:FileUtils.File):
+                self.f_video = f
                 self.playPauseButton.setCurrentWidget(self.pauseButton)
                 self.renderer.load(f)
 
@@ -2204,7 +2229,19 @@ class Widgets:
                 '''
                 Load default video.
                 '''
+                self.f_video = None
                 self.load(Widgets.Complex.VideoPlayer.Constants['Load-Default'])
+
+            def takeSnapshot(self):
+                '''
+                Take snapshot of the current frame, and save to a PNG image file.
+
+                Image file is located within the parent directory of the video file.
+
+                If there is no currently loaded (non-default) video, nothing occurs.
+                '''
+                if self.f_video is not None:
+                    self.renderer.takeSnapshot()
 
             def skipToNextFrame(self):
                 self.renderer.skipToNextFrame()
