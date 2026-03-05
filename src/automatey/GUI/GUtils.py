@@ -113,6 +113,12 @@ class EventHandler:
         AbstractInput.Key.Right: QtCore.Qt.Key.Key_Right,
     }
 
+    Modifier2QModifier = {
+        AbstractInput.ModifierKey.Ctrl: QtCore.Qt.KeyboardModifier.ControlModifier,
+        AbstractInput.ModifierKey.Alt: QtCore.Qt.KeyboardModifier.AltModifier,
+        AbstractInput.ModifierKey.Shift: QtCore.Qt.KeyboardModifier.ShiftModifier
+    }
+
 class EventHandlers:
     '''
     Different event-handler(s).
@@ -137,25 +143,42 @@ class EventHandlers:
         pass
     
     class KeyEventHandler(EventHandler):
+        '''
+        Note that,
+        - A key in `key2FcnDict` must either be,
+            - a `Key`.
+            - a `(ModifierKey, Key)` tuple. 
+        '''
         
         def __init__(self, key2FcnDict:dict):
             self.key2FcnDict = key2FcnDict
         
-        def INTERNAL_checkIfQKeyRegistered(self, qKey):
+        def INTERNAL_QEvent2Fcn(self, event):
             '''
-            Check if `qKey` is registered. If not, `None` is returned. Otherwise, corresponding `key` is returned.
+            Attempts to get the function to call from the `QEvent`.
+
+            If not found, `None` is returned.
             '''
+            qKey = event.key()
+            qModifiers = event.modifiers()
+
             foundKey = None
             for key in self.key2FcnDict:
-                if EventHandler.Key2QKey[key] == qKey:
-                    foundKey = key
-                    break
-            return foundKey
+                if isinstance(key, tuple):
+                    if (EventHandler.Key2QKey[key[1]] == qKey) and (EventHandler.Modifier2QModifier[key[0]] & qModifiers):
+                        foundKey = key
+                        break
+                else:
+                    if (EventHandler.Key2QKey[key] == qKey) and (QtCore.Qt.KeyboardModifier.NoModifier == qModifiers):
+                        foundKey = key
+                        break
+
+            return None if (foundKey is None) else self.key2FcnDict[foundKey]
 
     class KeyPressEventHandler(KeyEventHandler):
         pass
     
-    class ScrollEventHandler(KeyEventHandler):
+    class ScrollEventHandler(EventHandler):
         def __init__(self, scrollUpFcn=None, scrollDownFcn=None):
             self.scrollUpFcn = scrollUpFcn
             self.scrollDownFcn = scrollDownFcn

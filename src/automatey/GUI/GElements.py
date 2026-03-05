@@ -928,12 +928,11 @@ class Widgets:
                 return self.qWidget.setText(text)
             
             def INTERNAL_keyPressEvent(self, event):
-                qKey = event.key()
                 if GUtils.EventHandlers.KeyPressEventHandler in self.eventHandlers:
                     keyPressEventHandler:GUtils.EventHandlers.KeyPressEventHandler = self.eventHandlers[GUtils.EventHandlers.KeyPressEventHandler]
-                    foundKey = keyPressEventHandler.INTERNAL_checkIfQKeyRegistered(qKey)
-                    if foundKey != None:
-                        keyPressEventHandler.key2FcnDict[foundKey]()
+                    fcn = keyPressEventHandler.INTERNAL_QEvent2Fcn(event)
+                    if fcn is not None:
+                        fcn()
                         return 0
                 
             def INTERNAL_textChanged(self):
@@ -1007,12 +1006,11 @@ class Widgets:
                 return self.qWidget.setPlainText(text)
             
             def INTERNAL_keyPressEvent(self, event):
-                qKey = event.key()
                 if GUtils.EventHandlers.KeyPressEventHandler in self.eventHandlers:
                     keyPressEventHandler:GUtils.EventHandlers.KeyPressEventHandler = self.eventHandlers[GUtils.EventHandlers.KeyPressEventHandler]
-                    foundKey = keyPressEventHandler.INTERNAL_checkIfQKeyRegistered(qKey)
-                    if foundKey != None:
-                        keyPressEventHandler.key2FcnDict[foundKey]()
+                    fcn = keyPressEventHandler.INTERNAL_QEvent2Fcn(event)
+                    if fcn is not None:
+                        fcn()
                         return 0
                 
             def INTERNAL_textChanged(self):
@@ -1380,12 +1378,11 @@ class Widgets:
                     self.lastMousePosition = tuple(videoMousePosition)
             
             def INTERNAL_keyPressEvent(self, event):
-                qKey = event.key()
                 if GUtils.EventHandlers.KeyPressEventHandler in self.eventHandlers:
                     keyPressEventHandler:GUtils.EventHandlers.KeyPressEventHandler = self.eventHandlers[GUtils.EventHandlers.KeyPressEventHandler]
-                    foundKey = keyPressEventHandler.INTERNAL_checkIfQKeyRegistered(qKey)
-                    if foundKey != None:
-                        keyPressEventHandler.key2FcnDict[foundKey]()
+                    fcn = keyPressEventHandler.INTERNAL_QEvent2Fcn(event)
+                    if fcn is not None:
+                        fcn()
                     
             def INTERNAL_enterEvent(self, event):
                 # ? Gain focus (to be able to handle key-press(es)), when mouse enters widget's area.
@@ -2168,7 +2165,7 @@ class Widgets:
                     AbstractInput.Key.Space: self.togglePlay,
                     AbstractInput.Key.Letter_M: self.toggleMute,
 
-                    AbstractInput.Key.Letter_S: self.takeSnapshot,
+                    (AbstractInput.ModifierKey.Shift, AbstractInput.Key.Letter_S): self.takeSnapshot,
                     
                     AbstractInput.Key.Up: lambda: self.adjustVolume(Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),
                     AbstractInput.Key.Down: lambda: self.adjustVolume(-1 * Widgets.Complex.VideoPlayer.Constants['Adjust-Volume-Delta']),

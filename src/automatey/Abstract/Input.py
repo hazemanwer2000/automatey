@@ -55,3 +55,9 @@ class Key:
     BackwardSlash = 305
     SquareBrackets_Left = 306
     SquareBrackets_Right = 307
+
+class ModifierKey:
+
+    Shift = 0
+    Ctrl = 1
+    Alt = 2
