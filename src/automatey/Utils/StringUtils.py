@@ -165,11 +165,11 @@ class Split:
 class Case:
 
     @staticmethod
-    def Pascal2Snake(text:str, character:str='-'):
+    def Pascal2Snake(text:str, character:str='-', isCapitalize:bool=False):
         '''
         Converts *PascalCase* to *snake-case*.
         '''
-        return character.join([x.lower() for x in Split.atWords(text)])
+        return character.join([(x.capitalize() if isCapitalize else x.lower()) for x in Split.atWords(text)])
 
     @staticmethod
     def Snake2Pascal(text:str, character:str='-'):
