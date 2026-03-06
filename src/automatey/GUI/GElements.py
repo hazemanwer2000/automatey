@@ -822,8 +822,8 @@ class Widgets:
             def INTERNAL_mouseEvent(self, event):
                 # ? Update value.
                 ratio = event.position().x() / self.qWidget.width()
-                value = MathUtils.mapValue(ratio, [0.0, 1.0], [self.qWidget.minimum(), self.qWidget.maximum()])
-                value = MathUtils.clampValue(value, self.qWidget.minimum(), self.qWidget.maximum())
+                value = MathUtils.Floating.mapValue(ratio, [0.0, 1.0], [self.qWidget.minimum(), self.qWidget.maximum()])
+                value = MathUtils.Floating.clampValue(value, self.qWidget.minimum(), self.qWidget.maximum())
                 self.qWidget.setValue(int(value))
                 
                 # ? Call event-handler, if present.
@@ -1368,7 +1368,7 @@ class Widgets:
             
             def INTERNAL_contextMenuEvent(self, event:QtGui.QContextMenuEvent):
                 if self.qContextMenu != None:
-                    videoMousePosition = MathUtils.MediaSpecific.BoundingBox.isWithinFrame(
+                    videoMousePosition = MathUtils.Media.BoundingBox.isWithinFrame(
                         self.player.video_get_size(),
                         [self.qWidget.size().width(), self.qWidget.size().height()],
                         [event.pos().x(), event.pos().y()],
@@ -1377,7 +1377,7 @@ class Widgets:
                         self.qContextMenu.exec(event.globalPos())
             
             def INTERNAL_mouseMoveEvent(self, event):
-                videoMousePosition = MathUtils.MediaSpecific.BoundingBox.isWithinFrame(
+                videoMousePosition = MathUtils.Media.BoundingBox.isWithinFrame(
                     self.player.video_get_size(),
                     [self.qWidget.size().width(), self.qWidget.size().height()],
                     [event.pos().x(), event.pos().y()],
@@ -1510,7 +1510,7 @@ class Widgets:
                 '''
                 Adjust volume (0-100). Value is clamped.
                 '''
-                self.volume = int(MathUtils.clampValue(value, 0, 100))
+                self.volume = int(MathUtils.Floating.clampValue(value, 0, 100))
                 if not self.isMuteFlag:
                     self.player.audio_set_volume(self.volume)
 
@@ -1929,14 +1929,14 @@ class Widgets:
 
                 def addHighlight(self, color:ColorUtils.Color, addressRanges:list):
                     '''
-                    Specify a highlight color to apply on a number of address range(s).
+                    Specify a highlight color to apply on a number of non-overlapping address range(s).
 
                     Note that,
                     - Address-range(s) are start-inclusive, and end-exclusive.
                     '''
                     self.highlights.append({
                         'color' : QtGui.QColor('#' + color.asHEX()),
-                        'address-ranges' : addressRanges
+                        'address-ranges' : sorted(addressRanges, key=lambda x: x[0])
                     })
 
                 def clearHighlights(self):
@@ -1979,14 +1979,23 @@ class Widgets:
 
                     self.viewport().update()
 
+                @staticmethod
+                def INTERNAL_compareAddressToRange(address, addressRange):
+                    compareValue = 0
+                    if (address < addressRange[0]):
+                        compareValue = -1
+                    elif (address >= addressRange[1]):
+                        compareValue = 1
+                    return compareValue
+
                 def INTERNAL_getHighlightColor(self, address) -> QtGui.QColor:
 
                     color = None
 
                     for highlight in self.highlights:
-                        for addressRange in highlight['address-ranges']:
-                            if (address >= addressRange[0]) and (address < addressRange[1]):
-                                color = highlight['color']
+                        foundAddressRange = MathUtils.Collections.binarySearch(address, highlight['address-ranges'], compareFcn=type(self).INTERNAL_compareAddressToRange)
+                        if foundAddressRange is not None:
+                            color = highlight['color']
                     
                     return color
 
@@ -2216,7 +2225,7 @@ class Widgets:
                 ratio = self.seeker.getValue() / self.seekerMaxValue
                 videoDurationInMS = int(self.renderer.getDuration().toMilliseconds())
                 
-                seekTimeInMS = MathUtils.mapValue(ratio, [0.0, 1.0], [0, videoDurationInMS])
+                seekTimeInMS = MathUtils.Floating.mapValue(ratio, [0.0, 1.0], [0, videoDurationInMS])
                 self.renderer.seekPosition(TimeUtils.Time.createFromMilliseconds(seekTimeInMS))
 
             def INTERNAL_contextMenu_copyMousePosition(self):

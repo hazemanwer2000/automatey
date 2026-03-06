@@ -4,58 +4,66 @@ import bisect
 import collections
 import math
 
-def correlate(x, p1, p2):
-    '''
-    Given two points, use `y = mx + c` to get `y` for `x`.
-    '''
-    m = (p2[1] - p1[1]) / (p2[0] - p1[0])
-    c = p1[1] - (m * p1[0])
-    return (m * x) + c    
+class Floating:
 
-def mapValue(value, rangeFrom, rangeTo):
-    '''
-    Map a (float-)value from one range to another.
-    '''
-    to_min, to_max = rangeTo
-    from_min, from_max = rangeFrom
-    return to_min + ((value - from_min) / (from_max - from_min)) * (to_max - to_min)
+    @staticmethod
+    def correlate(x, p1, p2):
+        '''
+        Given two points, use `y = mx + c` to get `y` for `x`.
+        '''
+        m = (p2[1] - p1[1]) / (p2[0] - p1[0])
+        c = p1[1] - (m * p1[0])
+        return (m * x) + c    
 
-def clampValue(value, minValue, maxValue):
-    '''
-    Clamp a (float-)value between a minimum, and a maximum (all-inclusive).
-    '''
-    return min(maxValue, max(minValue, value))
+    @staticmethod
+    def mapValue(value, rangeFrom, rangeTo):
+        '''
+        Map a (float-)value from one range to another.
+        '''
+        to_min, to_max = rangeTo
+        from_min, from_max = rangeFrom
+        return to_min + ((value - from_min) / (from_max - from_min)) * (to_max - to_min)
 
-def findNearestValues(value, orderedValues):
-    '''
-    Returns a tuple `(x, y)`, where,
-    - `x` is the smallest value from `orderedValues`, larger than `value`.
-    - `y` is the largest value from `orderedValues`, smaller than `value`.
-    
-    If, for example, `value` is larger than all value(s) in `orderedValues`, `None` is returned.
-    '''
-    x = None
-    y = None
+    @staticmethod
+    def clampValue(value, minValue, maxValue):
+        '''
+        Clamp a (float-)value between a minimum, and a maximum (all-inclusive).
+        '''
+        return min(maxValue, max(minValue, value))
 
-    insertIdx = bisect.bisect_left(orderedValues, value)
-    if insertIdx > 0:
-        x = orderedValues[insertIdx - 1]
-
-    insertIdx = bisect.bisect_right(orderedValues, value)
-    if insertIdx < len(orderedValues):
-        y = orderedValues[insertIdx]
+    @staticmethod
+    def findNearestValues(value, orderedValues):
+        '''
+        Returns a tuple `(x, y)`, where,
+        - `x` is the smallest value from `orderedValues`, larger than `value`.
+        - `y` is the largest value from `orderedValues`, smaller than `value`.
         
-    return (x, y)
+        If, for example, `value` is larger than all value(s) in `orderedValues`, `None` is returned.
+        '''
+        x = None
+        y = None
+
+        insertIdx = bisect.bisect_left(orderedValues, value)
+        if insertIdx > 0:
+            x = orderedValues[insertIdx - 1]
+
+        insertIdx = bisect.bisect_right(orderedValues, value)
+        if insertIdx < len(orderedValues):
+            y = orderedValues[insertIdx]
+            
+        return (x, y)
 
 class Integral:
 
+    @staticmethod
     def ceilToMultiple(value:int, multiple:int):
         return ((value + multiple - 1) // multiple) * multiple
     
+    @staticmethod
     def isPowerOfTwo(n:int):
         return (n != 0) and ((n & (n-1)) == 0)
 
-class MediaSpecific:
+class Media:
 
     @staticmethod
     def keepAspectRatio(size, referenceSize):
@@ -127,8 +135,40 @@ class MediaSpecific:
             
             return position
 
-class CollectionSpecific:
+class Collections:
     
+    @staticmethod
+    def binarySearch(element, iterable, compareFcn):
+        '''
+        Binary search into an iterable.
+
+        Note that,
+        - If not found, `None` is returned.
+        - `compareFcn` must return,
+            - `0` if equal.
+            - `< 0` if left-argument is less than right-argument.
+            - `> 0` if right-argument is less than left-argument.
+        '''
+        foundElement = None
+
+        left = 0
+        right = len(iterable) - 1
+
+        while left <= right:
+            mid = (left + right) // 2
+            cmp = compareFcn(element, iterable[mid])
+
+            if cmp == 0:
+                foundElement = iterable[mid]
+                break
+            elif cmp < 0:
+                right = mid - 1
+            else:
+                left = mid + 1
+
+        return foundElement
+
+    @staticmethod
     def countOccurrences(iterable, key=None):
         '''
         Given an iterable, returns a dictionary, with,

@@ -1,12 +1,7 @@
 
 # External Libraries
 import PyQt6.QtWidgets as QtWidgets
-import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as QtCore
-
-import automatey.Utils.ExceptionUtils as ExceptionUtils
-import automatey.Utils.MathUtils as MathUtils
-import automatey.Utils.ColorUtils as ColorUtils
 
 class QThread(QtCore.QThread):
     

@@ -30,7 +30,7 @@ class Image:
         # ? Case: Resizing is necessary.
         if size != None:
             originalSize = [self.qImage.width(), self.qImage.height()]
-            MathUtils.MediaSpecific.keepAspectRatio(size, originalSize)
+            MathUtils.Media.keepAspectRatio(size, originalSize)
             self.qImage = self.qImage.scaled(size[0], size[1], QtCore.Qt.AspectRatioMode.IgnoreAspectRatio)
 
 class Icon:
