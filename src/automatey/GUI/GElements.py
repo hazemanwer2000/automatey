@@ -2683,7 +2683,7 @@ class StandardDialog:
         '''
         paths, _ = QtWidgets.QFileDialog.getOpenFileNames(None, directory=str(initialDirectory))
         return [FileUtils.File(path) for path in paths]
-    
+
     @staticmethod
     def selectExistingDirectory(initialDirectory:FileUtils.File):
         '''
@@ -2765,26 +2765,26 @@ class StandardDialog:
                 qMsgBox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
                 qMsgBox.exec()
         
-            def Error(msg:str):
-                StandardDialog.Message.Announce.INTERNAL_Announce('Error', msg, QtWidgets.QMessageBox.Icon.Critical)
+            def Error(title:str, msg:str):
+                StandardDialog.Message.Announce.INTERNAL_Announce(title, msg, QtWidgets.QMessageBox.Icon.Critical)
 
-            def Warning(msg:str):
-                StandardDialog.Message.Announce.INTERNAL_Announce('Warning', msg, QtWidgets.QMessageBox.Icon.Warning)
+            def Warning(title:str, msg:str):
+                StandardDialog.Message.Announce.INTERNAL_Announce(title, msg, QtWidgets.QMessageBox.Icon.Warning)
 
-            def Information(msg:str):
-                StandardDialog.Message.Announce.INTERNAL_Announce('Info', msg, QtWidgets.QMessageBox.Icon.Question)
+            def Information(title:str, msg:str):
+                StandardDialog.Message.Announce.INTERNAL_Announce(title, msg, QtWidgets.QMessageBox.Icon.Question)
 
-        class Ask:
+    class Ask:
 
-            def Confirm(title:str, msg:str):
-                qMsgBox = QtWidgets.QMessageBox(None)
-                qMsgBox.setWindowTitle(title)
-                qMsgBox.setText(msg)
-                qMsgBox.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
-                qMsgBox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
-                qMsgBox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No)
-                qMsgBox.setDefaultButton(QtWidgets.QMessageBox.StandardButton.No)
-                return qMsgBox.exec() == QtWidgets.QMessageBox.StandardButton.Yes
+        def Confirm(title:str, msg:str):
+            qMsgBox = QtWidgets.QMessageBox(None)
+            qMsgBox.setWindowTitle(title)
+            qMsgBox.setText(msg)
+            qMsgBox.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
+            qMsgBox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+            qMsgBox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No)
+            qMsgBox.setDefaultButton(QtWidgets.QMessageBox.StandardButton.No)
+            return qMsgBox.exec() == QtWidgets.QMessageBox.StandardButton.Yes
 
     class BackgroundActivity:
         '''
