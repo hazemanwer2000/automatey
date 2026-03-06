@@ -1218,6 +1218,14 @@ class Widgets:
 
                     return result
             
+                def headerData(self, section:int, orientation:QtCore.Qt.Orientation, role:int=QtCore.Qt.ItemDataRole.DisplayRole):
+                    result = None
+                    if (orientation == QtCore.Qt.Orientation.Vertical) and (role == QtCore.Qt.ItemDataRole.DisplayRole):
+                        result = str(section + 1)
+                    else:
+                        result = super().headerData(section, orientation, role)
+                    return result
+
             def __init__(self, header:list, comparators:list=None):
                 self.qWidget = QtWidgets.QTableView()
                 super().__init__(self.qWidget)
@@ -1298,7 +1306,7 @@ class Widgets:
                 self.qModel.appendRow([QtGui.QStandardItem(element) for element in row])
 
             def removeAllRows(self):
-                self.qModel.clear()
+                self.qModel.setRowCount(0)
 
             def resizeToContents(self):
                 self.qWidget.resizeColumnsToContents()
