@@ -2771,17 +2771,17 @@ class StandardDialog:
             def Information(title:str, msg:str):
                 StandardDialog.Message.Announce.INTERNAL_Announce(title, msg, QtWidgets.QMessageBox.Icon.Question)
 
-    class Ask:
+        class Ask:
 
-        def Confirm(title:str, msg:str):
-            qMsgBox = QtWidgets.QMessageBox(None)
-            qMsgBox.setWindowTitle(title)
-            qMsgBox.setText(msg)
-            qMsgBox.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
-            qMsgBox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
-            qMsgBox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No)
-            qMsgBox.setDefaultButton(QtWidgets.QMessageBox.StandardButton.No)
-            return qMsgBox.exec() == QtWidgets.QMessageBox.StandardButton.Yes
+            def Confirm(title:str, msg:str):
+                qMsgBox = QtWidgets.QMessageBox(None)
+                qMsgBox.setWindowTitle(title)
+                qMsgBox.setText(msg)
+                qMsgBox.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
+                qMsgBox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+                qMsgBox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No)
+                qMsgBox.setDefaultButton(QtWidgets.QMessageBox.StandardButton.No)
+                return qMsgBox.exec() == QtWidgets.QMessageBox.StandardButton.Yes
 
     class BackgroundActivity:
         '''
@@ -2791,7 +2791,7 @@ class StandardDialog:
         qProgressDialog:QtWidgets.QProgressDialog = None
         
         @staticmethod
-        def awaitActivity():
+        def awaitActivity(title:str):
             '''
             Opens up dialog.
             
@@ -2800,7 +2800,7 @@ class StandardDialog:
             '''
             # PyQt6: 'QProcessDialog' does not block the GUI event-loop.
             progressDialog = QtWidgets.QProgressDialog("", "", 0, 0, None)
-            progressDialog.setWindowTitle("(...)")
+            progressDialog.setWindowTitle(title)
             progressDialog.setWindowIcon(QtWidgets.QApplication.instance().icon.qIcon)
             progressDialog.setFixedSize(progressDialog.size())
             progressDialog.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
