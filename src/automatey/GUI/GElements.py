@@ -1260,9 +1260,6 @@ class Widgets:
                 }
                 self.contextMenuConditional = None
 
-                # ? Disable 'row-index' column.
-                self.qWidget.verticalHeader().setVisible(False)
-
             def INTERNAL_contextMenuEvent(self, pos:QtCore.QPoint):
 
                 if self.qContextMenu != None:
