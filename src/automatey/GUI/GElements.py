@@ -1866,6 +1866,9 @@ class Widgets:
             def seekAddress(self, address:int):
                 self.qWidget.seekAddress(address)
 
+            def setCursorAddress(self, address:int=None):
+                self.qWidget.setCursorAddress(address)
+
             class INTERNAL_QHexViewer(QtWidgets.QAbstractScrollArea):
                 '''
                 Display byte(s) at specific address(es).
@@ -1909,6 +1912,9 @@ class Widgets:
                     self.setFixedWidth(self.INTERNAL_calculateFixedWidth())
 
                     self.highlights = []
+
+                    # ? Store cursor address.
+                    self.cursorAddress = None
 
                 def INTERNAL_updateData(self, dataBytes:bytes, startAddress:int):
                     self.dataBytes = dataBytes
@@ -1975,6 +1981,9 @@ class Widgets:
                     scrollbar.setValue(line)
 
                     self.viewport().update()
+
+                def setCursorAddress(self, address:int=None):
+                    self.cursorAddress = address
 
                 @staticmethod
                 def INTERNAL_compareAddressToRange(address, addressRange):
@@ -2064,6 +2073,11 @@ class Widgets:
                                     painter.setFont(defaultFont)
                                 
                                 painter.drawText(horizontalOffset, y + self.lineHeight, f"{dataByte:02X}")
+
+                            # ? Draw cursor, if specified.
+                            if (self.cursorAddress is not None) and (self.cursorAddress == byteAddress):
+                                painter.setFont(defaultFont)
+                                painter.drawText(horizontalOffset - self.characterWidth, y + self.lineHeight, "►")
                             
                             horizontalOffset += self.characterWidth * (self.SPACES_BETWEEN_DATA + 2)
 
