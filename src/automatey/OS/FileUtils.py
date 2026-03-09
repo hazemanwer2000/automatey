@@ -141,7 +141,12 @@ class File:
                 'b' - Binary
                 't' - Text
         '''
-        self.handler = open(self.path, mode=mode)
+        kwargs = {
+            "mode" : mode
+        }
+        if 't' in mode:
+            kwargs['encoding'] = 'utf-8'
+        self.handler = open(self.path, **kwargs)
         return self
     
     def readLine(self) -> str:

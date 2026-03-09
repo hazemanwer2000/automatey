@@ -134,7 +134,7 @@ class EmptyLine:
     @staticmethod
     def removeConsecutiveEmptyLines(text:str):
         '''
-        Similar to `asParagraph`, but consecutive empty-line(s) are replaced with a single empty-line.
+        Similar to `removeEmptyLines`, but consecutive empty-line(s) are replaced with a single empty-line.
         '''
         return EmptyLine.removeEmptyLines(text, INTERNAL_newLine='\n\n')
 
