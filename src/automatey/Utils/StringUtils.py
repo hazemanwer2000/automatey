@@ -15,20 +15,28 @@ class Indent:
 class Regex:
 
     @staticmethod
-    def replaceAll(expr_match, expr_replace, txt, count=0):
+    def replaceAll(expr_match, expr_replace, txt, count=0, isIgnoreCase:bool=True):
         """
         Replace all (RegEx-)matches to an expression, with another expression.
         """
-        return re.sub(expr_match, expr_replace, txt, count=count)
+        kwargs = {
+            'count' : count
+        }
+        if isIgnoreCase:
+            kwargs['flags'] = re.IGNORECASE
+        return re.sub(expr_match, expr_replace, txt, **kwargs)
 
     @staticmethod
-    def findAll(expr_match:str, txt:str) -> list:
+    def findAll(expr_match:str, txt:str, isIgnoreCase:bool=True) -> list:
         """
         Find all (RegEx-)matches to an expression.
 
         Returns a list of all matches. If more than one capture group is used, each match is a tuple.
         """
-        res = re.findall(expr_match, txt)
+        kwargs = dict()
+        if isIgnoreCase:
+            kwargs['flags'] = re.IGNORECASE
+        res = re.findall(expr_match, txt, **kwargs)
         if res == None:
             res = []
         return res
