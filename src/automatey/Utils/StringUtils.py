@@ -15,7 +15,7 @@ class Indent:
 class Regex:
 
     @staticmethod
-    def replaceAll(expr_match, expr_replace, txt, count=0, isIgnoreCase:bool=True):
+    def replaceAll(expr_match, expr_replace, txt, count=0, isIgnoreCase:bool=False):
         """
         Replace all (RegEx-)matches to an expression, with another expression.
         """
@@ -27,7 +27,7 @@ class Regex:
         return re.sub(expr_match, expr_replace, txt, **kwargs)
 
     @staticmethod
-    def findAll(expr_match:str, txt:str, isIgnoreCase:bool=True) -> list:
+    def findAll(expr_match:str, txt:str, isIgnoreCase:bool=False) -> list:
         """
         Find all (RegEx-)matches to an expression.
 
