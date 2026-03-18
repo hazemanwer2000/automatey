@@ -5,7 +5,7 @@ import PySide6.QtCore as QtCore
 
 class QThread(QtCore.QThread):
     
-    notifySignal = QtCore.pyqtSignal(dict)
+    notifySignal = QtCore.Signal(dict)
     
     def __init__(self, mainFcn, mainFcnArgs, notifyFcn):
         QtCore.QThread.__init__(self)
@@ -16,7 +16,7 @@ class QThread(QtCore.QThread):
     def WNotify(self, data:dict):
         self.notifySignal.emit(data)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def run(self):
         self.mainFcn(*self.mainFcnArgs)
 

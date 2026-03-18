@@ -2686,7 +2686,7 @@ class StandardDialog:
         '''
         Select an existing file. Returns `None` if none were selected.
         '''
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(None, directory=str(initialDirectory))
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(None, dir=str(initialDirectory))
         path = FileUtils.File(path) if (path != '') else None
         return path
 
@@ -2695,7 +2695,7 @@ class StandardDialog:
         '''
         Select existing files, returned as a list.
         '''
-        paths, _ = QtWidgets.QFileDialog.getOpenFileNames(None, directory=str(initialDirectory))
+        paths, _ = QtWidgets.QFileDialog.getOpenFileNames(None, dir=str(initialDirectory))
         return [FileUtils.File(path) for path in paths]
 
     @staticmethod
@@ -2703,7 +2703,7 @@ class StandardDialog:
         '''
         Select existing directory.
         '''
-        path = QtWidgets.QFileDialog.getExistingDirectory(None, directory=str(initialDirectory))
+        path = QtWidgets.QFileDialog.getExistingDirectory(None, dir=str(initialDirectory))
         path = FileUtils.File(path) if (path != '') else None
         return path
 
@@ -2712,7 +2712,7 @@ class StandardDialog:
         '''
         Select a file. Returns `None` if none were selected.
         '''
-        path, _ = QtWidgets.QFileDialog.getSaveFileName(None, directory=str(initialDirectory))
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(None, dir=str(initialDirectory))
         path = FileUtils.File(path) if (path != '') else None
         return path
     
