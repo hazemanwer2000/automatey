@@ -1,8 +1,8 @@
 
 # External libraries
-import PyQt6.QtWidgets as QtWidgets
-import PyQt6.QtGui as QtGui
-import PyQt6.QtCore as QtCore
+import PySide6.QtWidgets as QtWidgets
+import PySide6.QtGui as QtGui
+import PySide6.QtCore as QtCore
 
 # Internal libraries
 import automatey.OS.FileUtils as FileUtils

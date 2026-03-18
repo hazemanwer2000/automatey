@@ -7,7 +7,7 @@ Automate everything!
 First, build the Python wheel using `poetry`.
 
 ```bash
-poetry build
+poetry build --format wheel
 ```
 
 Second, install the Python wheel using `pip`.

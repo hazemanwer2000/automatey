@@ -7,12 +7,11 @@ license = "None"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.10,<3.15"
 send2trash = "^1.8.3"
 opencv-python = "^4.10.0.84"
 pillow = "^11.0.0"
 imageio = "^2.36.0"
-pyqt6 = "^6.7.1"
 python-vlc = "^3.0.21203"
 pyperclip = "^1.9.0"
 lxml = "^5.3.0"
@@ -26,6 +25,7 @@ plotly = "^6.0.1"
 pandas = "^2.2.3"
 numpy = "^2.2.4"
 pysrt = "^1.1.2"
+pyside6 = "^6.10.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

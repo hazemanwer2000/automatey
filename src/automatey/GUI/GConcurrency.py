@@ -1,9 +1,9 @@
 
 # External Libraries
-import PyQt6.QtWidgets as QtWidgets
-import PyQt6.QtGui as QtGui
-import PyQt6.QtCore as QtCore
-import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
+import PySide6.QtWidgets as QtWidgets
+import PySide6.QtGui as QtGui
+import PySide6.QtCore as QtCore
+import automatey.GUI.Wrappers.PySide6 as PyQt6Wrapper
 
 # Internal Libraries
 import automatey.Utils.TimeUtils as TimeUtils

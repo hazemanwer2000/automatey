@@ -1,7 +1,7 @@
 
 # External Libraries
-import PyQt6.QtWidgets as QtWidgets
-import PyQt6.QtCore as QtCore
+import PySide6.QtWidgets as QtWidgets
+import PySide6.QtCore as QtCore
 
 class QThread(QtCore.QThread):
     

@@ -1,8 +1,8 @@
 
 # External Libraries
-import PyQt6.QtWidgets as QtWidgets
-import PyQt6.QtGui as QtGui
-import PyQt6.QtCore as QtCore
+import PySide6.QtWidgets as QtWidgets
+import PySide6.QtGui as QtGui
+import PySide6.QtCore as QtCore
 import vlc
 import typing
 import ctypes
@@ -17,7 +17,7 @@ import automatey.Utils.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
 import automatey.Resources as Resources
 import automatey.Utils.MathUtils as MathUtils
-import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
+import automatey.GUI.Wrappers.PySide6 as PyQt6Wrapper
 import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.OS.Clipboard as Clipboard
