@@ -21,6 +21,7 @@ import automatey.GUI.Wrappers.PyQt6 as PyQt6Wrapper
 import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.OS.Clipboard as Clipboard
+import automatey.OS.Utils as OSUtils
 
 class INTERNAL:
     
@@ -1333,8 +1334,9 @@ class Widgets:
                 # ? ? Configure player to ignore mouse/key event(s).
                 vlc.libvlc_video_set_mouse_input(self.player, 0)
                 vlc.libvlc_video_set_key_input(self.player, 0)
-                # (!) OS-specific (Windows-OS)
-                self.player.set_hwnd(self.qWidget.winId())
+                
+                if OSUtils.GetOSType() == OSUtils.OSType.Windows:
+                    self.player.set_hwnd(self.qWidget.winId())
                 
                 # ? Set initial volume.
                 self.isMuteFlag = False
@@ -2617,9 +2619,10 @@ class Application:
         # PyQt6: A cross-platform style called 'Fusion'.
         self.qApplication.setStyle('Fusion')
         
-        # (!) OS-specific (Windows-OS)
-        # ? Workaround, to display app's icon in Windows task-bar.
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('mycompany.myproduct.subproduct.version')
+        if OSUtils.GetOSType() == OSUtils.OSType.Windows:
+
+            # (!) Workaround, to display app's icon in the task-bar.
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('mycompany.myproduct.subproduct.version')
         
     def run(self):
         '''

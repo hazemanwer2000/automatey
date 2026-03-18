@@ -11,6 +11,7 @@ from send2trash import send2trash
 # Internal libraries
 import automatey.Utils.RandomUtils as RandomUtils
 import automatey.Utils.ExceptionUtils as ExceptionUtils
+import automatey.OS.Utils as OSUtils
 
 class INTERNAL_Constants:
     
@@ -316,8 +317,10 @@ class File:
             Move file/directory to 'Recycle Bin' (or, equivalent).
             '''
             if f.isExists():
-                # (!) OS-specific (Windows-OS)
-                send2trash(str(f).replace('/', '\\'))
+                path = str(f)
+                if OSUtils.GetOSType() == OSUtils.OSType.Windows:
+                    path = path.replace('/', '\\')
+                send2trash(path)
         
         @staticmethod
         def replicateDirectoryStructure(srcDir:"File", dstDir:"File"):
