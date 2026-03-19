@@ -1337,6 +1337,8 @@ class Widgets:
                 
                 if OSUtils.GetOSType() == OSUtils.OSType.Windows:
                     self.player.set_hwnd(self.qWidget.winId())
+                elif OSUtils.GetOSType() == OSUtils.OSType.Linux:
+                    self.player.set_xwindow(self.qWidget.winId())
                 
                 # ? Set initial volume.
                 self.isMuteFlag = False

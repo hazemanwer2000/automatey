@@ -120,7 +120,12 @@ class Process:
     def __init__(self, *args):
 
         command = StringUtils.Split.asCommand(*args)
-        self.process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        
+        # ? Create (and run) process.
+        creationFlags = 0
+        if OSUtils.GetOSType() == OSUtils.OSType.Windows:
+            creationFlags = subprocess.CREATE_NO_WINDOW
+        self.process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=creationFlags)
         
         self.status = None
 
