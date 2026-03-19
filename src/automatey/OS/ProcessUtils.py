@@ -1,8 +1,7 @@
 
 # Internal libraries
 import automatey.Utils.StringUtils as StringUtils
-import automatey.OS.FileUtils as FileUtils
-import automatey.Utils.ExceptionUtils as ExceptionUtils
+import automatey.OS.Utils as OSUtils
 
 # Standard libraries
 import subprocess
