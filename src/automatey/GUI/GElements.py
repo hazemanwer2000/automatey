@@ -6,6 +6,7 @@ import PySide6.QtCore as QtCore
 import vlc
 import typing
 import ctypes
+import time
 
 # Internal Libraries
 import automatey.GUI.GUtils as GUtils
@@ -2915,14 +2916,16 @@ class SplashScreen:
     def __init__(self, img:GUtils.Image):
         self.qSplashScreen = QtWidgets.QSplashScreen(QtGui.QPixmap.fromImage(img.qImage))
     
-    def render(self, app:Application):
+    def render(self, app:Application, delay:float=0.1):
         '''
         Render splash-screen.
 
         Note:
         - It is recommended to call this method just after creating the `Application` instance.
+        - A delay is necessary in some desktop environment(s).
         '''
         self.qSplashScreen.show()
+        time.sleep(delay)
         app.qApplication.processEvents()
 
     def derender(self, window:Window):
