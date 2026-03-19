@@ -2,4 +2,4 @@ __pycache__/
 /ignore*
 *.code-workspace
 /dist/
-/env
+/.venv
