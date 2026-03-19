@@ -1330,7 +1330,10 @@ class Widgets:
                 # ? Setting up VLC media-player.
                 # ? ? Option (quiet) silences VLC log messages.
                 # ? ? Option (input-repeat) sets the number of video-repetitions.
-                self.VLCInstance = vlc.Instance('--quiet', '--input-repeat=999999999')
+                opts = ['--quiet', '--input-repeat=999999999']
+                if OSUtils.GetOSType() == OSUtils.OSType.Linux:
+                    opts.extend(["--vout=xcb_x11", "--no-xlib"])
+                self.VLCInstance = vlc.Instance(*opts)
                 self.player = self.VLCInstance.media_player_new()
                 # ? ? Configure player to ignore mouse/key event(s).
                 vlc.libvlc_video_set_mouse_input(self.player, 0)
@@ -1434,6 +1437,8 @@ class Widgets:
                 '''
                 self.f_video = f
                 media = self.VLCInstance.media_new(str(f))
+                if OSUtils.GetOSType() == OSUtils.OSType.Linux:
+                    media.add_option(":avcodec-hw=none")
                 self.player.set_media(media)
                 self.player.play()
             
