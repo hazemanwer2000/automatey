@@ -1327,12 +1327,17 @@ class Widgets:
                 INTERNAL.EventManager.__init__(self)
                 Widget.__init__(self, self.qWidget)
                 
+                # ? (!) Miscellaneous Fix(es) for flickering, etc.
+                self.qWidget.setAttribute(QtCore.Qt.WidgetAttribute.WA_OpaquePaintEvent)
+                self.qWidget.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground)
+                self.qWidget.setAttribute(QtCore.Qt.WidgetAttribute.WA_PaintOnScreen)
+
                 # ? Setting up VLC media-player.
                 # ? ? Option (quiet) silences VLC log messages.
                 # ? ? Option (input-repeat) sets the number of video-repetitions.
                 opts = ['--quiet', '--input-repeat=999999999']
                 if OSUtils.GetOSType() == OSUtils.OSType.Linux:
-                    opts.extend(["--vout=xcb_x11", "--no-xlib"])
+                    opts.extend(["--vout=xcb_x11"])
                 self.VLCInstance = vlc.Instance(*opts)
                 self.player = self.VLCInstance.media_player_new()
                 # ? ? Configure player to ignore mouse/key event(s).
